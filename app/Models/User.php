@@ -6,11 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
+    protected $primaryKey = 'user_id';
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +21,12 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'phone_number',
+        'role',
     ];
 
     /**
@@ -44,5 +50,35 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function shelter()
+    {
+        return $this->hasOne(Shelter::class, 'user_id', 'user_id');
+    }
+
+    public function adopter()
+    {
+        return $this->hasOne(Adopter::class, 'user_id', 'user_id');
+    }
+
+    public function rescuer()
+    {
+        return $this->hasOne(Rescuer::class, 'user_id', 'user_id');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isShelter()
+    {
+        return $this->role === 'shelter';
+    }
+
+    public function isAdopter()
+    {
+        return $this->role === 'adopter';
     }
 }
