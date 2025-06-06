@@ -6,74 +6,203 @@
     <title>Login - PawMatch</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.2));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4a90e2;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: #4a90e2;
+        }
+
+        .nav-links .btn {
+            padding: 0.5rem 1rem;
+            background: #4a90e2;
+            color: white;
+            border-radius: 8px;
+        }
+
+        .nav-links .btn:hover {
+            background: #357abd;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn1 {
+            width: 100%;
+            padding: 0.8rem;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn1:hover {
+            background: #357abd;
+        }
+
+        .form-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .form-footer p {
+            margin: 0.5rem 0;
+            color: #666;
+        }
+
+        .form-footer a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                        🐾 PawMatch
-                    </a>
-                </div>
-                <div class="flex items-center space-x-8">
-                    <a href="/about" class="text-gray-600 hover:text-blue-600">About</a>
-                    <a href="/pets" class="text-gray-600 hover:text-blue-600">Find Pets</a>
-                    <a href="/faq" class="text-gray-600 hover:text-blue-600">FAQ</a>
-                    <a href="/terms" class="text-gray-600 hover:text-blue-600">Terms</a>
-                    <a href="/login" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">Login</a>
-                </div>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="/" class="logo">🐾 PawMatch</a>
+            <div class="nav-links">
+                <a href="/about">About</a>
+                <a href="/pets">Find Pets</a>
+                <a href="/faq">FAQ</a>
+                <a href="/terms">Terms</a>
+                <a href="/login" class="btn" style="font-weight: 700;">Login</a>
             </div>
         </div>
     </nav>
 
-    <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Welcome Back
-                </h2>
+    <div class="login-container">
+        <h1>Welcome Back</h1>
+        @if ($errors->any())
+            <div class="error-message">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
             </div>
-            <form class="mt-8 space-y-6" action="{{ route('login') }}" method="POST">
-                @csrf
-                <div class="rounded-md shadow-sm space-y-4">
-                    <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700">I am a:</label>
-                        <select id="role" name="role" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Select your role</option>
-                            <option value="adopter">Pet Adopter</option>
-                            <option value="shelter">Shelter/Rescuer</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input id="email" name="email" type="email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your email">
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                        <input id="password" name="password" type="password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your password">
-                    </div>
-                </div>
-
-                <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Login
-                    </button>
-                </div>
-
-                <div class="text-center space-y-2">
-                    <p class="text-sm text-gray-600">
-                        Don't have an account? <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-500">Register</a>
-                    </p>
-                    <p class="text-sm text-gray-600">
-                        <a href="{{ route('password.request') }}" class="font-medium text-blue-600 hover:text-blue-500">Forgot Password?</a>
-                    </p>
-                </div>
-            </form>
-        </div>
+        @endif
+        <form action="{{ route('login') }}" method="POST">
+            @csrf
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required autofocus>
+                @error('email')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                @error('password')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <button type="submit" class="btn1">Login</button>
+            <div class="form-footer">
+                <p>Don't have an account? <a href="{{ route('register') }}">Register</a></p>
+                <p><a href="{{ route('password.request') }}">Forgot Password?</a></p>
+            </div>
+        </form>
     </div>
 </body>
 </html> 

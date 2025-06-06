@@ -21,4 +21,14 @@ class Adopter extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+    public function savedPets()
+    {
+        return $this->belongsToMany(Pet::class, 'saved_pets', 'adopter_id', 'pet_id')->withTimestamps();
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(AdoptionApplication::class, 'adopter_id', 'adopter_id');
+    }
 } 

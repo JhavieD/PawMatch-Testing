@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -18,28 +19,31 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'role' => ['required', 'in:adopter,shelter,admin'],
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
             $request->session()->regenerate();
 
             // Redirect based on role
-            switch ($credentials['role']) {
+            switch ($user->role) {
                 case 'adopter':
-                    return redirect()->intended('/adopter/dashboard');
+                    return redirect()->route('adopter.dashboard');
                 case 'shelter':
-                    return redirect()->intended('/shelter/dashboard');
+                    return redirect()->route('shelter.dashboard');
+                case 'rescuer':
+                    return redirect()->route('rescuer.dashboard');
                 case 'admin':
-                    return redirect()->intended('/admin/dashboard');
+                    return redirect()->route('admin.dashboard');
                 default:
-                    return redirect()->intended('/');
+                    Auth::logout();
+                    return redirect('/login')->withErrors(['email' => 'Unknown role.']);
             }
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
     }
 
     public function logout(Request $request)
