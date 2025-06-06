@@ -18,11 +18,12 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'in:adopter,shelter'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone_number' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
         ]);
 
@@ -37,11 +38,12 @@ class RegisterController extends Controller
         }
 
         $user = User::create([
-            'name' => $validated['name'],
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-            'phone' => $validated['phone'],
+            'phone_number' => $validated['phone_number'],
             'address' => $validated['address'],
         ]);
 
@@ -55,6 +57,14 @@ class RegisterController extends Controller
                 'description' => $request->shelter_description,
                 'license_number' => $request->shelter_license,
                 'document_path' => $documentPath,
+            ]);
+        }
+
+        // Handle adopter-specific data
+        if ($request->role === 'adopter') {
+            $user->adopter()->create([
+                'address' => $request->address,
+                'adoption_status' => 'pending',
             ]);
         }
 
