@@ -81,4 +81,15 @@ class User extends Authenticatable
     {
         return $this->role === 'adopter';
     }
+
+    public function favoritePets()
+    {
+        return $this->hasOne(Adopter::class, 'user_id', 'user_id')
+            ->with('savedPets');
+    }
+
+    public function adopterApplications()
+    {
+        return $this->hasOne(Adopter::class, 'user_id', 'user_id')->with('applications');
+    }
 }

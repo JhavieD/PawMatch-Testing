@@ -42,23 +42,28 @@
                             <select id="role" name="role" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="">Select your role</option>
                                 <option value="adopter">Pet Adopter</option>
-                                <option value="shelter">Shelter/Rescuer</option>
+                                <option value="shelter">Shelter</option>
+                                <option value="rescuer">Rescuer</option>
                             </select>
                         </div>
 
                         <!-- Personal Information -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                <input type="text" name="name" id="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                                <input type="text" name="first_name" id="first_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <input type="text" name="last_name" id="last_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                                 <input type="email" name="email" id="email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <input type="tel" name="phone" id="phone" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <input type="tel" name="phone_number" id="phone_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
@@ -78,6 +83,28 @@
                             </div>
                         </div>
 
+                        <!-- Valid ID Upload for Adopter -->
+                        <div id="adopterFields" class="hidden space-y-6">
+                            <div>
+                                <label for="valid_id" class="block text-sm font-medium text-gray-700">Valid ID</label>
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                    <div class="space-y-1 text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <div class="flex text-sm text-gray-600">
+                                            <label for="valid_id" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                                <span>Upload a file</span>
+                                                <input id="valid_id" name="valid_id" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
+                                            </label>
+                                            <p class="pl-1">or drag and drop</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Shelter-specific fields -->
                         <div id="shelterFields" class="hidden space-y-6">
                             <div>
@@ -85,24 +112,50 @@
                                 <input type="text" name="shelter_name" id="shelter_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="shelter_description" class="block text-sm font-medium text-gray-700">Shelter Description</label>
-                                <textarea name="shelter_description" id="shelter_description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                                <label for="shelter_valid_id" class="block text-sm font-medium text-gray-700">Valid ID Number</label>
+                                <input type="text" name="shelter_valid_id" id="shelter_valid_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="shelter_license" class="block text-sm font-medium text-gray-700">License Number</label>
-                                <input type="text" name="shelter_license" id="shelter_license" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="shelter_documents" class="block text-sm font-medium text-gray-700">Shelter Documents</label>
+                                <label for="shelter_valid_id_upload" class="block text-sm font-medium text-gray-700">Valid ID Upload</label>
                                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                                     <div class="space-y-1 text-center">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                             <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                         <div class="flex text-sm text-gray-600">
-                                            <label for="shelter_documents" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                            <label for="shelter_valid_id_upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                                 <span>Upload a file</span>
-                                                <input id="shelter_documents" name="shelter_documents" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
+                                                <input id="shelter_valid_id_upload" name="shelter_valid_id_upload" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
+                                            </label>
+                                            <p class="pl-1">or drag and drop</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rescuer-specific fields -->
+                        <div id="rescuerFields" class="hidden space-y-6">
+                            <div>
+                                <label for="organization_name" class="block text-sm font-medium text-gray-700">Organization Name</label>
+                                <input type="text" name="organization_name" id="organization_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="rescuer_valid_id" class="block text-sm font-medium text-gray-700">Valid ID Number</label>
+                                <input type="text" name="rescuer_valid_id" id="rescuer_valid_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="rescuer_valid_id_upload" class="block text-sm font-medium text-gray-700">Valid ID Upload</label>
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                    <div class="space-y-1 text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <div class="flex text-sm text-gray-600">
+                                            <label for="rescuer_valid_id_upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                                <span>Upload a file</span>
+                                                <input id="rescuer_valid_id_upload" name="rescuer_valid_id_upload" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
                                             </label>
                                             <p class="pl-1">or drag and drop</p>
                                         </div>
@@ -132,17 +185,40 @@
     <script>
         document.getElementById('role').addEventListener('change', function() {
             const shelterFields = document.getElementById('shelterFields');
+            const rescuerFields = document.getElementById('rescuerFields');
+            const adopterFields = document.getElementById('adopterFields');
+            
+            // Hide all fields first
+            shelterFields.classList.add('hidden');
+            rescuerFields.classList.add('hidden');
+            adopterFields.classList.add('hidden');
+            
+            // Remove required from all fields
+            document.querySelectorAll('#shelterFields input, #shelterFields textarea').forEach(input => {
+                input.required = false;
+            });
+            document.querySelectorAll('#rescuerFields input, #rescuerFields textarea').forEach(input => {
+                input.required = false;
+            });
+            document.querySelectorAll('#adopterFields input, #adopterFields textarea').forEach(input => {
+                input.required = false;
+            });
+
+            // Show and set required fields based on selection
             if (this.value === 'shelter') {
                 shelterFields.classList.remove('hidden');
-                // Make shelter fields required
                 document.querySelectorAll('#shelterFields input, #shelterFields textarea').forEach(input => {
                     input.required = true;
                 });
-            } else {
-                shelterFields.classList.add('hidden');
-                // Remove required from shelter fields
-                document.querySelectorAll('#shelterFields input, #shelterFields textarea').forEach(input => {
-                    input.required = false;
+            } else if (this.value === 'rescuer') {
+                rescuerFields.classList.remove('hidden');
+                document.querySelectorAll('#rescuerFields input, #rescuerFields textarea').forEach(input => {
+                    input.required = true;
+                });
+            } else if (this.value === 'adopter') {
+                adopterFields.classList.remove('hidden');
+                document.querySelectorAll('#adopterFields input, #adopterFields textarea').forEach(input => {
+                    input.required = true;
                 });
             }
         });
