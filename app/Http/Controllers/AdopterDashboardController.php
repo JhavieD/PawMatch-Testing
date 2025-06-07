@@ -23,7 +23,7 @@ class AdopterDashboardController extends Controller
         // Get recent messages (temporarily disabled)
         $recentMessages = collect();
         
-        return view('dashboards.adopter_dashboard', compact(
+        return view('adopter.adopter_dashboard', compact(
             'favoritePets',
             'recentApplications',
             'recentMessages'
