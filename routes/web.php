@@ -7,6 +7,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\AdopterDashboardController;
+use App\Http\Controllers\ShelterController;
+use App\Http\Controllers\RescuerController;
 
 // Public routes
 Route::get('/', function () {
@@ -64,13 +66,13 @@ Route::middleware(['auth'])->group(function () {
     // Shelter Routes
     Route::middleware(['shelter'])->group(function(){
         Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
-            ->name('shelter_dashboard');
+            ->name('shelter.dashboard');
     });
   
     // Rescuer Routes
     Route::middleware(['rescuer'])->group(function(){
         Route::get('/rescuer/dashboard', [RescuerController::class, 'index'])
-            ->name('rescuer_dashboard');
+            ->name('rescuer.dashboard');
     });
    // Adopter Routes
     Route::middleware(['adopter'])->group(function(){

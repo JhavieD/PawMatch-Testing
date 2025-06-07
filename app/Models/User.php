@@ -92,4 +92,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(Adopter::class, 'user_id', 'user_id')->with('applications');
     }
+
+    public function adopterProfile()
+    {
+        return $this->hasOne(Adopter::class, 'user_id', 'user_id');
+    }
+
+    public function shelterProfile()
+    {
+        return $this->hasOne(Shelter::class, 'user_id', 'user_id');
+    }
+
+    public function rescuerProfile()
+    {
+        return $this->hasOne(Rescuer::class, 'user_id', 'user_id');
+    }
 }
