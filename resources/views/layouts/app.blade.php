@@ -7,13 +7,14 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
-        @stack('styles')
+        @yield('styles')
     </head>
     <body>
+        @section('navbar')
         <!-- Navigation -->
         <nav class="navbar">
             <div class="nav-content">
-                <a href="{{ route('home') }}" class="logo">🐾 PawMatch</a>
+                <a href="{{ route('home') }}" class="logo"><img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" style="height: 40px;"></a>
                 <div class="nav-links">
                     <a href="{{ route('about') }}">About</a>
                     <a href="{{ route('pet-listings') }}">Find Pets</a>
@@ -27,6 +28,7 @@
                 </div>
             </div>
         </nav>
+        @show
 
         <!-- Main Content -->
         <main>
