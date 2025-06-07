@@ -157,7 +157,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-content">
-            <a href="/" class="logo">🐾 PawMatch</a>
+            <a href="/" class="logo"><img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" style="height: 40px;"></a>
             <div class="nav-links">
                 <a href="/about">About</a>
                 <a href="/pets">Find Pets</a>
