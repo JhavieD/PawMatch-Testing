@@ -112,8 +112,8 @@
                                 <input type="text" name="shelter_name" id="shelter_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="shelter_valid_id" class="block text-sm font-medium text-gray-700">Valid ID Number</label>
-                                <input type="text" name="shelter_valid_id" id="shelter_valid_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <label for="shelter_location" class="block text-sm font-medium text-gray-700">Location</label>
+                                <input type="text" name="shelter_location" id="shelter_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label for="shelter_valid_id_upload" class="block text-sm font-medium text-gray-700">Valid ID Upload</label>
@@ -142,8 +142,8 @@
                                 <input type="text" name="organization_name" id="organization_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="rescuer_valid_id" class="block text-sm font-medium text-gray-700">Valid ID Number</label>
-                                <input type="text" name="rescuer_valid_id" id="rescuer_valid_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <label for="rescuer_location" class="block text-sm font-medium text-gray-700">Location</label>
+                                <input type="text" name="rescuer_location" id="rescuer_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label for="rescuer_valid_id_upload" class="block text-sm font-medium text-gray-700">Valid ID Upload</label>
