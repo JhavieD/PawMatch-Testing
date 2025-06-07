@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -52,9 +53,30 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Protected Routes
+// Protected Routes with Authentication and Role-Based Middleware
 Route::middleware(['auth'])->group(function () {
-    // Adopter Routes
+
+    // Admin Routes
+    Route::middleware(['admin'])->group(function(){
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('admin.dashboard');
+    });
+    // Shelter Routes
+    Route::middleware(['shelter'])->group(function(){
+        Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
+            ->name('shelter_dashboard');
+    });
+  
+    // Rescuer Routes
+    Route::middleware(['rescuer'])->group(function(){
+        Route::get('/rescuer/dashboard', [RescuerController::class, 'index'])
+            ->name('rescuer_dashboard');
+    });
+   // Adopter Routes
+    Route::middleware(['adopter'])->group(function(){
+        Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
+            ->name('adopter.dashboard');
+    });
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
         ->name('adopter.dashboard');
     Route::get('/adopter/pet-swipe', function () {
@@ -78,21 +100,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/adopter/messages', function () {
         return view('adopter.messages');
     })->name('adopter.messages');
-
-    // Shelter Routes
-    Route::get('/shelter/dashboard', function () {
-        return view('shelter.shelter_dashboard');
-    })->name('shelter.dashboard');
-
-    // Rescuer Routes
-    Route::get('/rescuer/dashboard', function () {
-        return view('dashboards.rescuer_dashboard');
-    })->name('rescuer.dashboard');
 });
-
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
