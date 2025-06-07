@@ -81,3 +81,27 @@ Route::get('/profile/edit', function () {
 Route::get('/admin/dashboard', function () {
     return 'Admin dashboard coming soon!';
 })->name('admin.dashboard');
+
+
+//Multiauth
+
+// adopter routes
+Route::middleware(['auth','adopterMiddleware'])->group(function(){
+
+    Route::get('dashboard',[AdopterController::class,'index'])->name('dashboard');
+
+});
+
+// rescuer routes
+Route::middleware(['auth','rescuerMiddleware'])->group(function(){
+
+    Route::get('dashboard',[RescuerController::class,'index'])->name('dashboard');
+
+});
+
+// shelter routes
+Route::middleware(['auth','shelterMiddleware'])->group(function(){
+
+    Route::get('/shelter/dashboard',[ShelterController::class,'index'])->name('shelter.dashboard');
+
+});
