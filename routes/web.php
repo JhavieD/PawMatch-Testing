@@ -57,6 +57,27 @@ Route::middleware(['auth'])->group(function () {
     // Adopter Routes
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
         ->name('adopter.dashboard');
+    Route::get('/adopter/pet-swipe', function () {
+        return view('adopter.pet-swipe');
+    })->name('adopter.pet-swipe');
+    Route::get('/adopter/pet-listings', function () {
+        return view('adopter.pet-listings');
+    })->name('adopter.pet-listings');
+    Route::get('/adopter/pet-details', function () {
+        return view('adopter.pet-details');
+    })->name('adopter.pet-details');
+    Route::get('/adopter/pet-personality-quiz', function () {
+        return view('adopter.pet-personality-quiz');
+    })->name('adopter.pet-personality-quiz');
+    Route::get('/adopter/adoption-form', function () {
+        return view('adopter.adoption-form');
+    })->name('adopter.adoption-form');
+    Route::get('/adopter/application-status', function () {
+        return view('adopter.application-status');
+    })->name('adopter.application-status');
+    Route::get('/adopter/messages', function () {
+        return view('adopter.messages');
+    })->name('adopter.messages');
 
     // Shelter Routes
     Route::get('/shelter/dashboard', function () {
@@ -97,15 +118,13 @@ Route::get('/profile/edit', function () {
     return 'Profile edit page coming soon!';
 })->name('profile.edit');
 
-// Admin dashboard
-Route::get('/admin/dashboard', function () {
-    return view('dashboards.admin-dashboard');
-})->name('admin.dashboard');
-
-// Report stray
-Route::get('/report-stray', function () {
-    return view('stray.report-stray');
-})->name('report-stray');
+// Admin routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.admin_dashboard');
+    })->name('admin.dashboard');
+    
+});
 
 Route::get('/dashboard-redirect', function () {
     $user = auth()->user();
