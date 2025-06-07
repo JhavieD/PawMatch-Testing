@@ -52,26 +52,28 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Protected Routes
-Route::middleware(['auth'])->group(function () {
-    // Adopter Routes
-    Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
-        ->name('adopter.dashboard');
+//Multiauth
 
-    // Shelter Routes
-    Route::get('/shelter/dashboard', function () {
-        return view('shelter.shelter_dashboard');
-    })->name('shelter.dashboard');
+// adopter routes
+Route::middleware(['auth','adopterMiddleware'])->group(function(){
 
-    // Rescuer Routes
-    Route::get('/rescuer/dashboard', function () {
-        return view('dashboards.rescuer_dashboard');
-    })->name('rescuer.dashboard');
+    Route::get('dashboard',[AdopterController::class,'index'])->name('dashboard');
+
 });
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// rescuer routes
+Route::middleware(['auth','rescuerMiddleware'])->group(function(){
+
+    Route::get('dashboard',[RescuerController::class,'index'])->name('dashboard');
+
+});
+
+// shelter routes
+Route::middleware(['auth','shelterMiddleware'])->group(function(){
+
+    Route::get('/shelter/dashboard',[ShelterController::class,'index'])->name('shelter.dashboard');
+
+});
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
@@ -101,6 +103,7 @@ Route::get('/profile/edit', function () {
 Route::get('/admin/dashboard', function () {
     return view('dashboards.admin-dashboard');
 })->name('admin.dashboard');
+
 
 // Report stray
 Route::get('/report-stray', function () {
