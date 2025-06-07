@@ -1,6 +1,6 @@
 @extends('layouts.adopter')
 
-@section('title', 'Adopter Dashboard - PawMatch')
+@section('title', 'Rescuer Dashboard - PawMatch')
 
 @section('adopter-content')
     
