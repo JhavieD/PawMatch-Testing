@@ -9,8 +9,28 @@ use App\Http\Controllers\AdopterDashboardController;
 
 // Public routes
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('home');
+})->name('home');
+
+Route::get('/faq', function () {
+    return view('faq');
+})->name('faq');
+
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+Route::get('/pet-listings', function () {
+    return view('adopter.pet-listings');
+})->name('pet-listings');
+
+Route::get('/report-stray', function () {
+    return view('report-stray');
+})->name('report-stray');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -32,26 +52,28 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Protected Routes
-Route::middleware(['auth'])->group(function () {
-    // Adopter Routes
-    Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
-        ->name('adopter.dashboard');
+//Multiauth
 
-    // Shelter Routes
-    Route::get('/shelter/dashboard', function () {
-        return view('dashboards.shelter_dashboard');
-    })->name('shelter.dashboard');
+// adopter routes
+Route::middleware(['auth','adopterMiddleware'])->group(function(){
 
-    // Rescuer Routes
-    Route::get('/rescuer/dashboard', function () {
-        return view('dashboards.rescuer_dashboard');
-    })->name('rescuer.dashboard');
+    Route::get('dashboard',[AdopterController::class,'index'])->name('dashboard');
+
 });
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// rescuer routes
+Route::middleware(['auth','rescuerMiddleware'])->group(function(){
+
+    Route::get('dashboard',[RescuerController::class,'index'])->name('dashboard');
+
+});
+
+// shelter routes
+Route::middleware(['auth','shelterMiddleware'])->group(function(){
+
+    Route::get('/shelter/dashboard',[ShelterController::class,'index'])->name('shelter.dashboard');
+
+});
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
@@ -77,31 +99,36 @@ Route::get('/profile/edit', function () {
     return 'Profile edit page coming soon!';
 })->name('profile.edit');
 
-// Placeholder route for admin.dashboard
+// Admin dashboard
 Route::get('/admin/dashboard', function () {
-    return 'Admin dashboard coming soon!';
+    return view('dashboards.admin-dashboard');
 })->name('admin.dashboard');
 
 
-//Multiauth
+// Report stray
+Route::get('/report-stray', function () {
+    return view('stray.report-stray');
+})->name('report-stray');
 
-// adopter routes
-Route::middleware(['auth','adopterMiddleware'])->group(function(){
+Route::get('/dashboard-redirect', function () {
+    $user = auth()->user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
+    switch ($user->role) {
+        case 'admin':
+            return redirect()->route('admin.dashboard');
+        case 'adopter':
+            return redirect()->route('adopter.dashboard');
+        case 'shelter':
+            return redirect()->route('shelter.dashboard');
+        case 'rescuer':
+            return redirect()->route('rescuer.dashboard');
+        default:
+            return redirect()->route('home');
+    }
+})->name('dashboard.redirect')->middleware('auth');
 
-    Route::get('dashboard',[AdopterController::class,'index'])->name('dashboard');
-
-});
-
-// rescuer routes
-Route::middleware(['auth','rescuerMiddleware'])->group(function(){
-
-    Route::get('dashboard',[RescuerController::class,'index'])->name('dashboard');
-
-});
-
-// shelter routes
-Route::middleware(['auth','shelterMiddleware'])->group(function(){
-
-    Route::get('/shelter/dashboard',[ShelterController::class,'index'])->name('shelter.dashboard');
-
-});
+Route::get('/application-status', function () {
+    return view('adopter.application-status');
+})->name('application-status');
