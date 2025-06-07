@@ -23,26 +23,16 @@ new class extends Component
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ Auth::user()->usertype == 'adopter' ? route('adopter.dashboard') : route('dashboard')}}" wire:navigate> 
-                        <!-- ^Multiauth -->
+                    <a href="{{ route('dashboard') }}" wire:navigate>
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="Auth::user()->usertype == 'adopter' ? request()->routeIs('adopter.dashboard') : request()->routeIs('dashboard')">
-                        <!-- ^Multiauth -->
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
-
-                    <!-- admin links
-                    @if (Auth::user()->usertype == 'admin')
-                    <x-nav-link :href="shelter/shelterAuth::user()->usertype == 'adopter' ? request()->routeIs('adopter.dashboard') : request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    @endif -->
-                    <!-- ^Multiauth -->
                 </div>
             </div>
 
