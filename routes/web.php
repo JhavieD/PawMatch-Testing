@@ -9,8 +9,28 @@ use App\Http\Controllers\AdopterDashboardController;
 
 // Public routes
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('home');
+})->name('home');
+
+Route::get('/faq', function () {
+    return view('faq');
+})->name('faq');
+
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+Route::get('/pet-listings', function () {
+    return view('adopter.pet-listings');
+})->name('pet-listings');
+
+Route::get('/report-stray', function () {
+    return view('report-stray');
+})->name('report-stray');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -40,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Shelter Routes
     Route::get('/shelter/dashboard', function () {
-        return view('dashboards.shelter_dashboard');
+        return view('shelter.shelter_dashboard');
     })->name('shelter.dashboard');
 
     // Rescuer Routes
@@ -77,7 +97,35 @@ Route::get('/profile/edit', function () {
     return 'Profile edit page coming soon!';
 })->name('profile.edit');
 
-// Placeholder route for admin.dashboard
+// Admin dashboard
 Route::get('/admin/dashboard', function () {
-    return 'Admin dashboard coming soon!';
+    return view('dashboards.admin-dashboard');
 })->name('admin.dashboard');
+
+// Report stray
+Route::get('/report-stray', function () {
+    return view('stray.report-stray');
+})->name('report-stray');
+
+Route::get('/dashboard-redirect', function () {
+    $user = auth()->user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
+    switch ($user->role) {
+        case 'admin':
+            return redirect()->route('admin.dashboard');
+        case 'adopter':
+            return redirect()->route('adopter.dashboard');
+        case 'shelter':
+            return redirect()->route('shelter.dashboard');
+        case 'rescuer':
+            return redirect()->route('rescuer.dashboard');
+        default:
+            return redirect()->route('home');
+    }
+})->name('dashboard.redirect')->middleware('auth');
+
+Route::get('/application-status', function () {
+    return view('adopter.application-status');
+})->name('application-status');
