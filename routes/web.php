@@ -81,3 +81,4 @@ Route::get('/profile/edit', function () {
 Route::get('/admin/dashboard', function () {
     return 'Admin dashboard coming soon!';
 })->name('admin.dashboard');
+
