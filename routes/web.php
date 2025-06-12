@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\AdopterDashboardController;
 use App\Http\Controllers\ShelterController;
 use App\Http\Controllers\RescuerController;
+use App\Http\Controllers\AdminDashboardController;
 
 // Public routes
 Route::get('/', function () {
@@ -59,23 +60,42 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::middleware(['auth'])->group(function () {
 
     // Admin Routes
-    Route::middleware(['admin'])->group(function(){
+    Route::middleware(['admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
             ->name('admin.dashboard');
     });
     // Shelter Routes
-    Route::middleware(['shelter'])->group(function(){
+    Route::middleware(['shelter'])->group(function () {
         Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
             ->name('shelter.dashboard');
+
+        Route::get('/shelter/pets', function () {
+            return view('shelter.pets');
+        })->name('shelter.pets');
+
+        Route::get('/shelter/pet_applications', function () {
+            return view('shelter.pet_applications');
+        })->name('shelter.pet_applications');
+
+        Route::get('/shelter/messages', function () {
+            return view('shelter.messages');
+        })->name('shelter.messages');
+
+        Route::get('/shelter/profile', function () {
+            return view('shelter.profile');
+        })->name('shelter.profile');
+        
+        Route::get('/shelter/applications', 
+        [\App\Http\Controllers\ShelterController::class, 'applications'])->name('shelter.applications');
     });
-  
+
     // Rescuer Routes
-    Route::middleware(['rescuer'])->group(function(){
+    Route::middleware(['rescuer'])->group(function () {
         Route::get('/rescuer/dashboard', [RescuerController::class, 'index'])
             ->name('rescuer.dashboard');
     });
-   // Adopter Routes
-    Route::middleware(['adopter'])->group(function(){
+    // Adopter Routes
+    Route::middleware(['adopter'])->group(function () {
         Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
             ->name('adopter.dashboard');
     });
@@ -133,7 +153,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.admin_dashboard');
     })->name('admin.dashboard');
-    
 });
 
 Route::get('/dashboard-redirect', function () {
