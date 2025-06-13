@@ -22,7 +22,7 @@ class RegisterController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'in:adopter,shelter'],
+            'role' => ['required', 'in:adopter,shelter,rescuer'],
             'phone_number' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
         ]);
@@ -31,9 +31,16 @@ class RegisterController extends Controller
         if ($request->role === 'shelter') {
             $request->validate([
                 'shelter_name' => ['required', 'string', 'max:255'],
-                'shelter_description' => ['required', 'string'],
-                'shelter_license' => ['required', 'string', 'max:255'],
-                'shelter_documents' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'shelter_location' => ['required', 'string', 'max:255'],
+                'shelter_valid_id_upload' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            ]);
+        }
+
+        // Additional validation for rescuer role
+        if ($request->role === 'rescuer') {
+            $request->validate([
+                'organization_name' => ['required', 'string', 'max:255'],
+                'rescuer_location' => ['required', 'string', 'max:255'],
             ]);
         }
 
@@ -49,27 +56,55 @@ class RegisterController extends Controller
 
         // Handle shelter-specific data
         if ($request->role === 'shelter') {
-            $shelterDocument = $request->file('shelter_documents');
-            $documentPath = $shelterDocument->store('shelter-documents', 'public');
+            $shelterIdFile = $request->file('shelter_valid_id_upload');
+            $shelterIdPath = $shelterIdFile ? $shelterIdFile->store('shelter-ids', 'public') : null;
+            $user->shelterProfile()->create([
+                'shelter_name' => $request->shelter_name,
+                'location' => $request->shelter_location,
+                'contact_info' => $validated['phone_number'],
+                'verified' => false,
+                'user_id' => $user->user_id,
+            ]);
+        }
 
-            $user->shelter()->create([
-                'name' => $request->shelter_name,
-                'description' => $request->shelter_description,
-                'license_number' => $request->shelter_license,
-                'document_path' => $documentPath,
+        // Handle rescuer-specific data
+        if ($request->role === 'rescuer') {
+            $user->rescuerProfile()->create([
+                'organization_name' => $request->organization_name,
+                'location' => $request->rescuer_location,
+                'verified' => false,
+                'user_id' => $user->user_id,
             ]);
         }
 
         // Handle adopter-specific data
         if ($request->role === 'adopter') {
-            $user->adopter()->create([
-                'address' => $request->address,
-                'adoption_status' => 'pending',
-            ]);
+            // Optionally handle adopter-specific fields, e.g., valid_id
+            if ($request->hasFile('valid_id')) {
+                $adopterIdFile = $request->file('valid_id');
+                $adopterIdPath = $adopterIdFile->store('adopter-ids', 'public');
+                $user->adopterProfile()->create([
+                    'address' => $request->address,
+                    'adoption_status' => 'pending',
+                    'valid_id_path' => $adopterIdPath,
+                ]);
+            } else {
+                $user->adopterProfile()->create([
+                    'address' => $request->address,
+                    'adoption_status' => 'pending',
+                ]);
+            }
         }
 
         Auth::login($user);
 
-        return redirect()->intended($request->role === 'shelter' ? '/shelter/dashboard' : '/adopter/dashboard');
+        // Redirect based on role
+        if ($request->role === 'shelter') {
+            return redirect()->intended('/shelter/dashboard');
+        } elseif ($request->role === 'rescuer') {
+            return redirect()->intended('/rescuer/dashboard');
+        } else {
+            return redirect()->intended('/adopter/dashboard');
+        }
     }
 } 
