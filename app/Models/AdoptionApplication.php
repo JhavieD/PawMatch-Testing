@@ -9,6 +9,8 @@ class AdoptionApplication extends Model
 {
     use HasFactory;
 
+    protected $table = 'adoption_applications';
+
     protected $primaryKey = 'application_id';
     protected $fillable = [
         'adopter_id', 'pet_id', 'shelter_id', 'rescuer_id', 'reason_for_adoption', 'living_environment',
