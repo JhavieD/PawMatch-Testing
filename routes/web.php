@@ -111,6 +111,11 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['adopter'])->group(function () {
         Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
             ->name('adopter.dashboard');
+        Route::get('/adopter/profile', [\App\Http\Controllers\AdopterDashboardController::class, 'profile'])->name('adopter.profile');
+        Route::post('/adopter/profile/update', [\App\Http\Controllers\AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
+        Route::post('/adopter/profile/password', [\App\Http\Controllers\AdopterDashboardController::class, 'updatePassword'])->name('adopter.profile.password');
+        Route::post('/adopter/profile/notifications', [\App\Http\Controllers\AdopterDashboardController::class, 'updateNotifications'])->name('adopter.profile.notifications');
+        Route::post('/adopter/profile/delete', [\App\Http\Controllers\AdopterDashboardController::class, 'deleteAccount'])->name('adopter.profile.delete');
     });
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
         ->name('adopter.dashboard');
