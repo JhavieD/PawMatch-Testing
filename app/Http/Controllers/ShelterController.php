@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ShelterController extends Controller
 {
@@ -50,22 +51,30 @@ class ShelterController extends Controller
         $pets = $shelter->pets()->latest()->get();
         return view('shelter.pets', compact('pets'));
     }
-
+    // for addingpets
     public function store(Request $request)
     {
         $shelter = auth()->user()->shelter;
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string',
+            'species' => 'required|string',
             'breed' => 'required|string',
             'age' => 'required|integer',
             'gender' => 'required|string',
             'size' => 'required|string',
-            'species' => 'nullable|string',
             'description' => 'nullable|string',
-            'adoption_status' => 'required|string',
+            'behavior' => 'nullable|string',
+            'daily_activity' => 'nullable|string',
+            'special_needs' => 'nullable|string',
+            'compatibility' => 'nullable|string',
         ]);
+        $data['adoption_status'] = 'available'; // always set to available on add
         $data['shelter_id'] = $shelter->shelter_id;
+
+        // Debug: log all request and validated data
+        Log::info('Pet Add Request Data', $request->all());
+        Log::info('Pet Add Validated Data', $data);
+
         $pet = \App\Models\Pet::create($data);
 
         if ($request->ajax() || $request->wantsJson()) {
@@ -74,20 +83,23 @@ class ShelterController extends Controller
 
         return redirect()->route('shelter.pets')->with('success', 'Pet added successfully!');
     }
-
+    // for editing pets
     public function update(Request $request, $petId)
     {
         $pet = \App\Models\Pet::findOrFail($petId);
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string',
+            'species' => 'required|string',
             'breed' => 'required|string',
             'age' => 'required|integer',
             'gender' => 'required|string',
             'size' => 'required|string',
-            'species' => 'nullable|string',
             'description' => 'nullable|string',
             'adoption_status' => 'required|string',
+            'behavior' => 'nullable|string',
+            'daily_activity' => 'nullable|string',
+            'special_needs' => 'nullable|string',
+            'compatibility' => 'nullable|string',
         ]);
         $pet->update($data);
 
@@ -97,6 +109,8 @@ class ShelterController extends Controller
 
         return redirect()->route('shelter.pets')->with('success', 'Pet updated successfully!');
     }
+
+    // for deleting pets
     public function destroy($petId)
     {
         $pet = \App\Models\Pet::findOrFail($petId);
