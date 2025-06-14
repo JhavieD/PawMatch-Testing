@@ -18,7 +18,6 @@
             <option value="adopted">Adopted</option>
         </select>
     </div>
-
     <!-- Pet Cards -->
     <div class="pets-grid">
         @forelse($pets as $pet)
@@ -43,6 +42,7 @@
                         data-adoption_status="{{ $pet->adoption_status }}">
                         Edit
                     </button>
+
                     <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}" data-pet-name="{{ $pet->name }}">View Applications</button>
                     <form method="POST" action="{{ route('shelter.pets.destroy', $pet->pet_id) }}" style="display: contents;">
                     @csrf
@@ -230,7 +230,6 @@
             </div>
         </div>
     </div>
-
     <!-- View Applications Modal -->
     <div id="viewApplicationsModal" class="modal" style="display:none;">
         <div class="modal-content">
@@ -247,10 +246,10 @@
     </div>
 </div>
 
-<script>
-    function logout() {
-        window.location.href = 'login.html';
-    }
+@if($showApplicationsModal)
+@include('shelter.partials.applications-modal', ['pet' => $selectedPet])
+@endif
+
 
     // Modal functionality
     const editModal = document.getElementById('editPetModal');
@@ -259,10 +258,30 @@
     const editBtns = document.querySelectorAll('.edit-pet-btn');
     const addPetBtn = document.querySelector('.add-pet-btn');
 
-    function closeModal(modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                editModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                const petId = btn.getAttribute('data-pet-id');
+                const editForm = document.getElementById('editPetForm');
+                editForm.action = `/shelter/pets/${petId}`;
+                console.log('Edit button clicked, form action set to:', editForm.action);
+                // Enable save button
+                editForm.querySelector('button[type="submit"]').disabled = false;
+                // Pre-fill all fields in the edit modal
+                document.getElementById('edit-name').value = btn.dataset.name || '';
+                document.getElementById('edit-type').value = btn.dataset.type || '';
+                document.getElementById('edit-breed').value = btn.dataset.breed || '';
+                document.getElementById('edit-age').value = btn.dataset.age || '';
+                document.getElementById('edit-gender').value = btn.dataset.gender || '';
+                document.getElementById('edit-size').value = btn.dataset.size || '';
+                document.getElementById('edit-species').value = btn.dataset.species || '';
+                document.getElementById('edit-description').value = btn.dataset.description || '';
+                document.getElementById('edit-adoption_status').value = btn.dataset.adoption_status || '';
+            });
+        });
+
 
     editBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -293,27 +312,43 @@
             form.action = form.action.replace('__PET_ID__', petId);
 
             editModal.style.display = 'block';
+
             document.body.style.overflow = 'hidden';
         });
-    });
 
-    addPetBtn.addEventListener('click', () => {
-        addModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    });
-
-    closeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const modal = btn.closest('.modal');
-            closeModal(modal);
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal');
+                closeModal(modal);
+            });
         });
-    });
 
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeModal(e.target);
-        }
-    });
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeModal(e.target);
+            }
+        });
+
+        // Form submission this is only alert page it and it doesn't submit to the backend
+        // document.getElementById('editPetForm').addEventListener('submit', (e) => {
+        //     e.preventDefault();
+        //     alert('Changes saved successfully!');
+        //     closeModal(editModal);
+        // });
+
+        // document.getElementById('addPetForm').addEventListener('submit', (e) => {
+        //     e.preventDefault();
+        //     alert('Pet added successfully!');
+        //     closeModal(addModal);
+        // });
+
+        // Image upload handling
+        document.querySelectorAll('.upload-box input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const files = e.target.files;
+                alert(`${files.length} image(s) selected for upload`);
+            });
+        });
 
     // Form submission
     document.getElementById('editPetForm').addEventListener('submit', (e) => {
@@ -394,20 +429,17 @@
         closeModal(addModal);
     });
 
-    // Image upload handling
-    document.querySelectorAll('.upload-box input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const files = e.target.files;
-            alert(`${files.length} image(s) selected for upload`);
-        });
-    });
 
-    // Remove image handling
-    document.querySelectorAll('.remove-image').forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.parentElement.remove();
+        function viewApplicationDetails(applicationId) {
+            // Redirect to the application details page
+            window.location.href = `applications-review.html?id=${applicationId}`;
+        }
+
+        //close applications modal
+        document.querySelector('#viewApplicationsModal .close-btn').addEventListener('click', () => {
+            viewApplicationsModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
         });
-    });
 
     // View Applications functionality
     const viewApplicationsModal = document.getElementById('viewApplicationsModal');
@@ -457,17 +489,74 @@
                 .catch(error => {
                     console.error('Error fetching applications:', error);
                 });
+
         });
     });
+</script>
 
-    function viewApplicationDetails(applicationId) {
-        // Redirect to the application details page
-        window.location.href = `applications-review.html?id=${applicationId}`;
+<script>
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    function messageApplicant(applicantName) {
-        // Redirect to messages with the applicant
-        window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
+    function showApplications(petId, petName) {
+        document.getElementById('petNameTitle').textContent = petName;
+        fetch(`/shelter/pets/${petId}/applications`)
+            .then(response => response.json())
+            .then(applications => {
+                let html = '';
+                if (!applications || applications.length === 0) {
+                    html = `<p>No recent applications for <strong>${petName}</strong>.</p>`;
+                } else {
+                    applications.forEach(app => {
+                        const appName = app?.adopter?.user?.name || '';
+                        const appStatus = app?.status || '';
+                        const appStatusClass = appStatus.toLowerCase();
+                        const appCreated = app?.created_at ? new Date(app.created_at).toLocaleDateString() : '';
+                        html += `
+<div class="application-item">
+    <div class="applicant-info">
+        <h3>${appName}</h3>
+        <p>Submitted: ${appCreated}</p>
+        <span class="status-badge status-${appStatusClass}">${appStatus}</span>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-primary view-details-btn" data-id="${app.id}">View Details</button>
+        <button class="btn btn-outline message-applicant-btn" data-applicant="${appName}">Message</button>
+    </div>
+</div>
+`;
+                    });
+                }
+                document.querySelector('#viewApplicationsModal .applications-list').innerHTML = html;
+                document.getElementById('viewApplicationsModal').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+
+                // Attach event listeners for the new buttons
+                document.querySelectorAll('.view-details-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        viewApplicationDetails(id);
+                    });
+                });
+                document.querySelectorAll('.message-applicant-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const name = this.getAttribute('data-applicant');
+                        messageApplicant(name);
+                    });
+                });
+            })
+            .catch(error => {
+                document.querySelector('#viewApplicationsModal .applications-list').innerHTML = '<p>No loading applications.</p>';
+                document.getElementById('viewApplicationsModal').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                console.error('Error fetching applications:', error);
+            });
     }
 </script>
 @endsection

@@ -209,3 +209,4 @@ Route::get('/dashboard', function () {
             return redirect()->route('home');
     }
 })->name('dashboard')->middleware('auth');
+
