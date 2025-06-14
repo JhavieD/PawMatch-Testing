@@ -43,4 +43,64 @@ class ShelterController extends Controller
     {
         return view('shelter.pet_applications');
     }
+
+    public function pets()
+    {
+        $shelter = auth()->user()->shelter;
+        $pets = $shelter->pets()->latest()->get();
+        return view('shelter.pets', compact('pets'));
+    }
+
+    public function store(Request $request)
+    {
+        $shelter = auth()->user()->shelter;
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|string',
+            'breed' => 'required|string',
+            'age' => 'required|integer',
+            'gender' => 'required|string',
+            'size' => 'required|string',
+            'species' => 'nullable|string',
+            'description' => 'nullable|string',
+            'adoption_status' => 'required|string',
+        ]);
+        $data['shelter_id'] = $shelter->shelter_id;
+        $pet = \App\Models\Pet::create($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('shelter.pets')->with('success', 'Pet added successfully!');
+    }
+
+    public function update(Request $request, $petId)
+    {
+        $pet = \App\Models\Pet::findOrFail($petId);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|string',
+            'breed' => 'required|string',
+            'age' => 'required|integer',
+            'gender' => 'required|string',
+            'size' => 'required|string',
+            'species' => 'nullable|string',
+            'description' => 'nullable|string',
+            'adoption_status' => 'required|string',
+        ]);
+        $pet->update($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('shelter.pets')->with('success', 'Pet updated successfully!');
+    }
+    public function destroy($petId)
+    {
+        $pet = \App\Models\Pet::findOrFail($petId);
+        $pet->delete();
+        return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
+    }
 }
