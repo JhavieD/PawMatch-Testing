@@ -10,6 +10,8 @@ use App\Http\Controllers\AdopterDashboardController;
 use App\Http\Controllers\ShelterController;
 use App\Http\Controllers\RescuerController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\Auth\AdoptionApplicationController;
+use App\Models\AdoptionApplication;
 
 // Public routes
 Route::get('/', function () {
@@ -69,9 +71,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
             ->name('shelter.dashboard');
 
-        Route::get('/shelter/pets', function () {
-            return view('shelter.pets');
-        })->name('shelter.pets');
+        Route::post('/shelter/pets', [ShelterController::class, 'store'])
+            ->name('shelter.pets.store');
+
+        Route::get('/shelter/pets', [ShelterController::class, 'pets'])
+            ->name('shelter.pets');
 
         Route::get('/shelter/pet_applications', function () {
             return view('shelter.pet_applications');
@@ -84,9 +88,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/profile', function () {
             return view('shelter.profile');
         })->name('shelter.profile');
-        
-        Route::get('/shelter/applications', 
-        [\App\Http\Controllers\ShelterController::class, 'applications'])->name('shelter.applications');
+
+        Route::get(
+            '/shelter/applications',
+            [\App\Http\Controllers\ShelterController::class, 'applications']
+        )->name('shelter.applications');
+
+        // edit pet details
+        Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterController::class, 'update'])->name('shelter.pets.update');
+        // view pet details
+        Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
+        // delete a pet
+        Route::delete('/shelter/pets/{pet}', [ShelterController::class, 'destroy'])->name('shelter.pets.destroy');
     });
 
     // Rescuer Routes
@@ -177,3 +190,23 @@ Route::get('/dashboard-redirect', function () {
 Route::get('/application-status', function () {
     return view('adopter.application-status');
 })->name('application-status');
+
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
+    switch ($user->role) {
+        case 'admin':
+            return redirect()->route('admin.dashboard');
+        case 'adopter':
+            return redirect()->route('adopter.dashboard');
+        case 'shelter':
+            return redirect()->route('shelter.dashboard');
+        case 'rescuer':
+            return redirect()->route('rescuer.dashboard');
+        default:
+            return redirect()->route('home');
+    }
+})->name('dashboard')->middleware('auth');
+
