@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
@@ -215,3 +216,15 @@ Route::get('/dashboard', function () {
     }
 })->name('dashboard')->middleware('auth');
 
+// S3 Upload
+Route::post('/upload', function (Request $request) {
+    if ($request->hasFile('photo')) {
+        $fileName = $request->file('photo')->getClientOriginalName();
+        $request->file('photo')->store('pawmatch-system', [
+            'disk' => 's3',
+            'visibility' => 'public'
+        ]);
+        return 'Uploaded!';
+    }
+    return 'No file uploaded.';
+});
