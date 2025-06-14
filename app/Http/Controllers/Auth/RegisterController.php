@@ -32,7 +32,7 @@ class RegisterController extends Controller
             $request->validate([
                 'shelter_name' => ['required', 'string', 'max:255'],
                 'shelter_location' => ['required', 'string', 'max:255'],
-                'shelter_valid_id_upload' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'shelter_valid_id' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
             ]);
         }
 
@@ -56,44 +56,101 @@ class RegisterController extends Controller
 
         // Handle shelter-specific data
         if ($request->role === 'shelter') {
-            $shelterIdFile = $request->file('shelter_valid_id_upload');
-            $shelterIdPath = $shelterIdFile ? $shelterIdFile->store('shelter-ids', 'public') : null;
-            $user->shelterProfile()->create([
+            if ($request->role === 'shelter') {
+            $request->validate([
+                'shelter_valid_id' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            ]);
+
+            $validIdPath = null;
+            $fileType = null;
+            if ($request->hasFile('shelter_valid_id')) {
+                $validId = $request->file('shelter_valid_id');
+                $validIdPath = $validId->store('shelters/', 's3');
+                $fileType = $validId->getClientMimeType();
+            }
+            $user->shelter()->create([
                 'shelter_name' => $request->shelter_name,
                 'location' => $request->shelter_location,
                 'contact_info' => $validated['phone_number'],
                 'verified' => false,
                 'user_id' => $user->user_id,
+                'shelter_valid_id' => $validIdPath,
             ]);
+            // Insert into user_valid_ids using $user->id
+            if ($validIdPath) {
+                \DB::table('user_valid_ids')->insert([
+                    'user_id' => $user->user_id,
+                    'image_url' => $validIdPath,
+                    'file_type' => $fileType,
+                    'uploaded_at' => now(),
+                ]);
+            }
         }
+    }
 
         // Handle rescuer-specific data
         if ($request->role === 'rescuer') {
-            $user->rescuerProfile()->create([
+            if ($request->role === 'rescuer') {
+            $request->validate([
+                'rescuer_valid_id' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            ]);
+
+            $validIdPath = null;
+            $fileType = null;
+            if ($request->hasFile('rescuer_valid_id')) {
+                $validId = $request->file('rescuer_valid_id');
+                $validIdPath = $validId->store('rescuers/', 's3');
+                $fileType = $validId->getClientMimeType();
+            }
+            $user->rescuer()->create([
                 'organization_name' => $request->organization_name,
                 'location' => $request->rescuer_location,
                 'verified' => false,
                 'user_id' => $user->user_id,
             ]);
+
+            if ($validIdPath) {
+                \DB::table('user_valid_ids')->insert([
+                    'user_id' => $user->user_id,
+                    'image_url' => $validIdPath,
+                    'file_type' => $fileType,
+                    'uploaded_at' => now(),
+                ]);
+            }
         }
+        }
+        
 
         // Handle adopter-specific data
         if ($request->role === 'adopter') {
-            // Optionally handle adopter-specific fields, e.g., valid_id
-            if ($request->hasFile('valid_id')) {
-                $adopterIdFile = $request->file('valid_id');
-                $adopterIdPath = $adopterIdFile->store('adopter-ids', 'public');
-                $user->adopterProfile()->create([
-                    'address' => $request->address,
-                    'adoption_status' => 'pending',
-                    'valid_id_path' => $adopterIdPath,
-                ]);
-            } else {
-                $user->adopterProfile()->create([
-                    'address' => $request->address,
-                    'adoption_status' => 'pending',
+            if ($request->role === 'adopter') {
+            $request->validate([
+                'adopter_valid_id' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            ]);
+
+            $validIdPath = null;
+            $fileType = null;
+            if ($request->hasFile('adopter_valid_id')) {
+                $validId = $request->file('adopter_valid_id');
+                $validIdPath = $validId->store('adopters/', 's3');
+                $fileType = $validId->getClientMimeType();
+            }
+            $user->adopter()->create([
+                'address' => $request->address,
+                'adoption_status' => 'pending',
+                'adopter_valid_id' => $validIdPath,
+            ]);
+
+            // Insert into user_valid_ids using $user->id
+            if ($validIdPath) {
+                \DB::table('user_valid_ids')->insert([
+                    'user_id' => $user->user_id,
+                    'image_url' => $validIdPath,
+                    'file_type' => $fileType,
+                    'uploaded_at' => now(),
                 ]);
             }
+        }
         }
 
         Auth::login($user);
