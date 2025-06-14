@@ -148,13 +148,6 @@ Route::get('/profile/edit', function () {
     return 'Profile edit page coming soon!';
 })->name('profile.edit');
 
-<<<<<<< feature/reset-password-email
-// Placeholder route for admin.dashboard
-Route::get('/admin/dashboard', function () {
-    return 'Admin dashboard coming soon!';
-})->name('admin.dashboard');
-
-=======
 // Admin routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
@@ -184,4 +177,3 @@ Route::get('/dashboard-redirect', function () {
 Route::get('/application-status', function () {
     return view('adopter.application-status');
 })->name('application-status');
->>>>>>> main
