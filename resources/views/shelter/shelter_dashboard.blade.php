@@ -200,24 +200,25 @@
     </div><!-- .content-wrapper -->
 </main>
 
-<!-- Add New Pet Modal -->
+<!-- Add New Pet Modal (FROM PET.BLADE.PHP SAME FUNCTIONALITY) -->
 <div id="addPetModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Add New Pet</h2>
-            <button class="close-btn">&times;</button>
+            <button class="close-btn" type="button">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="addPetForm">
+            <form id="addPetForm" method="POST" action="{{ route('shelter.pets.store') }}" enctype="multipart/form-data">
+                @csrf
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="petName">Pet Name</label>
-                        <input type="text" id="petName" name="petName" required>
+                        <label for="name">Pet Name</label>
+                        <input type="text" id="name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="petType">Type</label>
-                        <select id="petType" name="petType" required>
-                            <option value="">Select type</option>
+                        <label for="type">Type</label>
+                        <select id="type" name="type" required>
+                            <option value="">Select Type</option>
                             <option value="dog">Dog</option>
                             <option value="cat">Cat</option>
                             <option value="other">Other</option>
@@ -234,7 +235,7 @@
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select id="gender" name="gender" required>
-                            <option value="">Select gender</option>
+                            <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                         </select>
@@ -242,32 +243,50 @@
                     <div class="form-group">
                         <label for="size">Size</label>
                         <select id="size" name="size" required>
-                            <option value="">Select size</option>
+                            <option value="">Select Size</option>
                             <option value="small">Small</option>
                             <option value="medium">Medium</option>
                             <option value="large">Large</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="species">Species</label>
+                        <select id="species" name="species" required>
+                            <option value="">Select Species</option>
+                            <option value="canine">Canine</option>
+                            <option value="feline">Feline</option>
+                            <option value="avian">Avian</option>
+                            <option value="rodent">Rodent</option>
+                            <option value="reptile">Reptile</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
                 </div>
-
                 <div class="form-group">
                     <label for="description">Description</label>
                     <textarea id="description" name="description" rows="4" required></textarea>
                 </div>
-
+                <div class="form-group">
+                    <label for="adoption_status">Status</label>
+                    <select id="adoption_status" name="adoption_status" required>
+                        <option value="">Select Status</option>
+                        <option value="available">Available</option>
+                        <option value="pending">Application Pending</option>
+                        <option value="adopted">Adopted</option>
+                    </select>
+                </div>
                 <div class="image-upload">
                     <h3>Pet Images</h3>
                     <div class="image-grid">
                         <label class="upload-box">
-                            <input type="file" accept="image/*" multiple required>
+                            <input type="file" name="images[]" accept="image/*" multiple>
                             <span>+ Add Photos</span>
                         </label>
                     </div>
                 </div>
-
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">Add Pet</button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal(addPetModal)">Cancel</button>
                 </div>
             </form>
         </div>
@@ -360,26 +379,45 @@
         }
     });
 
-    // Handle form submissions (Mock Save)
-    document.getElementById('addPetForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert('Pet added successfully!');
-        closeModal(addPetModal);
-    });
-
-    document.getElementById('editPetForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert('Changes saved successfully!');
-        closeModal(editPetModal);
-    });
-
-    // Image upload handling
-    document.querySelectorAll('.upload-box input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const files = e.target.files;
-            alert(`${files.length} image(s) selected for upload`);
+    // Add Pet AJAX submission
+    if (document.getElementById('addPetForm')) {
+        document.getElementById('addPetForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.href = "{{ route('shelter.pets') }}";
+                    } else {
+                        alert('Error adding pet. Please try again.');
+                    }
+                } else if (response.status === 422) {
+                    const errorData = await response.json();
+                    let messages = [];
+                    for (const key in errorData.errors) {
+                        messages.push(errorData.errors[key].join(' '));
+                    }
+                    alert('Validation error:\n' + messages.join('\n'));
+                } else {
+                    alert('An error occurred. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+            closeModal(addPetModal);
         });
-    });
+    }
 
     // Function to open shelter modal
     function openShelterModal(shelterId) {
