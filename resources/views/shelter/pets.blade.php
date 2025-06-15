@@ -33,14 +33,17 @@
                 <div class="card-actions">
                     <button type="button" class="edit-pet-btn" data-pet-id="{{ $pet->pet_id }}"
                         data-name="{{ $pet->name }}"
-                        data-type="{{ $pet->type }}"
+                        data-species="{{ $pet->species }}"
                         data-breed="{{ $pet->breed }}"
                         data-age="{{ $pet->age }}"
                         data-gender="{{ $pet->gender }}"
                         data-size="{{ $pet->size }}"
-                        data-species="{{ $pet->species }}"
                         data-description="{{ $pet->description }}"
-                        data-adoption_status="{{ $pet->adoption_status }}">
+                        data-adoption_status="{{ $pet->adoption_status }}"
+                        data-behavior="{{ $pet->behavior }}"
+                        data-daily_activity="{{ $pet->daily_activity }}"
+                        data-special_needs="{{ $pet->special_needs }}"
+                        data-compatibility="{{ $pet->compatibility }}">
                         Edit
                     </button>
                     <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}" data-pet-name="{{ $pet->name }}">View Applications</button>
@@ -74,8 +77,9 @@
                             <input type="text" name="name" id="edit-name">
                         </div>
                         <div class="form-group">
-                            <label for="edit-type">Type</label>
-                            <select id="edit-type" name="type" required>
+                            <label for="edit-species">Species</label>
+                            <select id="edit-species" name="species" required>
+                                <option value="">Select Species</option>
                                 <option value="dog">Dog</option>
                                 <option value="cat">Cat</option>
                                 <option value="other">Other</option>
@@ -104,18 +108,6 @@
                                 <option value="large">Large</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="edit-species">Species</label>
-                            <select id="edit-species" name="species" required>
-                                <option value="">Select Species</option>
-                                <option value="canine">Canine</option>
-                                <option value="feline">Feline</option>
-                                <option value="avian">Avian</option>
-                                <option value="rodent">Rodent</option>
-                                <option value="reptile">Reptile</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="form-group">
                         <label for="edit-description">Description</label>
@@ -127,6 +119,41 @@
                             <option value="available">Available</option>
                             <option value="pending">Application Pending</option>
                             <option value="adopted">Adopted</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-behavior">Behavior</label>
+                        <select name="behavior" id="edit-behavior" required>
+                            <option value="">Select Behavior</option>
+                            <option value="Calm and Relaxed">Calm and Relaxed</option>
+                            <option value="Playful and Energetic">Playful and Energetic</option>
+                            <option value="Independent">Independent</option>
+                            <option value="Protective">Protective</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-daily_activity">Daily Activity</label>
+                        <select name="daily_activity" id="edit-daily_activity" required>
+                            <option value="">Select Activity Level</option>
+                            <option value="Low">Low</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-special_needs">Special Needs</label>
+                        <select name="special_needs" id="edit-special_needs" required>
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-compatibility">Compatibility</label>
+                        <select name="compatibility" id="edit-compatibility" required>
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
                         </select>
                     </div>
                     <div class="modal-actions">
@@ -154,9 +181,9 @@
                             <input type="text" id="name" name="name" required>
                         </div>
                         <div class="form-group">
-                            <label for="type">Type</label>
-                            <select id="type" name="type" required>
-                                <option value="">Select Type</option>
+                            <label for="species">Species</label>
+                            <select id="species" name="species" required>
+                                <option value="">Select Species</option>
                                 <option value="dog">Dog</option>
                                 <option value="cat">Cat</option>
                                 <option value="other">Other</option>
@@ -187,32 +214,47 @@
                                 <option value="large">Large</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="species">Species</label>
-                            <select id="species" name="species" required>
-                                <option value="">Select Species</option>
-                                <option value="canine">Canine</option>
-                                <option value="feline">Feline</option>
-                                <option value="avian">Avian</option>
-                                <option value="rodent">Rodent</option>
-                                <option value="reptile">Reptile</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="form-group">
                         <label for="description">Description</label>
                         <textarea id="description" name="description" rows="4" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="adoption_status">Status</label>
-                        <select id="adoption_status" name="adoption_status" required>
-                            <option value="">Select Status</option>
-                            <option value="available">Available</option>
-                            <option value="pending">Application Pending</option>
-                            <option value="adopted">Adopted</option>
+                        <label for="behavior">Behavior</label>
+                        <select name="behavior" id="behavior" required>
+                            <option value="">Select Behavior</option>
+                            <option value="Calm and Relaxed">Calm and Relaxed</option>
+                            <option value="Playful and Energetic">Playful and Energetic</option>
+                            <option value="Independent">Independent</option>
+                            <option value="Protective">Protective</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="daily_activity">Daily Activity</label>
+                        <select name="daily_activity" id="daily_activity" required>
+                            <option value="">Select Activity Level</option>
+                            <option value="Low">Low</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="special_needs">Special Needs</label>
+                        <select name="special_needs" id="special_needs" required>
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="compatibility">Compatibility</label>
+                        <select name="compatibility" id="compatibility">
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
                     <div class="image-upload">
                         <h3>Pet Images</h3>
                         <div class="image-grid">
@@ -268,25 +310,34 @@
         btn.addEventListener('click', () => {
             const petId = btn.getAttribute('data-pet-id');
             const name = btn.getAttribute('data-name');
-            const type = btn.getAttribute('data-type');
+            const species = btn.getAttribute('data-species');
             const breed = btn.getAttribute('data-breed');
             const age = btn.getAttribute('data-age');
             const gender = btn.getAttribute('data-gender');
-            const size = btn.getAttribute('data-size');
-            const species = btn.getAttribute('data-species');
+            const size = btn.getAttribute('data-size') ? btn.getAttribute('data-size').toLowerCase() : '';
             const description = btn.getAttribute('data-description');
             const adoptionStatus = btn.getAttribute('data-adoption_status');
+            const behavior = btn.getAttribute('data-behavior');
+            const dailyActivity = btn.getAttribute('data-daily_activity');
+            const specialNeeds = btn.getAttribute('data-special_needs');
+            const compatibility = btn.getAttribute('data-compatibility');
+
+            // Debug log
+            console.log({size, behavior, dailyActivity, specialNeeds, compatibility});
 
             // Populate the edit form with the pet's current details
             document.getElementById('edit-name').value = name;
-            document.getElementById('edit-type').value = type;
+            document.getElementById('edit-species').value = species;
             document.getElementById('edit-breed').value = breed;
             document.getElementById('edit-age').value = age;
             document.getElementById('edit-gender').value = gender;
             document.getElementById('edit-size').value = size;
-            document.getElementById('edit-species').value = species;
             document.getElementById('edit-description').value = description;
             document.getElementById('edit-adoption_status').value = adoptionStatus;
+            document.getElementById('edit-behavior').value = behavior;
+            document.getElementById('edit-daily_activity').value = dailyActivity;
+            document.getElementById('edit-special_needs').value = specialNeeds;
+            document.getElementById('edit-compatibility').value = compatibility;
 
             // Update the form action to the correct pet ID
             const form = document.getElementById('editPetForm');
@@ -359,6 +410,11 @@
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
+
+        // Debug: log all form data
+        for (let [key, value] of formData.entries()) {
+            console.log('ADD FORM FIELD:', key, value);
+        }
 
         fetch(form.action, {
             method: 'POST',
