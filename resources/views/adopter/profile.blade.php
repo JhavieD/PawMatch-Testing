@@ -16,12 +16,19 @@
                     <h2>Profile Information</h2>
                 </div>
                 <div class="card-content">
+                    @php
+                        $profilePic = \DB::table('user_profile_pic')->where('user_id', $user->user_id)->first();
+                    @endphp
                     <form method="POST" action="{{ route('adopter.profile.update') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="profile-upload">
-                            <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
+                            @if($profilePic && $profilePic->image_url && $profilePic->is_displayed)
+                                <img src="{{ Storage::disk('s3')->url($profilePic->image_url) }}" alt="Profile" class="profile-image" />
+                            @else
+                                <img src="{{ asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
+                            @endif
                             <div class="upload-buttons">
-                                <input type="file" name="profile_image" id="profile_image" class="profile-image-input" onchange="this.form.submit()">
+                                <input type="file" name="profile_image" id="profile_image" class="profile-image-input">
                                 <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
                                 <button type="submit" name="remove_photo" value="1" class="btn btn-outline">Remove</button>
                             </div>
