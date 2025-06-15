@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdoptionApplication;
 use Illuminate\Http\Request;
 use App\Models\Pet;
 use App\Models\Application;
@@ -29,4 +30,4 @@ class AdopterDashboardController extends Controller
             'recentMessages'
         ));
     }
-} 
+}
