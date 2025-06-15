@@ -37,6 +37,8 @@ class AdopterDashboardController extends Controller
 
     public function updateProfile(Request $request)
     {
+        \Log::info('updateProfile called');
+
         $user = auth()->user();
         $adopter = $user->adopter;
 
@@ -45,7 +47,7 @@ class AdopterDashboardController extends Controller
             'email' => 'required|email',
             'phone_number' => 'required|string|max:20',
             'address' => 'required|string|max:255',
-            'profile_image' => 'nullable|image|max:2048',
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // Split name if needed
@@ -62,13 +64,24 @@ class AdopterDashboardController extends Controller
         ]);
 
         if ($request->hasFile('profile_image')) {
-            $path = $request->file('profile_image')->store('profile-images', 'public');
-            $user->profile_image = 'storage/' . $path;
-            $user->save();
+            $file = $request->file('profile_image');
+            $profileImagePath = $file->store('profileimage', 's3');
+            $fileType = $file->getClientMimeType();
+
+            \DB::table('user_profile_pic')->updateOrInsert(
+            ['user_id' => $user->user_id],
+            [
+                'image_url' => $profileImagePath,
+                'file_type' => $fileType,
+                'uploaded_at' => now(),
+                'is_displayed' => true,
+            ]
+            );
         }
         if ($request->has('remove_photo')) {
-            $user->profile_image = null;
-            $user->save();
+            \DB::table('user_profile_pic')
+            ->where('user_id', $user->user_id)
+            ->update(['is_displayed' => false]); // hide image
         }
 
         return back()->with('success', 'Profile updated!');

@@ -228,3 +228,5 @@ Route::post('/upload', function (Request $request) {
     }
     return 'No file uploaded.';
 });
+
+Route::post('/adopter/profile/update', [AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
