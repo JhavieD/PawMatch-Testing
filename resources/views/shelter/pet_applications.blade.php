@@ -19,83 +19,53 @@
     </div>
 
     <div class="applications-list">
-        <!-- Sample Application Items -->
-        <div class="application-item">
-            <img src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.15752-9/482958427_546890997878558_7939868464340469320_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEg26tmyKvJjnwIVGA4p7VpyQUyRIOYwdHJBTJEg5jB0Wx4wKGdnDZxTVL1IbZ-XSjbaTHznmX8rfBWnCPmJmMd&_nc_ohc=Z4p-MgCZnLUQ7kNvgEaxlgm&_nc_oc=Adj34yEQkoq4BVC1rbv3hqxuOEPtGTzHnNq_bsWvPqyo8vgZ9z2tbbWgJ7HSzT1tE3w&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&oh=03_Q7cD1wGK65XEYIiIyewAECv3ua60cvr7cDuW6l98OwR5gTpdRw&oe=67F7AA9D" alt="Ester" class="pet-image">
-            <div class="application-info">
-                <h3>Application for Ester</h3>
-                <p>From: Jan Vincent Dominguez • Phone: 0912-345-6789</p>
-                <div class="application-meta">
-                    <span>Submitted: March 15, 2024</span>
-                    <span class="status-badge status-pending">Pending Review</span>
+        @foreach ($applications as $application)
+            <div class="application-item">
+                <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image">
+                <div class="application-info">
+                    <h3>Application for {{ $application->pet->name }}</h3>
+                    <p>From: {{ $application->adopter->user->name }} • Phone: {{ $application->adopter->user->phone }}</p>
+                    <div class="application-meta">
+                        <span>Submitted: {{ \Carbon\Carbon::parse($application->submitted_at)->format('F d, Y') }}</span>
+                        <span class="status-badge status-{{ $application->status }}">{{ ucfirst($application->status) }}</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showApplicationModal({{ $application->application_id }})">Review</button>
+                    <button class="btn btn-outline" onclick="messageApplicant('{{ $application->adopter->user->name }}')">Message</button>
                 </div>
             </div>
-            <div class="action-buttons">
-                <button class="btn btn-primary">Review</button>
-                <button onclick="messageApplicant('Jan Vincent Dominguez')" class="btn btn-outline">Message</button>
-            </div>
-        </div>
-
-        <div class="application-item">
-            <img src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.15752-9/482487994_519954501125001_2078025813899306849_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEeZjpdAK_M-yf5h5IvWdXQUR3Ko2en25tRHcqjZ6fbm_KRvQPSzX18tPL-2ParloJBk9AHSq4CfWq5m8dMHjOZ&_nc_ohc=bZ16vY0c35YQ7kNvgGtgcCE&_nc_oc=AdhzMhPeljm5uTxIQuorDQdXH2IQFxYfI27IX1SynAkecUVIN-tpoisUk_G_BIkQA-U&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&oh=03_Q7cD1wEaT8XJlz7gNg-5YTKvcnQf3ePKvmU6Pe0I0jDrb0IO1w&oe=67F7B9B4" alt="Fort" class="pet-image">
-            <div class="application-info">
-                <h3>Application for Fort</h3>
-                <p>From: Allainne Villanueva • Phone: 0912-456-345</p>
-                <div class="application-meta">
-                    <span>Submitted: March 14, 2024</span>
-                    <span class="status-badge status-approved">Approved</span>
-                </div>
-            </div>
-            <div class="action-buttons">
-                <button class="btn btn-primary">View Details</button>
-                <button class="btn btn-outline">Message</button>
-            </div>
-        </div>
-
-        <div class="application-item">
-            <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t1.15752-9/482640700_627447673475554_6154494766157000980_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeHwxEiY35eQJpJbi1AievedO8DosPsyGwY7wOiw-zIbBhsQ6fFsfo-g-0r22I7cxnXopUSrX2reZo4RYNdjDJHu&_nc_ohc=ciEvSNmnJ3MQ7kNvgGikfsF&_nc_oc=Adgy6d2x88wvmtbCvuhM-0IpHAYtnTjUQIMdpv54ogffEumEEEtWJctAE76Iw1Gwjy8&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&oh=03_Q7cD1wGnvieAKeYEanduwoXtD_JDDbrT6dgOzNCLApF17iq-GQ&oe=67F7D0E7" alt="Rocky" class="pet-image">
-            <div class="application-info">
-                <h3>Application for Rocky</h3>
-                <p>From: Vince Rubio • Phone: 0912-456-3452</p>
-                <div class="application-meta">
-                    <span>Submitted: March 13, 2024</span>
-                    <span class="status-badge status-rejected">Rejected</span>
-                </div>
-            </div>
-            <div class="action-buttons">
-                <button class="btn btn-primary">View Details</button>
-                <button class="btn btn-outline">Message</button>
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>
 
 <!-- Application Review Modal -->
-<div id="applicationModal" class="modal">
+<div id="applicationModal" class="modal" style="display:none;">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Application Details</h2>
             <button class="close-btn">&times;</button>
         </div>
         <div class="modal-body">
+            @if(isset($selectedApplication))
             <div class="applicant-info">
                 <h3>Applicant Information</h3>
                 <div class="info-grid">
                     <div class="info-item">
                         <label>Full Name</label>
-                        <p id="applicantName">Jan Vincent Dominguez</p>
+                        <p id="applicantName">{{ $selectedApplication->adopter->user->name ?? '' }}</p>
                     </div>
                     <div class="info-item">
                         <label>Phone</label>
-                        <p id="applicantPhone">0912-345-6789</p>
+                        <p id="applicantPhone">{{ $selectedApplication->adopter->user->phone ?? '' }}</p>
                     </div>
                     <div class="info-item">
                         <label>Email</label>
-                        <p id="applicantEmail">jan@gmail.com</p>
+                        <p id="applicantEmail">{{ $selectedApplication->adopter->user->email ?? '' }}</p>
                     </div>
                     <div class="info-item">
                         <label>Address</label>
-                        <p id="applicantAddress">Guadalupe, Makati City</p>
+                        <p id="applicantAddress">{{ $selectedApplication->adopter->user->address ?? '' }}</p>
                     </div>
                 </div>
             </div>
@@ -105,15 +75,15 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <label>Pet Name</label>
-                        <p id="petName">Ester</p>
+                        <p id="petName">{{ $selectedApplication->pet->name ?? '' }}</p>
                     </div>
                     <div class="info-item">
                         <label>Submission Date</label>
-                        <p id="submissionDate">March 15, 2024</p>
+                        <p id="submissionDate">{{ \Carbon\Carbon::parse($selectedApplication->submitted_at)->format('F d, Y') }}</p>
                     </div>
                     <div class="info-item">
                         <label>Status</label>
-                        <p id="applicationStatus">Pending Review</p>
+                        <p id="applicationStatus">{{ ucfirst($selectedApplication->status ?? '') }}</p>
                     </div>
                 </div>
 
@@ -121,19 +91,47 @@
                     <h4>Questionnaire Responses</h4>
                     <div class="question">
                         <label>Why do you want to adopt this pet?</label>
-                        <p>I've always wanted a Tabby Cat and feel ready to provide a loving home.</p>
+                        <p>{{ $selectedApplication->reason_for_adoption ?? '' }}</p>
                     </div>
                     <div class="question">
                         <label>Do you have experience with pets?</label>
-                        <p>Yes, I grew up with dogs and currently have a cat.</p>
+                        <p>{{ $selectedApplication->experience_with_pets ?? '' }}</p>
                     </div>
                     <div class="question">
                         <label>Living situation</label>
-                        <p>I own a house with a fenced backyard.</p>
+                        <p>{{ $selectedApplication->living_environment ?? '' }}</p>
                     </div>
+                    <div class="question">
+                        <label>Household Members</label>
+                        <p>{{ $selectedApplication->household_members ?? '' }}</p>
+                    </div>
+                    <div class="question">
+                        <label>Allergies</label>
+                        <p>{{ $selectedApplication->allergies ? 'Yes' : 'No' }}</p>
+                    </div>
+                    <div class="question">
+                        <label>Has Other Pets</label>
+                        <p>{{ $selectedApplication->has_other_pets ? 'Yes' : 'No' }}</p>
+                    </div>
+                    @if($selectedApplication->has_other_pets)
+                    <div class="question">
+                        <label>Other Pets Details</label>
+                        <p>{{ $selectedApplication->other_pets_details ?? '' }}</p>
+                    </div>
+                    @endif
+                    <div class="question">
+                        <label>Can Provide Vet Care</label>
+                        <p>{{ $selectedApplication->can_provide_vet_care ? 'Yes' : 'No' }}</p>
+                    </div>
+                    @if($selectedApplication->status == 'rejected')
+                    <div class="question">
+                        <label>Rejection Reason</label>
+                        <p>{{ $selectedApplication->rejection_reason ?? '' }}</p>
+                    </div>
+                    @endif
                 </div>
             </div>
-
+            @endif
             <div class="modal-actions">
                 <button class="btn btn-primary" id="approveBtn">Approve Application</button>
                 <button class="btn btn-outline" id="rejectBtn">Reject Application</button>
@@ -151,43 +149,32 @@
     // Modal functionality
     const modal = document.getElementById('applicationModal');
     const closeBtn = document.querySelector('.close-btn');
-    const reviewBtns = document.querySelectorAll('.btn-primary');
-
-    reviewBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        });
-    });
-
+    function showApplicationModal(id) {
+        // You should implement AJAX or Livewire to load the selected application details by id
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
     function messageApplicant(applicantName) {
-        // Redirect to messages with the applicant
         window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
     }
-
     closeBtn.addEventListener('click', () => {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     });
-
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
     });
-
-    // Sample action handlers
     document.getElementById('approveBtn').addEventListener('click', () => {
         alert('Application approved!');
         modal.style.display = 'none';
     });
-
     document.getElementById('rejectBtn').addEventListener('click', () => {
         alert('Application rejected!');
         modal.style.display = 'none';
     });
-
     document.getElementById('requestInfoBtn').addEventListener('click', () => {
         alert('Information request sent to applicant!');
         modal.style.display = 'none';
