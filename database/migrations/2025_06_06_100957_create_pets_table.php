@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('breed');
             $table->integer('age');
             $table->string('gender');
+            $table->string('size');
             $table->text('medical_history')->nullable();
             $table->string('adoption_status')->nullable();
             $table->string('behavior')->nullable();
