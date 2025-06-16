@@ -13,6 +13,7 @@ use App\Http\Controllers\RescuerController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\AdoptionApplicationController;
 use App\Models\AdoptionApplication;
+use App\Http\Controllers\AdopterPetListingsController;
 
 // Public routes
 Route::get('/', function () {
@@ -124,9 +125,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/adopter/pet-swipe', function () {
         return view('adopter.pet-swipe');
     })->name('adopter.pet-swipe');
-    Route::get('/adopter/pet-listings', function () {
-        return view('adopter.pet-listings');
-    })->name('adopter.pet-listings');
+    Route::get('/adopter/pet-listings', [\App\Http\Controllers\AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
     Route::get('/adopter/pet-details', function () {
         return view('adopter.pet-details');
     })->name('adopter.pet-details');
