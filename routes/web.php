@@ -67,7 +67,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
             ->name('admin.dashboard');
     });
+
     // Shelter Routes
+    Route::middleware(['auth', 'shelter'])->group(function () {
+        Route::get('/shelter/pet_applications', [\App\Http\Controllers\Auth\AdoptionApplicationController::class, 'index'])
+            ->name('shelter.pet_applications'); // Add route name for blade usage        // Add routes for review, approve, reject, message, etc.
+    });
     Route::middleware(['shelter'])->group(function () {
         Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
             ->name('shelter.dashboard');
@@ -77,10 +82,6 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/shelter/pets', [ShelterController::class, 'pets'])
             ->name('shelter.pets');
-
-        Route::get('/shelter/pet_applications', function () {
-            return view('shelter.pet_applications');
-        })->name('shelter.pet_applications');
 
         Route::get('/shelter/messages', function () {
             return view('shelter.messages');
@@ -215,6 +216,7 @@ Route::get('/dashboard', function () {
             return redirect()->route('home');
     }
 })->name('dashboard')->middleware('auth');
+
 
 // S3 Upload
 Route::post('/upload', function (Request $request) {
