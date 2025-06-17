@@ -57,7 +57,8 @@
 
         <div class="pet-grid">
             @forelse($pets as $pet)
-            <div class="pet-card" data-pet-id="{{ $pet->id }}">
+            @if($pet->status === 'available' || $pet->adoption_status === 'available')
+            <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
                 <img src="{{ $pet->image_url }}" alt="{{ $pet->name }}" class="pet-image">
                 <div class="pet-info">
                     <h3 class="pet-name">{{ $pet->name }}</h3>
@@ -65,6 +66,7 @@
                     <span class="pet-status">{{ $pet->status }}</span>
                 </div>
             </div>
+            @endif
             @empty
             <div class="no-pets-message">
                 <p>No pets found matching your criteria.</p>
@@ -110,10 +112,6 @@
                     <p id="petSize"></p>
                 </div>
                 <div class="detail-item">
-                    <label>Weight</label>
-                    <p id="petWeight"></p>
-                </div>
-                <div class="detail-item">
                     <label>Status</label>
                     <p id="petStatus"></p>
                 </div>
@@ -132,9 +130,68 @@
             </div>
 
             <div class="modal-actions">
-                <a href="#" id="applyButton" class="btn">Apply for Adoption</a>
+                <button id="applyButton" class="btn">Apply for Adoption</button>
                 <button id="favoriteButton" class="btn" style="background: #f3f4f6; color: #4b5563;">Save to Favorites</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Adoption Application Modal -->
+<div id="adoptionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Adoption Application</h2>
+            <button class="close-btn" id="closeAdoptionModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="adoptionForm">
+                <input type="hidden" name="pet_id" id="adoptionPetId">
+                <div class="form-group">
+                    <label for="reason_for_adoption">Why do you want to adopt this pet?</label>
+                    <textarea name="reason_for_adoption" id="reason_for_adoption" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="living_arrangement">Living Arrangement</label>
+                    <input type="text" name="living_arrangement" id="living_arrangement" required>
+                </div>
+                <div class="form-group">
+                    <label for="experience_with_pets">Experience with Pets</label>
+                    <input type="text" name="experience_with_pets" id="experience_with_pets" required>
+                </div>
+                <div class="form-group">
+                    <label for="household_members">Household Members</label>
+                    <input type="number" name="household_members" id="household_members" required>
+                </div>
+                <div class="form-group">
+                    <label for="allergies">Allergies</label>
+                    <select name="allergies" id="allergies" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="has_other_pets">Do you have other pets?</label>
+                    <select name="has_other_pets" id="has_other_pets" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group" id="otherPetsDetailsGroup" style="display:none;">
+                    <label for="other_pets_details">Other Pets Details</label>
+                    <input type="text" name="other_pets_details" id="other_pets_details">
+                </div>
+                <div class="form-group">
+                    <label for="can_provide_vet_care">Can you provide vet care?</label>
+                    <select name="can_provide_vet_care" id="can_provide_vet_care" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -157,10 +214,10 @@
     petCards.forEach(card => {
         card.addEventListener('click', async () => {
             const petId = card.dataset.petId;
+            console.log('Pet card clicked, petId:', petId);
             try {
                 const response = await fetch(`/api/pets/${petId}`);
                 const pet = await response.json();
-                
                 // Update modal content
                 document.getElementById('petName').textContent = pet.name;
                 document.getElementById('petNameDesc').textContent = pet.name;
@@ -168,24 +225,25 @@
                 document.getElementById('petAge').textContent = `${pet.age} years`;
                 document.getElementById('petGender').textContent = pet.gender;
                 document.getElementById('petSize').textContent = pet.size;
-                document.getElementById('petWeight').textContent = `${pet.weight} lbs`;
                 document.getElementById('petStatus').textContent = pet.status;
                 document.getElementById('petDescription').textContent = pet.description;
                 document.getElementById('shelterName').textContent = pet.shelter.name;
                 document.getElementById('shelterAddress').textContent = pet.shelter.address;
                 document.getElementById('shelterPhone').textContent = pet.shelter.phone;
-
                 // Update images
                 mainImage.src = pet.images[0];
                 thumbnailGrid.innerHTML = pet.images.map(img => 
                     `<img src="${img}" alt="Pet photo" class="thumbnail">`
                 ).join('');
-
                 // Update buttons
-                applyButton.href = `/adoption-form/${petId}`;
+                applyButton.dataset.petId = petId;
+                applyButton.onclick = function() {
+                    adoptionModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    adoptionPetId.value = petId;
+                };
                 favoriteButton.textContent = pet.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
                 favoriteButton.dataset.petId = petId;
-
                 modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
             } catch (error) {
@@ -226,6 +284,59 @@
         } catch (error) {
             console.error('Error toggling favorite:', error);
         }
+    });
+
+    const adoptionModal = document.getElementById('adoptionModal');
+    const closeAdoptionModal = document.getElementById('closeAdoptionModal');
+    const adoptionForm = document.getElementById('adoptionForm');
+    const adoptionPetId = document.getElementById('adoptionPetId');
+    const hasOtherPets = document.getElementById('has_other_pets');
+    const otherPetsDetailsGroup = document.getElementById('otherPetsDetailsGroup');
+
+    closeAdoptionModal.addEventListener('click', function() {
+        adoptionModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === adoptionModal) {
+            adoptionModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
+
+    hasOtherPets.addEventListener('change', function() {
+        if (this.value == '1') {
+            otherPetsDetailsGroup.style.display = 'block';
+        } else {
+            otherPetsDetailsGroup.style.display = 'none';
+        }
+    });
+
+    adoptionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(adoptionForm);
+        fetch('/adopter/applications', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Application submitted successfully!');
+                adoptionModal.style.display = 'none';
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                window.location.href = '/adopter/application-status';
+            } else {
+                alert('Error submitting application.');
+            }
+        })
+        .catch(() => alert('Error submitting application.'));
     });
 </script>
 @endsection

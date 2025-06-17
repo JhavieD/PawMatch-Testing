@@ -46,97 +46,8 @@
             <h2>Application Details</h2>
             <button class="close-btn">&times;</button>
         </div>
-        <div class="modal-body">
-            @if(isset($selectedApplication))
-            <div class="applicant-info">
-                <h3>Applicant Information</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>Full Name</label>
-                        <p id="applicantName">{{ $selectedApplication->adopter->user->name ?? '' }}</p>
-                    </div>
-                    <div class="info-item">
-                        <label>Phone</label>
-                        <p id="applicantPhone">{{ $selectedApplication->adopter->user->phone ?? '' }}</p>
-                    </div>
-                    <div class="info-item">
-                        <label>Email</label>
-                        <p id="applicantEmail">{{ $selectedApplication->adopter->user->email ?? '' }}</p>
-                    </div>
-                    <div class="info-item">
-                        <label>Address</label>
-                        <p id="applicantAddress">{{ $selectedApplication->adopter->user->address ?? '' }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="application-details">
-                <h3>Application Details</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>Pet Name</label>
-                        <p id="petName">{{ $selectedApplication->pet->name ?? '' }}</p>
-                    </div>
-                    <div class="info-item">
-                        <label>Submission Date</label>
-                        <p id="submissionDate">{{ \Carbon\Carbon::parse($selectedApplication->submitted_at)->format('F d, Y') }}</p>
-                    </div>
-                    <div class="info-item">
-                        <label>Status</label>
-                        <p id="applicationStatus">{{ ucfirst($selectedApplication->status ?? '') }}</p>
-                    </div>
-                </div>
-
-                <div class="questionnaire">
-                    <h4>Questionnaire Responses</h4>
-                    <div class="question">
-                        <label>Why do you want to adopt this pet?</label>
-                        <p>{{ $selectedApplication->reason_for_adoption ?? '' }}</p>
-                    </div>
-                    <div class="question">
-                        <label>Do you have experience with pets?</label>
-                        <p>{{ $selectedApplication->experience_with_pets ?? '' }}</p>
-                    </div>
-                    <div class="question">
-                        <label>Living situation</label>
-                        <p>{{ $selectedApplication->living_environment ?? '' }}</p>
-                    </div>
-                    <div class="question">
-                        <label>Household Members</label>
-                        <p>{{ $selectedApplication->household_members ?? '' }}</p>
-                    </div>
-                    <div class="question">
-                        <label>Allergies</label>
-                        <p>{{ $selectedApplication->allergies ? 'Yes' : 'No' }}</p>
-                    </div>
-                    <div class="question">
-                        <label>Has Other Pets</label>
-                        <p>{{ $selectedApplication->has_other_pets ? 'Yes' : 'No' }}</p>
-                    </div>
-                    @if($selectedApplication->has_other_pets)
-                    <div class="question">
-                        <label>Other Pets Details</label>
-                        <p>{{ $selectedApplication->other_pets_details ?? '' }}</p>
-                    </div>
-                    @endif
-                    <div class="question">
-                        <label>Can Provide Vet Care</label>
-                        <p>{{ $selectedApplication->can_provide_vet_care ? 'Yes' : 'No' }}</p>
-                    </div>
-                    @if($selectedApplication->status == 'rejected')
-                    <div class="question">
-                        <label>Rejection Reason</label>
-                        <p>{{ $selectedApplication->rejection_reason ?? '' }}</p>
-                    </div>
-                    @endif
-                </div>
-            </div>
-            @endif
-            <div class="modal-actions">
-                <button class="btn btn-primary" id="approveBtn">Approve Application</button>
-                <button class="btn btn-outline" id="rejectBtn">Reject Application</button>
-                <button class="btn btn-outline" id="requestInfoBtn">Request More Info</button>
-            </div>
+        <div class="modal-body" id="applicationModalBody">
+            <!-- Application details will be loaded here via AJAX -->
         </div>
     </div>
 </div>
@@ -150,9 +61,14 @@
     const modal = document.getElementById('applicationModal');
     const closeBtn = document.querySelector('.close-btn');
     function showApplicationModal(id) {
-        // You should implement AJAX or Livewire to load the selected application details by id
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        fetch(`/shelter/applications/${id}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('applicationModalBody').innerHTML = html;
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                attachActionHandlers(id);
+            });
     }
     function messageApplicant(applicantName) {
         window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
@@ -167,17 +83,57 @@
             document.body.style.overflow = 'auto';
         }
     });
-    document.getElementById('approveBtn').addEventListener('click', () => {
-        alert('Application approved!');
-        modal.style.display = 'none';
-    });
-    document.getElementById('rejectBtn').addEventListener('click', () => {
-        alert('Application rejected!');
-        modal.style.display = 'none';
-    });
-    document.getElementById('requestInfoBtn').addEventListener('click', () => {
-        alert('Information request sent to applicant!');
-        modal.style.display = 'none';
-    });
+
+    function attachActionHandlers(id) {
+        const approveBtn = document.getElementById('approveBtn');
+        const rejectBtn = document.getElementById('rejectBtn');
+        const requestInfoBtn = document.getElementById('requestInfoBtn');
+        if (approveBtn) {
+            approveBtn.onclick = function() {
+                fetch(`/shelter/applications/${id}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                }).then(res => res.json()).then(data => {
+                    alert('Application approved!');
+                    location.reload();
+                });
+            };
+        }
+        if (rejectBtn) {
+            rejectBtn.onclick = function() {
+                const reason = prompt('Enter rejection reason:');
+                if (!reason) return;
+                fetch(`/shelter/applications/${id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ rejection_reason: reason })
+                }).then(res => res.json()).then(data => {
+                    alert('Application rejected!');
+                    location.reload();
+                });
+            };
+        }
+        if (requestInfoBtn) {
+            requestInfoBtn.onclick = function() {
+                fetch(`/shelter/applications/${id}/request-info`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                }).then(res => res.json()).then(data => {
+                    alert('Information request sent to applicant!');
+                    location.reload();
+                });
+            };
+        }
+    }
 </script>
 @endsection
