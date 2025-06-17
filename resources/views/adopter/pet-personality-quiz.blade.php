@@ -1,101 +1,235 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Pet Personality Quiz') }}
-        </h2>
-    </x-slot>
+@extends('layouts.pet-personality-quiz')
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <!-- Progress Bar -->
-                    <div class="mb-8">
-                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Question 3 of 10</span>
-                            <span>30% Complete</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-indigo-600 h-2 rounded-full" style="width: 30%"></div>
-                        </div>
-                    </div>
+@section('title', 'Pet Personality Quiz')
 
-                    <!-- Question -->
-                    <div class="mb-8">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">How much time can you dedicate to a pet daily?</h3>
-                        <p class="text-gray-600 mb-6">This helps us match you with a pet that fits your lifestyle.</p>
+@section('content')
 
-                        <div class="space-y-4">
-                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="time" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
-                                <span class="ml-3">
-                                    <span class="block text-sm font-medium text-gray-900">Less than 2 hours</span>
-                                    <span class="block text-sm text-gray-500">I have a busy schedule but can provide basic care</span>
-                                </span>
-                            </label>
-
-                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="time" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
-                                <span class="ml-3">
-                                    <span class="block text-sm font-medium text-gray-900">2-4 hours</span>
-                                    <span class="block text-sm text-gray-500">I can provide regular exercise and attention</span>
-                                </span>
-                            </label>
-
-                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="time" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
-                                <span class="ml-3">
-                                    <span class="block text-sm font-medium text-gray-900">4-6 hours</span>
-                                    <span class="block text-sm text-gray-500">I can provide extensive care and training</span>
-                                </span>
-                            </label>
-
-                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="time" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
-                                <span class="ml-3">
-                                    <span class="block text-sm font-medium text-gray-900">More than 6 hours</span>
-                                    <span class="block text-sm text-gray-500">I can provide constant attention and care</span>
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Navigation Buttons -->
-                    <div class="flex justify-between">
-                        <button class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                            Previous Question
-                        </button>
-                        <button class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
-                            Next Question
-                        </button>
-                    </div>
-
-                    <!-- Quiz Tips -->
-                    <div class="mt-8 p-4 bg-indigo-50 rounded-lg">
-                        <h4 class="text-sm font-medium text-indigo-800 mb-2">Why we ask this</h4>
-                        <p class="text-sm text-indigo-700">
-                            Different pets require different amounts of attention and care. Some pets need more exercise and 
-                            interaction, while others are more independent. Your available time helps us match you with a pet 
-                            that will thrive in your care.
-                        </p>
-                    </div>
+<div class="quiz-container">
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="questions-wrapper">
+        <div class="question-container active" id="question1">
+            <div class="question-number">Question 1 of 5</div>
+            <div class="question-text">What type of pet would you prefer?</div>
+            <div class="options-container">
+                <div class="option-card" data-value="dog">
+                    <span class="option-icon">🐕</span>
+                    <span class="option-text">Dog</span>
+                </div>
+                <div class="option-card" data-value="cat">
+                    <span class="option-icon">🐱</span>
+                    <span class="option-text">Cat</span>
+                </div>
+                <div class="option-card" data-value="either">
+                    <span class="option-icon">🤔</span>
+                    <span class="option-text">Either</span>
                 </div>
             </div>
         </div>
+
+        <div class="question-container" id="question2">
+            <div class="question-number">Question 2 of 5</div>
+            <div class="question-text">What personality traits are you looking for?</div>
+            <div class="options-container">
+                <div class="option-card" data-value="calm">
+                    <span class="option-icon">😌</span>
+                    <span class="option-text">Calm and Relaxed</span>
+                </div>
+                <div class="option-card" data-value="playful">
+                    <span class="option-icon">🎾</span>
+                    <span class="option-text">Playful and Energetic</span>
+                </div>
+                <div class="option-card" data-value="independent">
+                    <span class="option-icon">🦁</span>
+                    <span class="option-text">Independent</span>
+                </div>
+                <div class="option-card" data-value="protective">
+                    <span class="option-icon">🛡️</span>
+                    <span class="option-text">Protective</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="question-container" id="question3">
+            <div class="question-number">Question 3 of 5</div>
+            <div class="question-text">What's your preferred activity level?</div>
+            <div class="options-container">
+                <div class="option-card" data-value="low">
+                    <span class="option-icon">🌙</span>
+                    <span class="option-text">Low - I prefer a relaxed lifestyle</span>
+                </div>
+                <div class="option-card" data-value="moderate">
+                    <span class="option-icon">🌅</span>
+                    <span class="option-text">Moderate - Balanced activity</span>
+                </div>
+                <div class="option-card" data-value="high">
+                    <span class="option-icon">⚡</span>
+                    <span class="option-text">High - Very active lifestyle</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="question-container" id="question4">
+            <div class="question-number">Question 4 of 5</div>
+            <div class="question-text">Could you manage a pet with special needs?</div>
+            <div class="options-container">
+                <div class="option-card" data-value="yes">
+                    <span class="option-icon">❤️</span>
+                    <span class="option-text">Yes, I'm open to special needs pets</span>
+                </div>
+                <div class="option-card" data-value="no">
+                    <span class="option-icon">🤔</span>
+                    <span class="option-text">No, I prefer a healthy pet</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="question-container" id="question5">
+        <div class="question-number">Question 5 of 5</div>
+        <div class="question-text">What best describes your preferred pet's eating habits?</div>
+        <div class="options-container">
+            <div class="option-card" data-value="balanced_diet">
+                <span class="option-icon">🥗</span>
+                <span class="option-text">Balanced Diet</span>
+            </div>
+            <div class="option-card" data-value="portion_control">
+                <span class="option-icon">🍽️</span>
+                <span class="option-text">Portion Control</span>
+            </div>
+            <div class="option-card" data-value="consistent_schedule">
+                <span class="option-icon">⏰</span>
+                <span class="option-text">Consistent Feeding Schedule</span>
+            </div>
+        </div>
+</div>
     </div>
 
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const radioButtons = document.querySelectorAll('input[type="radio"]');
-            const nextButton = document.querySelector('button:last-child');
-            
-            radioButtons.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    nextButton.disabled = false;
-                });
+   <div class="result-container" id="result">
+        </div>
+        <div class="navigation-buttons">
+            <button class="btn btn-secondary" id="prevBtn" disabled onclick="prevQuestion()">Previous</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = document.querySelectorAll('.question-container');
+    const options = document.querySelectorAll('.option-card');
+    const progressBar = document.getElementById('progressBar');
+    const resultContainer = document.getElementById('result');
+    const resultDescription = document.getElementById('resultDescription');
+    let currentQuestion = 0;
+    let answers = {};
+
+    function initQuiz() {
+        updateProgressBar();
+        updateNavigationButtons();
+        questions[0].classList.add('active');
+    }
+
+    function updateProgressBar() {
+        const progress = ((currentQuestion + 1) / questions.length) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        prevBtn.disabled = currentQuestion === 0;
+        nextBtn.textContent = (currentQuestion === questions.length - 1) ? 'Get Results' : 'Next';
+    }
+
+    options.forEach(option => {
+        option.addEventListener('click', () => {
+            const questionContainer = option.closest('.question-container');
+            const questionId = questionContainer.id;
+            const value = option.dataset.value;
+            questionContainer.querySelectorAll('.option-card').forEach(opt => {
+                opt.classList.remove('selected');
             });
+            option.classList.add('selected');
+            answers[questionId] = value;
         });
-    </script>
-    @endpush
-</x-app-layout> 
+    });
+
+    function nextQuestion() {
+        if (currentQuestion === questions.length - 1) {
+            showResults();
+            return;
+        }
+        const currentContainer = questions[currentQuestion];
+        const nextContainer = questions[currentQuestion + 1];
+        nextContainer.style.visibility = 'visible';
+        nextContainer.style.display = 'flex';
+        currentContainer.classList.add('prev');
+        currentContainer.classList.remove('active');
+        nextContainer.classList.add('active');
+        nextContainer.classList.remove('next');
+        currentQuestion++;
+        updateProgressBar();
+        updateNavigationButtons();
+        setTimeout(() => {
+            currentContainer.style.visibility = 'hidden';
+            questions.forEach(q => {
+                if (!q.classList.contains('active')) {
+                    q.style.visibility = 'hidden';
+                }
+            });
+        }, 300);
+    }
+
+    function prevQuestion() {
+        const currentContainer = questions[currentQuestion];
+        const prevContainer = questions[currentQuestion - 1];
+        prevContainer.style.visibility = 'visible';
+        prevContainer.style.display = 'flex';
+        currentContainer.classList.add('next');
+        currentContainer.classList.remove('active');
+        prevContainer.classList.add('active');
+        prevContainer.classList.remove('prev');
+        currentQuestion--;
+        updateProgressBar();
+        updateNavigationButtons();
+        setTimeout(() => {
+            currentContainer.style.visibility = 'hidden';
+            questions.forEach(q => {
+                if (!q.classList.contains('active')) {
+                    q.style.visibility = 'hidden';
+                }
+            });
+        }, 300);
+    }
+
+    function showResults() {
+
+    const params = new URLSearchParams(answers).toString();
+    window.location.href = "{{ route('adopter.pet-swipe') }}" + '?' + params;
+    
+}
+
+    function restartQuiz() {
+        currentQuestion = 0;
+        answers = {};
+        questions.forEach((q, idx) => {
+            q.classList.remove('active', 'prev', 'next');
+            if (idx === 0) {
+                q.classList.add('active');
+                q.style.visibility = 'visible';
+                q.style.display = 'flex';
+            } else {
+                q.style.visibility = 'hidden';
+                q.style.display = 'none';
+            }
+        });
+        resultContainer.classList.remove('active');
+        updateProgressBar();
+        updateNavigationButtons();
+        options.forEach(opt => opt.classList.remove('selected'));
+        if (eatingHabitsSelect) eatingHabitsSelect.selectedIndex = 0;
+    }
+
+    initQuiz();
+</script>
+
+@endsection

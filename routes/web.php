@@ -10,6 +10,10 @@ use App\Http\Controllers\AdopterDashboardController;
 use App\Http\Controllers\ShelterController;
 use App\Http\Controllers\RescuerController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PetPersonalityQuizController;
+use App\Http\Controllers\PetSwipeController;
+
+
 
 // Public routes
 Route::get('/', function () {
@@ -58,6 +62,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 // Protected Routes with Authentication and Role-Based Middleware
 Route::middleware(['auth'])->group(function () {
+    });
 
     // Admin Routes
     Route::middleware(['admin'])->group(function () {
@@ -96,34 +101,43 @@ Route::middleware(['auth'])->group(function () {
     });
     // Adopter Routes
     Route::middleware(['adopter'])->group(function () {
-        Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
-            ->name('adopter.dashboard');
-    });
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
         ->name('adopter.dashboard');
-    Route::get('/adopter/pet-swipe', function () {
-        return view('adopter.pet-swipe');
-    })->name('adopter.pet-swipe');
+
+    Route::get('/adopter/pet-swipe', [PetSwipeController::class, 'index'])
+        ->name('adopter.pet-swipe');
+
     Route::get('/adopter/pet-listings', function () {
         return view('adopter.pet-listings');
     })->name('adopter.pet-listings');
+
     Route::get('/adopter/pet-details', function () {
         return view('adopter.pet-details');
     })->name('adopter.pet-details');
+
     Route::get('/adopter/pet-personality-quiz', function () {
         return view('adopter.pet-personality-quiz');
     })->name('adopter.pet-personality-quiz');
+
     Route::get('/adopter/adoption-form', function () {
         return view('adopter.adoption-form');
     })->name('adopter.adoption-form');
+
     Route::get('/adopter/application-status', function () {
         return view('adopter.application-status');
     })->name('adopter.application-status');
+
     Route::get('/adopter/messages', function () {
         return view('adopter.messages');
     })->name('adopter.messages');
 });
 
+// Pet Personality Quiz Routes
+Route::get('/quiz', [PetPersonalityQuizController::class, 'showQuiz'])->name('quiz.show');
+Route::post('/quiz', [PetPersonalityQuizController::class, 'submitQuiz'])->name('quiz.submit');
+Route::get('/adopter.pet-swipe', [PetSwipeController::class, 'index'])->name('adopter.pet-swipe');
+
+    
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
