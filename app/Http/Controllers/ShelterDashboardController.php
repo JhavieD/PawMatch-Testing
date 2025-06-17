@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ShelterController extends Controller
+class ShelterDashboardController extends Controller
 {
     public function index()
     {
@@ -37,6 +37,7 @@ class ShelterController extends Controller
             'recentApplications',
             'recentMessages',
             'recentReviews'
+            // 'profilePictureUrl' // No longer needed
         ));
     }
 
@@ -116,5 +117,89 @@ class ShelterController extends Controller
         $pet = \App\Models\Pet::findOrFail($petId);
         $pet->delete();
         return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
+    }
+
+    public function profile()
+    {
+        $user = auth()->user();
+        $shelter = $user->shelter;
+        return view('shelter.profile', compact('user', 'shelter'));
+    }
+    //Upload New Photo Feature
+    public function updateProfile(Request $request)
+    {
+        \Log::info('updateProfile called'); // Identical to adopter's log
+
+        $user = auth()->user();
+        $shelter = $user->shelter; // Use shelter relationship
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone_number' => 'required|string|max:20',
+            'address' => 'required|string|max:255', 
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        // Split name if needed
+        [$first_name, $last_name] = array_pad(explode(' ', $request->name, 2), 2, '');
+
+        $user->update([
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+        ]);
+        
+        $shelter->update([
+            'address' => $request->address,
+        ]);
+
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $profileImagePath = $file->store('profileimage', 's3'); 
+            $fileType = $file->getClientMimeType();
+
+            \DB::table('user_profile_pic')->updateOrInsert(
+                ['user_id' => $user->user_id],
+                [
+                    'image_url' => $profileImagePath,
+                    'file_type' => $fileType,
+                    'uploaded_at' => now(),
+                    'is_displayed' => true,
+                ]
+            );
+        }
+        
+        if ($request->has('remove_photo')) {
+            \DB::table('user_profile_pic')
+            ->where('user_id', $user->user_id)
+            ->update(['is_displayed' => false]); // hide image
+        }
+
+        return back()->with('success', 'Profile updated!');
+    }
+    
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|confirmed|min:8',
+        ]);
+        $user = auth()->user();
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+        $user->password = \Hash::make($request->new_password);
+        $user->save();
+        return back()->with('success', 'Password updated!');
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = auth()->user();
+        auth()->logout();
+        $user->delete();
+        return redirect('/')->with('success', 'Account deleted.');
     }
 }

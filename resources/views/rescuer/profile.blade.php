@@ -1,11 +1,11 @@
-@extends('layouts.adopter')
+@extends('layouts.rescuer')
 
-@section('title', "Adopter's Profile - PawMatch")
+@section('title', "Rescuer's Profile - PawMatch")
 
-@section('adopter-content')
+@section('rescuer-content')
 <main class="main-content">
-    <div class="container adopter-profile-container">
-        <div class="header adopter-profile-header">
+    <div class="container rescuer-profile-container">
+        <div class="header rescuer-profile-header">
             <h1>Settings</h1>
             <p>Manage your account preferences and profile information</p>
         </div>
@@ -16,7 +16,7 @@
                     <h2>Profile Information</h2>
                 </div>
                 <div class="card-content">
-                    <form method="POST" action="{{ route('adopter.profile.update') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('rescuer.profile.update') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="profile-upload">
                             <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
@@ -40,7 +40,7 @@
                         </div>
                         <div class="form-group">
                             <label for="address" class="form-label">Address</label>
-                            <input type="text" id="address" name="address" class="form-input" value="{{ $adopter->address ?? '' }}" />
+                            <input type="text" id="address" name="address" class="form-input" value="{{ $rescuer->address ?? '' }}" />
                         </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
@@ -52,7 +52,7 @@
                     <h2>Change Password</h2>
                 </div>
                 <div class="card-content">
-                    <form method="POST" action="{{ route('adopter.profile.password') }}">
+                    <form method="POST" action="{{ route('rescuer.profile.password') }}">
                         @csrf
                         <div class="form-group">
                             <label for="current-password" class="form-label">Current Password</label>
@@ -70,46 +70,6 @@
                     </form>
                 </div>
             </div>
-            <!-- Notification Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h2>Notification Preferences</h2>
-                </div>
-                <div class="card-content">
-                    <form method="POST" action="{{ route('adopter.profile.notifications') }}">
-                        @csrf
-                        <div class="switch-group">
-                            <span class="switch-label">Email Notifications</span>
-                            <label class="switch">
-                                <input type="checkbox" name="email_notifications" {{ $adopter->email_notifications ?? true ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">Application Updates</span>
-                            <label class="switch">
-                                <input type="checkbox" name="application_updates" {{ $adopter->application_updates ?? true ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">New Pet Alerts</span>
-                            <label class="switch">
-                                <input type="checkbox" name="new_pet_alerts" {{ $adopter->new_pet_alerts ?? false ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">Marketing Communications</span>
-                            <label class="switch">
-                                <input type="checkbox" name="marketing_communications" {{ $adopter->marketing_communications ?? false ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Preferences</button>
-                    </form>
-                </div>
-            </div>
             <!-- Account Deletion -->
             <div class="settings-card">
                 <div class="card-header">
@@ -119,7 +79,7 @@
                     <div class="danger-zone">
                         <h3>Delete Account</h3>
                         <p>Once you delete your account, there is no going back. Please be certain.</p>
-                        <form method="POST" action="{{ route('adopter.profile.delete') }}">
+                        <form method="POST" action="{{ route('rescuer.profile.delete') }}">
                             @csrf
                             <button type="submit" class="btn btn-danger">Delete Account</button>
                         </form>
@@ -130,4 +90,3 @@
     </div>
 </main>
 @endsection
-
