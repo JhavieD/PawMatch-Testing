@@ -14,6 +14,8 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\AdoptionApplicationController;
 use App\Models\AdoptionApplication;
 use App\Http\Controllers\AdopterPetListingsController;
+use App\Http\Controllers\ShelterApplicationController;
+use App\Http\Controllers\AdopterApplicationController as AdopterApplicationControllerAlias;
 
 // Public routes
 Route::get('/', function () {
@@ -92,10 +94,11 @@ Route::middleware(['auth'])->group(function () {
             return view('shelter.profile');
         })->name('shelter.profile');
 
-        Route::get(
-            '/shelter/applications',
-            [\App\Http\Controllers\ShelterController::class, 'applications']
-        )->name('shelter.applications');
+        Route::get('/shelter/applications', [\App\Http\Controllers\ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
+        Route::get('/shelter/applications/{id}', [\App\Http\Controllers\ShelterApplicationController::class, 'show'])->name('shelter.applications.show');
+        Route::post('/shelter/applications/{id}/approve', [\App\Http\Controllers\ShelterApplicationController::class, 'approve'])->name('shelter.applications.approve');
+        Route::post('/shelter/applications/{id}/reject', [\App\Http\Controllers\ShelterApplicationController::class, 'reject'])->name('shelter.applications.reject');
+        Route::post('/shelter/applications/{id}/request-info', [\App\Http\Controllers\ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
 
         // edit pet details
         Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterController::class, 'update'])->name('shelter.pets.update');
@@ -119,6 +122,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/adopter/profile/password', [\App\Http\Controllers\AdopterDashboardController::class, 'updatePassword'])->name('adopter.profile.password');
         Route::post('/adopter/profile/notifications', [\App\Http\Controllers\AdopterDashboardController::class, 'updateNotifications'])->name('adopter.profile.notifications');
         Route::post('/adopter/profile/delete', [\App\Http\Controllers\AdopterDashboardController::class, 'deleteAccount'])->name('adopter.profile.delete');
+        Route::get('/adopter/application-status', [\App\Http\Controllers\AdopterApplicationController::class, 'index'])->name('adopter.application-status');
+        Route::post('/adopter/applications', [\App\Http\Controllers\AdopterApplicationController::class, 'store'])->name('adopter.applications.store');
     });
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
         ->name('adopter.dashboard');
@@ -135,9 +140,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/adopter/adoption-form', function () {
         return view('adopter.adoption-form');
     })->name('adopter.adoption-form');
-    Route::get('/adopter/application-status', function () {
-        return view('adopter.application-status');
-    })->name('adopter.application-status');
     Route::get('/adopter/messages', function () {
         return view('adopter.messages');
     })->name('adopter.messages');
@@ -231,3 +233,30 @@ Route::post('/upload', function (Request $request) {
 });
 
 Route::post('/adopter/profile/update', [AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
+
+// API route for fetching pet details by ID
+Route::get('/api/pets/{id}', function ($id) {
+    $pet = \App\Models\Pet::with('shelter')->find($id);
+    if (!$pet) {
+        return response()->json(['error' => 'Pet not found'], 404);
+    }
+    // Compose the response to match frontend expectations
+    return response()->json([
+        'pet_id' => $pet->pet_id,
+        'name' => $pet->name,
+        'breed' => $pet->breed,
+        'age' => $pet->age,
+        'gender' => $pet->gender,
+        'size' => $pet->size,
+        'weight' => $pet->weight ?? 0,
+        'status' => $pet->adoption_status ?? $pet->status ?? 'available',
+        'description' => $pet->description,
+        'images' => [$pet->image_url ?? 'https://placehold.co/400x300'], // Placeholder for now
+        'is_favorite' => false, // Placeholder, implement favorite logic if needed
+        'shelter' => [
+            'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
+            'address' => $pet->shelter->location ?? 'Unknown Address',
+            'phone' => $pet->shelter->contact_info ?? 'Unknown Phone',
+        ],
+    ]);
+});
