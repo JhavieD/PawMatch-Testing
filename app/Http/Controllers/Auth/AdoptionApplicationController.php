@@ -11,12 +11,11 @@ class AdoptionApplicationController extends Controller
     // View all applications for a specific pet
     public function index(Request $request)
     {
-        $shelterId = auth()->user()->shelter->id;
+        $shelterId = auth()->user()->shelter->shelter_id ?? auth()->user()->shelter->id ?? null;
         $applications = \App\Models\AdoptionApplication::with(['adopter.user', 'pet'])
             ->where('shelter_id', $shelterId)
             ->orderByDesc('submitted_at')
             ->get();
-
         return view('shelter.pet_applications', compact('applications'));
     }
 
