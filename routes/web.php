@@ -8,8 +8,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\AdopterDashboardController;
-use App\Http\Controllers\ShelterController;
-use App\Http\Controllers\RescuerController;
+use App\Http\Controllers\ShelterDashboardController;
+use App\Http\Controllers\RescuerDashboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\AdoptionApplicationController;
 use App\Models\AdoptionApplication;
@@ -69,13 +69,13 @@ Route::middleware(['auth'])->group(function () {
     });
     // Shelter Routes
     Route::middleware(['shelter'])->group(function () {
-        Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
+        Route::get('/shelter/dashboard', [ShelterDashboardController::class, 'index'])
             ->name('shelter.dashboard');
 
-        Route::post('/shelter/pets', [ShelterController::class, 'store'])
+        Route::post('/shelter/pets', [ShelterDashboardController::class, 'store'])
             ->name('shelter.pets.store');
 
-        Route::get('/shelter/pets', [ShelterController::class, 'pets'])
+        Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])
             ->name('shelter.pets');
 
         Route::get('/shelter/pet_applications', function () {
@@ -86,27 +86,33 @@ Route::middleware(['auth'])->group(function () {
             return view('shelter.messages');
         })->name('shelter.messages');
 
-        Route::get('/shelter/profile', function () {
-            return view('shelter.profile');
-        })->name('shelter.profile');
+        
+        Route::get('/shelter/profile', [ShelterDashboardController::class, 'profile'])->name('shelter.profile');
+        Route::post('/shelter/profile/update', [ShelterDashboardController::class, 'updateProfile'])->name('shelter.profile.update');
+        Route::post('/shelter/profile/password', [ShelterDashboardController::class, 'updatePassword'])->name('shelter.profile.password');
+        Route::post('/shelter/profile/delete', [ShelterDashboardController::class, 'deleteAccount'])->name('shelter.profile.delete');
 
         Route::get(
             '/shelter/applications',
-            [\App\Http\Controllers\ShelterController::class, 'applications']
+            [ShelterDashboardController::class, 'applications']
         )->name('shelter.applications');
 
         // edit pet details
-        Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterController::class, 'update'])->name('shelter.pets.update');
+        Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterDashboardController::class, 'update'])->name('shelter.pets.update');
         // view pet details
         Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
         // delete a pet
-        Route::delete('/shelter/pets/{pet}', [ShelterController::class, 'destroy'])->name('shelter.pets.destroy');
+        Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
     });
 
     // Rescuer Routes
     Route::middleware(['rescuer'])->group(function () {
-        Route::get('/rescuer/dashboard', [RescuerController::class, 'index'])
+        Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])
             ->name('rescuer.dashboard');
+        Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
+        Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
+        Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
+        Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
     });
     // Adopter Routes
     Route::middleware(['adopter'])->group(function () {

@@ -3,45 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Pet;
-use App\Models\Application;
-use App\Models\Message;
 
-class AdopterDashboardController extends Controller
+class RescuerDashboardController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
-        $adopter = $user->adopter()->with('savedPets')->first();
-        $favoritePets = $adopter ? $adopter->savedPets : collect();
-
-        // Get recent applications
-        $recentApplications = $adopter ? $adopter->applications()->with(['pet', 'shelter'])->latest()->take(5)->get() : collect();
-
-        // Get recent messages (temporarily disabled)
-        $recentMessages = collect();
-
-        return view('adopter.adopter_dashboard', compact(
-            'user',
-            'favoritePets',
-            'recentApplications',
-            'recentMessages'
-        ));
+        return view('rescuer.rescuer_dashboard');
     }
 
     public function profile()
     {
         $user = auth()->user();
-        $adopter = $user->adopter;
-        return view('adopter.profile', compact('user', 'adopter'));
+        $rescuer = $user->rescuer;
+        return view('rescuer.profile', compact('user', 'rescuer'));
     }
-    //Upload New Photo Feature
+
     public function updateProfile(Request $request)
     {
         \Log::info('updateProfile called');
 
         $user = auth()->user();
-        $adopter = $user->adopter;
+        $rescuer = $user->rescuer;
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -60,7 +42,7 @@ class AdopterDashboardController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
         ]);
-        $adopter->update([
+        $rescuer->update([
             'address' => $request->address,
         ]);
 
@@ -87,7 +69,8 @@ class AdopterDashboardController extends Controller
 
         return back()->with('success', 'Profile updated!');
     }
-
+    
+    //Upload Profile Picture Feature
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -103,18 +86,6 @@ class AdopterDashboardController extends Controller
         return back()->with('success', 'Password updated!');
     }
 
-    public function updateNotifications(Request $request)
-    {
-        $adopter = auth()->user()->adopter;
-        $adopter->update([
-            'email_notifications' => $request->has('email_notifications'),
-            'application_updates' => $request->has('application_updates'),
-            'new_pet_alerts' => $request->has('new_pet_alerts'),
-            'marketing_communications' => $request->has('marketing_communications'),
-        ]);
-        return back()->with('success', 'Notification preferences updated!');
-    }
-
     public function deleteAccount(Request $request)
     {
         $user = auth()->user();
@@ -122,4 +93,4 @@ class AdopterDashboardController extends Controller
         $user->delete();
         return redirect('/')->with('success', 'Account deleted.');
     }
-} 
+}
