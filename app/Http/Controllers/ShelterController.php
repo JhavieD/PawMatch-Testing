@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shelter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Log;
 
 class ShelterController extends Controller
@@ -116,5 +120,69 @@ class ShelterController extends Controller
         $pet = \App\Models\Pet::findOrFail($petId);
         $pet->delete();
         return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
+    }
+
+    public function dashboard()
+    {
+        return view('shelter.shelter_dashboard');
+    }
+
+    public function profile()
+    {
+        return view('shelter.profile');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'shelter_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id() . ',user_id'],
+            'contact_number' => ['required', 'string', 'max:255'],
+        ]);
+
+        // Update user information
+        $user = Auth::user();
+        $user->first_name = $request->first_name;
+        $user->last_name = $request->last_name;
+        $user->email = $request->email;
+        $user->save();
+
+        // Update shelter information
+        $shelter = $user->shelter;
+        $shelter->name = $request->shelter_name;
+        $shelter->contact_number = $request->contact_number;
+        $shelter->save();
+
+        return redirect()->back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'new_password' => ['required', Password::defaults(), 'confirmed'],
+        ]);
+
+        Auth::user()->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return redirect()->back()->with('success', 'Password updated successfully.');
+    }
+
+    public function updateNotifications(Request $request)
+    {
+        $user = Auth::user();
+        $shelter = $user->shelter;
+        
+        $shelter->update([
+            'email_notifications' => $request->has('email_notifications'),
+            'application_updates' => $request->has('application_updates'),
+            'marketing_communications' => $request->has('marketing_communications')
+        ]);
+
+        return redirect()->back()->with('success', 'Notification preferences updated successfully.');
     }
 }
