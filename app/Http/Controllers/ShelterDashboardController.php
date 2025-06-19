@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Log;
 
-class ShelterController extends Controller
+class ShelterDashboardController extends Controller
 {
     public function index()
     {
@@ -41,6 +41,7 @@ class ShelterController extends Controller
             'recentApplications',
             'recentMessages',
             'recentReviews'
+            // 'profilePictureUrl' // No longer needed
         ));
     }
 
@@ -122,67 +123,87 @@ class ShelterController extends Controller
         return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
     }
 
-    public function dashboard()
-    {
-        return view('shelter.shelter_dashboard');
-    }
-
     public function profile()
     {
-        return view('shelter.profile');
+        $user = auth()->user();
+        $shelter = $user->shelter;
+        return view('shelter.profile', compact('user', 'shelter'));
     }
-
+    //Upload New Photo Feature
     public function updateProfile(Request $request)
     {
+        \Log::info('updateProfile called'); // Identical to adopter's log
+
+        $user = auth()->user();
+        $shelter = $user->shelter; // Use shelter relationship
+
         $request->validate([
-            'shelter_name' => ['required', 'string', 'max:255'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id() . ',user_id'],
-            'contact_number' => ['required', 'string', 'max:255'],
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone_number' => 'required|string|max:20',
+            'address' => 'required|string|max:255', 
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Update user information
-        $user = Auth::user();
-        $user->first_name = $request->first_name;
-        $user->last_name = $request->last_name;
-        $user->email = $request->email;
-        $user->save();
+        // Split name if needed
+        [$first_name, $last_name] = array_pad(explode(' ', $request->name, 2), 2, '');
 
-        // Update shelter information
-        $shelter = $user->shelter;
-        $shelter->name = $request->shelter_name;
-        $shelter->contact_number = $request->contact_number;
-        $shelter->save();
+        $user->update([
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+        ]);
+        
+        $shelter->update([
+            'address' => $request->address,
+        ]);
 
-        return redirect()->back()->with('success', 'Profile updated successfully.');
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $profileImagePath = $file->store('profileimage', 's3'); 
+            $fileType = $file->getClientMimeType();
+
+            \DB::table('user_profile_pic')->updateOrInsert(
+                ['user_id' => $user->user_id],
+                [
+                    'image_url' => $profileImagePath,
+                    'file_type' => $fileType,
+                    'uploaded_at' => now(),
+                    'is_displayed' => true,
+                ]
+            );
+        }
+        
+        if ($request->has('remove_photo')) {
+            \DB::table('user_profile_pic')
+            ->where('user_id', $user->user_id)
+            ->update(['is_displayed' => false]); // hide image
+        }
+
+        return back()->with('success', 'Profile updated!');
     }
-
+    
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'new_password' => ['required', Password::defaults(), 'confirmed'],
+            'current_password' => 'required',
+            'new_password' => 'required|confirmed|min:8',
         ]);
-
-        Auth::user()->update([
-            'password' => Hash::make($request->new_password)
-        ]);
-
-        return redirect()->back()->with('success', 'Password updated successfully.');
+        $user = auth()->user();
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+        $user->password = \Hash::make($request->new_password);
+        $user->save();
+        return back()->with('success', 'Password updated!');
     }
 
-    public function updateNotifications(Request $request)
+    public function deleteAccount(Request $request)
     {
-        $user = Auth::user();
-        $shelter = $user->shelter;
-        
-        $shelter->update([
-            'email_notifications' => $request->has('email_notifications'),
-            'application_updates' => $request->has('application_updates'),
-            'marketing_communications' => $request->has('marketing_communications')
-        ]);
-
-        return redirect()->back()->with('success', 'Notification preferences updated successfully.');
+        $user = auth()->user();
+        auth()->logout();
+        $user->delete();
+        return redirect('/')->with('success', 'Account deleted.');
     }
 }
