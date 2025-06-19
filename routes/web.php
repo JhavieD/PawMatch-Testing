@@ -16,6 +16,7 @@ use App\Models\AdoptionApplication;
 use App\Http\Controllers\AdopterPetListingsController;
 use App\Http\Controllers\ShelterApplicationController;
 use App\Http\Controllers\AdopterApplicationController as AdopterApplicationControllerAlias;
+use App\Http\Controllers\ShelterVerificationController;
 
 // Public routes
 Route::get('/', function () {
@@ -75,6 +76,18 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth', 'shelter'])->group(function () {
         Route::get('/shelter/pet_applications', [\App\Http\Controllers\Auth\AdoptionApplicationController::class, 'index'])
             ->name('shelter.pet_applications'); // Add route name for blade usage        // Add routes for review, approve, reject, message, etc.
+        
+        // Shelter Verification Routes
+        Route::get('/shelter/verification', [ShelterVerificationController::class, 'showVerificationForm'])
+            ->name('shelter.verification.form');
+        Route::post('/shelter/verification', [ShelterVerificationController::class, 'submitVerification'])
+            ->name('shelter.verification.submit');
+
+        Route::get('/shelter/dashboard', [ShelterController::class, 'dashboard'])->name('shelter.dashboard');
+        Route::get('/shelter/profile', [ShelterController::class, 'profile'])->name('shelter.profile');
+        Route::put('/shelter/profile', [ShelterController::class, 'updateProfile'])->name('shelter.profile.update');
+        Route::put('/shelter/password', [ShelterController::class, 'updatePassword'])->name('shelter.password.update');
+        Route::put('/shelter/notifications', [ShelterController::class, 'updateNotifications'])->name('shelter.notifications.update');
     });
     Route::middleware(['shelter'])->group(function () {
         Route::get('/shelter/dashboard', [ShelterController::class, 'index'])
@@ -89,10 +102,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/messages', function () {
             return view('shelter.messages');
         })->name('shelter.messages');
-
-        Route::get('/shelter/profile', function () {
-            return view('shelter.profile');
-        })->name('shelter.profile');
 
         Route::get('/shelter/applications', [\App\Http\Controllers\ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
         Route::get('/shelter/applications/{id}', [\App\Http\Controllers\ShelterApplicationController::class, 'show'])->name('shelter.applications.show');
@@ -171,9 +180,29 @@ Route::get('/profile/edit', function () {
 
 // Admin routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.admin_dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/users', [AdminDashboardController::class, 'users'])->name('admin.users');
+    Route::get('/verifications', [AdminDashboardController::class, 'verifications'])->name('admin.verifications');
+    Route::get('/verifications/{id}', [AdminDashboardController::class, 'showVerification'])->name('admin.verifications.show');
+    Route::post('/verifications/{id}/approve', [AdminDashboardController::class, 'approveVerification'])->name('admin.verifications.approve');
+    Route::post('/verifications/{id}/reject', [AdminDashboardController::class, 'rejectVerification'])->name('admin.verifications.reject');
+    Route::get('/stray-reports', [AdminDashboardController::class, 'strayReports'])->name('admin.stray-reports');
+    Route::get('/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
+    
+    // User Management
+    Route::post('/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
+    Route::put('/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/users/{user}', [AdminDashboardController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/users/{user}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])->name('admin.users.toggle-status');
+    Route::post('/users/bulk-action', [AdminDashboardController::class, 'bulkAction'])->name('admin.users.bulk-action');
+    Route::get('/users/export', [AdminDashboardController::class, 'exportUsers'])->name('admin.users.export');
+
+    // Stray Reports Management
+    Route::post('/stray-reports/{report}/assign', [AdminDashboardController::class, 'assignReport'])->name('admin.stray-reports.assign');
+    Route::post('/stray-reports/{report}/status', [AdminDashboardController::class, 'updateReportStatus'])->name('admin.stray-reports.status');
+
+    // Settings Management
+    Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('admin.settings.update');
 });
 
 Route::get('/dashboard-redirect', function () {
