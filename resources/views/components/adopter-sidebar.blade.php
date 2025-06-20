@@ -11,13 +11,13 @@
             <i class="fas fa-paw"></i>
             <span>Browse Pets</span>
         </a>
-        <a href="{{ route('adopter.pet-swipe') }}" class="nav-item {{ request()->routeIs('adopter.pet-swipe') ? 'active' : '' }}">
-            <i class="fas fa-random"></i>
-            <span>Pet Swipe</span>
-        </a>
         <a href="{{ route('adopter.pet-personality-quiz') }}" class="nav-item {{ request()->routeIs('adopter.pet-personality-quiz') ? 'active' : '' }}">
             <i class="fas fa-question-circle"></i>
             <span>Personality Quiz</span>
+        </a>
+        <a href="{{ route('adopter.profile') }}" class="nav-item {{ request()->routeIs('adopter.profile') ? 'active' : '' }}">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
         </a>
         <a href="{{ route('adopter.application-status') }}" class="nav-item {{ request()->routeIs('adopter.application-status') ? 'active' : '' }}">
             <i class="fas fa-clipboard-list"></i>

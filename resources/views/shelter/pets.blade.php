@@ -19,263 +19,270 @@
         </select>
     </div>
 
+    <!-- Pet Cards -->
     <div class="pets-grid">
-        <!-- Sample Pet Cards -->
+        @forelse($pets as $pet)
         <div class="pet-card">
-            <img src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.15752-9/482958427_546890997878558_7939868464340469320_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEg26tmyKvJjnwIVGA4p7VpyQUyRIOYwdHJBTJEg5jB0Wx4wKGdnDZxTVL1IbZ-XSjbaTHznmX8rfBWnCPmJmMd&_nc_ohc=Z4p-MgCZnLUQ7kNvgEaxlgm&_nc_oc=Adj34yEQkoq4BVC1rbv3hqxuOEPtGTzHnNq_bsWvPqyo8vgZ9z2tbbWgJ7HSzT1tE3w&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&oh=03_Q7cD1wGK65XEYIiIyewAECv3ua60cvr7cDuW6l98OwR5gTpdRw&oe=67F7AA9D" alt="Ester" class="pet-image">
+            <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
             <div class="pet-info">
-                <h3 class="pet-name">Ester</h3>
-                <p class="pet-details">Tabby Cat • 2 years old</p>
-                <span class="pet-status status-available">Available</span>
+                <h3 class="pet-name">{{ $pet->name }}</h3>
+                <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>
+                <span class="pet-status status-{{ $pet->adoption_status }}">
+                    {{ ucfirst($pet->adoption_status) }}
+                </span>
                 <div class="card-actions">
-                    <button>Edit</button>
-                    <button>View Applications</button>
-                    <button>Delete</button>
+                    <button type="button" class="edit-pet-btn" data-pet-id="{{ $pet->pet_id }}"
+                        data-name="{{ $pet->name }}"
+                        data-species="{{ $pet->species }}"
+                        data-breed="{{ $pet->breed }}"
+                        data-age="{{ $pet->age }}"
+                        data-gender="{{ $pet->gender }}"
+                        data-size="{{ $pet->size }}"
+                        data-description="{{ $pet->description }}"
+                        data-adoption_status="{{ $pet->adoption_status }}"
+                        data-behavior="{{ $pet->behavior }}"
+                        data-daily_activity="{{ $pet->daily_activity }}"
+                        data-special_needs="{{ $pet->special_needs }}"
+                        data-compatibility="{{ $pet->compatibility }}">
+                        Edit
+                    </button>
+                    <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}" data-pet-name="{{ $pet->name }}">View Applications</button>
+                    <form method="POST" action="{{ route('shelter.pets.destroy', $pet->pet_id) }}" style="display: contents;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn" onclick="return confirm('Are you sure you want to delete this pet?')" style="justify-content: center;">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>
+        @empty
+        <div>No pets found.</div>
+        @endforelse
+    </div>
 
-        <div class="pet-card">
-            <img src="https://scontent.fmnl17-4.fna.fbcdn.net/v/t1.15752-9/483141889_1675833660025267_1290389856524842791_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFiU2l-lMqiT0yOzqHvaKcBjpUqFd79mTaOlSoV3v2ZNlyoGX5LvyV0WGq8B-1ou-da8iwMWIqMvLc6zVV7ocSO&_nc_ohc=Ig-bidMrjgAQ7kNvgFbwmsH&_nc_oc=AdiWsP5H0Z3Fod7YR9kmeQoIz8fr778iAnJLBmNhxdsqELJJRYvz2uIdxR48AbN7Vkw&_nc_zt=23&_nc_ht=scontent.fmnl17-4.fna&oh=03_Q7cD1wGU_rMD2FIgwYa-HG-mjZwjOaYCt4_tmj0bfU_3bldL1A&oe=67F7BCA9" alt="Fort" class="pet-image">
-            <div class="pet-info">
-                <h3 class="pet-name">Fort</h3>
-                <p class="pet-details">Belgian Cat • 1 year old</p>
-                <span class="pet-status status-pending">Application Pending</span>
-                <div class="card-actions">
-                    <button>Edit</button>
-                    <button>View Applications</button>
-                    <button>Delete</button>
-                </div>
+    <!-- Edit Pet Modal -->
+    <div id="editPetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Pet Details</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editPetForm" method="POST" action="/shelter/pets/__PET_ID__">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="edit-name">Pet Name</label>
+                            <input type="text" name="name" id="edit-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-species">Species</label>
+                            <select id="edit-species" name="species" required>
+                                <option value="">Select Species</option>
+                                <option value="dog">Dog</option>
+                                <option value="cat">Cat</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-breed">Breed</label>
+                            <input type="text" id="edit-breed" name="breed" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-age">Age</label>
+                            <input type="number" id="edit-age" name="age" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-gender">Gender</label>
+                            <select id="edit-gender" name="gender" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-size">Size</label>
+                            <select id="edit-size" name="size" required>
+                                <option value="small">Small</option>
+                                <option value="medium">Medium</option>
+                                <option value="large">Large</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-description">Description</label>
+                        <textarea id="edit-description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-adoption_status">Status</label>
+                        <select id="edit-adoption_status" name="adoption_status" required>
+                            <option value="available">Available</option>
+                            <option value="pending">Application Pending</option>
+                            <option value="adopted">Adopted</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-behavior">Behavior</label>
+                        <select name="behavior" id="edit-behavior" required>
+                            <option value="">Select Behavior</option>
+                            <option value="Calm and Relaxed">Calm and Relaxed</option>
+                            <option value="Playful and Energetic">Playful and Energetic</option>
+                            <option value="Independent">Independent</option>
+                            <option value="Protective">Protective</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-daily_activity">Daily Activity</label>
+                        <select name="daily_activity" id="edit-daily_activity" required>
+                            <option value="">Select Activity Level</option>
+                            <option value="Low">Low</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-special_needs">Special Needs</label>
+                        <select name="special_needs" id="edit-special_needs" required>
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-compatibility">Compatibility</label>
+                        <select name="compatibility" id="edit-compatibility" required>
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-outline" onclick="closeModal(editModal)">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 
-        <div class="pet-card">
-            <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t1.15752-9/482640700_627447673475554_6154494766157000980_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeHwxEiY35eQJpJbi1AievedO8DosPsyGwY7wOiw-zIbBhsQ6fFsfo-g-0r22I7cxnXopUSrX2reZo4RYNdjDJHu&_nc_ohc=ciEvSNmnJ3MQ7kNvgGikfsF&_nc_oc=Adgy6d2x88wvmtbCvuhM-0IpHAYtnTjUQIMdpv54ogffEumEEEtWJctAE76Iw1Gwjy8&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&oh=03_Q7cD1wGnvieAKeYEanduwoXtD_JDDbrT6dgOzNCLApF17iq-GQ&oe=67F7D0E7" alt="Rocky" class="pet-image">
-            <div class="pet-info">
-                <h3 class="pet-name">Rocky</h3>
-                <p class="pet-details">German Shepherd • 3 years old</p>
-                <span class="pet-status status-adopted">Adopted</span>
-                <div class="card-actions">
-                    <button>Edit</button>
-                    <button>View Applications</button>
-                    <button>Delete</button>
-                </div>
+    <!-- Add Pet Modal -->
+    <div id="addPetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Pet</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addPetForm" method="POST" action="{{ route('shelter.pets.store') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Pet Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="species">Species</label>
+                            <select id="species" name="species" required>
+                                <option value="">Select Species</option>
+                                <option value="dog">Dog</option>
+                                <option value="cat">Cat</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="breed">Breed</label>
+                            <input type="text" id="breed" name="breed" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" name="age" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="size">Size</label>
+                            <select id="size" name="size" required>
+                                <option value="">Select Size</option>
+                                <option value="small">Small</option>
+                                <option value="medium">Medium</option>
+                                <option value="large">Large</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="behavior">Behavior</label>
+                        <select name="behavior" id="behavior" required>
+                            <option value="">Select Behavior</option>
+                            <option value="Calm and Relaxed">Calm and Relaxed</option>
+                            <option value="Playful and Energetic">Playful and Energetic</option>
+                            <option value="Independent">Independent</option>
+                            <option value="Protective">Protective</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="daily_activity">Daily Activity</label>
+                        <select name="daily_activity" id="daily_activity" required>
+                            <option value="">Select Activity Level</option>
+                            <option value="Low">Low</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="special_needs">Special Needs</label>
+                        <select name="special_needs" id="special_needs" required>
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="compatibility">Compatibility</label>
+                        <select name="compatibility" id="compatibility">
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="image-upload">
+                        <h3>Pet Images</h3>
+                        <div class="image-grid">
+                            <label class="upload-box">
+                                <input type="file" name="images[]" accept="image/*" multiple>
+                                <span>+ Add Photos</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Add Pet</button>
+                        <button type="button" class="btn btn-outline" onclick="closeModal(addModal)">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Edit Pet Modal -->
-<div id="editPetModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit Pet Details</h2>
-            <button class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="editPetForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="petName">Pet Name</label>
-                        <input type="text" id="petName" name="petName" value="Ester">
-                    </div>
-                    <div class="form-group">
-                        <label for="petType">Type</label>
-                        <select id="petType" name="petType">
-                            <option value="dog">Dog</option>
-                            <option value="cat">Cat</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="breed">Breed</label>
-                        <input type="text" id="breed" name="breed" value="Tabby Cat">
-                    </div>
-                    <div class="form-group">
-                        <label for="age">Age</label>
-                        <input type="number" id="age" name="age" value="2">
-                    </div>
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
-                        <select id="gender" name="gender">
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="size">Size</label>
-                        <select id="size" name="size">
-                            <option value="small">Small</option>
-                            <option value="medium">Medium</option>
-                            <option value="large">Large</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4">Friendly and energetic Tabby Cat looking for a loving home.</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" name="status">
-                        <option value="available">Available</option>
-                        <option value="pending">Application Pending</option>
-                        <option value="adopted">Adopted</option>
-                    </select>
-                </div>
-
-                <div class="image-upload">
-                    <h3>Pet Images</h3>
-                    <div class="image-grid">
-                        <div class="image-item">
-                            <img src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.15752-9/482958427_546890997878558_7939868464340469320_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEg26tmyKvJjnwIVGA4p7VpyQUyRIOYwdHJBTJEg5jB0Wx4wKGdnDZxTVL1IbZ-XSjbaTHznmX8rfBWnCPmJmMd&_nc_ohc=Z4p-MgCZnLUQ7kNvgEaxlgm&_nc_oc=Adj34yEQkoq4BVC1rbv3hqxuOEPtGTzHnNq_bsWvPqyo8vgZ9z2tbbWgJ7HSzT1tE3w&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&oh=03_Q7cD1wGK65XEYIiIyewAECv3ua60cvr7cDuW6l98OwR5gTpdRw&oe=67F7AA9D" alt="Pet photo">
-                            <button type="button" class="remove-image">&times;</button>
-                        </div>
-                        <div class="image-item">
-                            <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t1.15752-9/481596592_1188427862939538_5723652600303824613_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeGBLyrExbLdDdTzASuJF6NziczxXHFDeI2JzPFccUN4jbX8-GWmxshexj8fLTOn8MEB0l1mnBiqSAj0oKU2VMTQ&_nc_ohc=4l6zYonHqqgQ7kNvgGPA7TT&_nc_oc=Adi0zMNxPg4e893EM5wgYGH2M358oifh1ipsMnTcQcry2B4YiZ0xDmV4yy8Wy3cKQGE&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&oh=03_Q7cD1wGu2m2aE4YaCrNXfc-CQFEhi7ZLq-lP2OaIJdyeJ9tOvA&oe=67F7B056" alt="Pet photo">
-                            <button type="button" class="remove-image">&times;</button>
-                        </div>
-                        <label class="upload-box">
-                            <input type="file" accept="image/*" multiple>
-                            <span>+ Add Photos</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal(addModal)">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Add Pet Modal -->
-<div id="addPetModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Add New Pet</h2>
-            <button class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="addPetForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="petName">Pet Name</label>
-                        <input type="text" id="petName" name="petName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="petType">Type</label>
-                        <select id="petType" name="petType" required>
-                            <option value="">Select Type</option>
-                            <option value="dog">Dog</option>
-                            <option value="cat">Cat</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="breed">Breed</label>
-                        <input type="text" id="breed" name="breed" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="age">Age</label>
-                        <input type="number" id="age" name="age" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
-                        <select id="gender" name="gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="size">Size</label>
-                        <select id="size" name="size" required>
-                            <option value="">Select Size</option>
-                            <option value="small">Small</option>
-                            <option value="medium">Medium</option>
-                            <option value="large">Large</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" name="status" required>
-                        <option value="">Select Status</option>
-                        <option value="available">Available</option>
-                        <option value="pending">Application Pending</option>
-                        <option value="adopted">Adopted</option>
-                    </select>
-                </div>
-
-                <div class="image-upload">
-                    <h3>Pet Images</h3>
-                    <div class="image-grid">
-                        <div class="image-item">
-                            <img src="https://placehold.co/400x300" alt="Pet photo">
-                            <button type="button" class="remove-image">&times;</button>
-                        </div>
-                        <div class="image-item">
-                            <img src="https://placehold.co/400x300" alt="Pet photo">
-                            <button type="button" class="remove-image">&times;</button>
-                        </div>
-                        <label class="upload-box">
-                            <input type="file" accept="image/*" multiple>
-                            <span>+ Add Photos</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary">Add Pet</button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- View Applications Modal -->
-<div id="viewApplicationsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Applications for <span id="petNameTitle">Ester</span></h2>
-            <button class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="applications-list">
-                <div class="application-item">
-                    <div class="applicant-info">
-                        <h3>Jan Vincent Dominguez</h3>
-                        <p>Submitted: March 15, 2024</p>
-                        <span class="status-badge status-pending">Pending Review</span>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="viewApplicationDetails(1)">View Details</button>
-                        <button class="btn btn-outline" onclick="messageApplicant('Jan Vincent Dominguez')">Message</button>
-                    </div>
-                </div>
-
-                <div class="application-item">
-                    <div class="applicant-info">
-                        <h3>Allainne Villanueva</h3>
-                        <p>Submitted: March 14, 2024</p>
-                        <span class="status-badge status-approved">Approved</span>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="viewApplicationDetails(2)">View Details</button>
-                        <button class="btn btn-outline" onclick="messageApplicant('Allainne Villanueva')">Message</button>
-                    </div>
+    <!-- View Applications Modal -->
+    <div id="viewApplicationsModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Applications for <span id="petNameTitle"></span></h2>
+                <button class="close-btn" type="button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="applications-list">
+                    <!-- Applications will be loaded here by JS -->
                 </div>
             </div>
         </div>
@@ -291,7 +298,7 @@
     const editModal = document.getElementById('editPetModal');
     const addModal = document.getElementById('addPetModal');
     const closeBtns = document.querySelectorAll('.close-btn');
-    const editBtns = document.querySelectorAll('.card-actions button:first-child');
+    const editBtns = document.querySelectorAll('.edit-pet-btn');
     const addPetBtn = document.querySelector('.add-pet-btn');
 
     function closeModal(modal) {
@@ -301,6 +308,41 @@
 
     editBtns.forEach(btn => {
         btn.addEventListener('click', () => {
+            const petId = btn.getAttribute('data-pet-id');
+            const name = btn.getAttribute('data-name');
+            const species = btn.getAttribute('data-species');
+            const breed = btn.getAttribute('data-breed');
+            const age = btn.getAttribute('data-age');
+            const gender = btn.getAttribute('data-gender');
+            const size = btn.getAttribute('data-size') ? btn.getAttribute('data-size').toLowerCase() : '';
+            const description = btn.getAttribute('data-description');
+            const adoptionStatus = btn.getAttribute('data-adoption_status');
+            const behavior = btn.getAttribute('data-behavior');
+            const dailyActivity = btn.getAttribute('data-daily_activity');
+            const specialNeeds = btn.getAttribute('data-special_needs');
+            const compatibility = btn.getAttribute('data-compatibility');
+
+            // Debug log
+            console.log({size, behavior, dailyActivity, specialNeeds, compatibility});
+
+            // Populate the edit form with the pet's current details
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-species').value = species;
+            document.getElementById('edit-breed').value = breed;
+            document.getElementById('edit-age').value = age;
+            document.getElementById('edit-gender').value = gender;
+            document.getElementById('edit-size').value = size;
+            document.getElementById('edit-description').value = description;
+            document.getElementById('edit-adoption_status').value = adoptionStatus;
+            document.getElementById('edit-behavior').value = behavior;
+            document.getElementById('edit-daily_activity').value = dailyActivity;
+            document.getElementById('edit-special_needs').value = specialNeeds;
+            document.getElementById('edit-compatibility').value = compatibility;
+
+            // Update the form action to the correct pet ID
+            const form = document.getElementById('editPetForm');
+            form.action = form.action.replace('__PET_ID__', petId);
+
             editModal.style.display = 'block';
             document.body.style.overflow = 'hidden';
         });
@@ -327,13 +369,84 @@
     // Form submission
     document.getElementById('editPetForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        alert('Changes saved successfully!');
+        const form = e.target;
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error saving changes. Please try again.');
+                }
+            } else if (response.status === 422) {
+                const errorData = await response.json();
+                let messages = [];
+                for (const key in errorData.errors) {
+                    messages.push(errorData.errors[key].join(' '));
+                }
+                alert('Validation error:\n' + messages.join('\n'));
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+
         closeModal(editModal);
     });
 
     document.getElementById('addPetForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        alert('Pet added successfully!');
+        const form = e.target;
+        const formData = new FormData(form);
+
+        // Debug: log all form data
+        for (let [key, value] of formData.entries()) {
+            console.log('ADD FORM FIELD:', key, value);
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error adding pet. Please try again.');
+                }
+            } else if (response.status === 422) {
+                const errorData = await response.json();
+                let messages = [];
+                for (const key in errorData.errors) {
+                    messages.push(errorData.errors[key].join(' '));
+                }
+                alert('Validation error:\n' + messages.join('\n'));
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+
         closeModal(addModal);
     });
 
@@ -354,7 +467,7 @@
 
     // View Applications functionality
     const viewApplicationsModal = document.getElementById('viewApplicationsModal');
-    const viewApplicationsBtns = document.querySelectorAll('.card-actions button:nth-child(2)');
+    const viewApplicationsBtns = document.querySelectorAll('.view-applications-btn');
 
     viewApplicationsBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -363,6 +476,43 @@
             document.getElementById('petNameTitle').textContent = petName;
             viewApplicationsModal.style.display = 'block';
             document.body.style.overflow = 'hidden';
+
+            const petId = btn.getAttribute('data-pet-id');
+            // Fetch and display applications for the selected pet
+            fetch(`/shelter/pets/${petId}/applications`, {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const applicationsList = document.querySelector('.applications-list');
+                    applicationsList.innerHTML = ''; // Clear existing content
+
+                    if (data.applications.length > 0) {
+                        data.applications.forEach(application => {
+                            const applicationItem = document.createElement('div');
+                            applicationItem.classList.add('application-item');
+
+                            applicationItem.innerHTML = `
+                                <div class="applicant-info">
+                                    <h3>${application.applicant_name}</h3>
+                                    <p>Submitted: ${new Date(application.submitted_at).toLocaleString()}</p>
+                                    <span class="status-badge status-${application.status.toLowerCase()}">${application.status}</span>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary" onclick="viewApplicationDetails(${application.id})">View Details</button>
+                                    <button class="btn btn-outline" onclick="messageApplicant('${application.applicant_name}')">Message</button>
+                                </div>
+                            `;
+
+                            applicationsList.appendChild(applicationItem);
+                        });
+                    } else {
+                        applicationsList.innerHTML = '<div>No applications found.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching applications:', error);
+                });
         });
     });
 

@@ -12,8 +12,12 @@ class Pet extends Model
     protected $primaryKey = 'pet_id';
 
     protected $fillable = [
-        'shelter_id', 'rescuer_id', 'name', 'species', 'breed', 'age', 'gender', 'medical_history', 'adoption_status', 'behavior', 'daily_activity', 'eating_habits', 'special_needs', 'compatibility', 'description'
+        'shelter_id', 'rescuer_id', 'name', 'species', 'breed', 'age', 'gender', 'size', 'medical_history', 'adoption_status', 'behavior', 'daily_activity', 'eating_habits', 'special_needs', 'compatibility', 'description'
     ];
 
     // Relationships can be added here as needed
-} 
+    public function shelter()
+    {
+        return $this->belongsTo(\App\Models\Shelter::class, 'shelter_id');
+    }
+}   
