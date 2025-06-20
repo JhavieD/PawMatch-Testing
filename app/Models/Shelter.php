@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Pet;
 use App\Models\AdopterReview;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shelter extends Model
 {
@@ -22,14 +24,24 @@ class Shelter extends Model
         'verified_by',
         'verified_at',
         'avg_adopter_rating',
+        'email_notifications',
+        'application_updates',
+        'marketing_communications'
     ];
 
-    public function user()
+    protected $casts = [
+        'verified' => 'boolean',
+        'email_notifications' => 'boolean',
+        'application_updates' => 'boolean',
+        'marketing_communications' => 'boolean'
+    ];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function pets()
+    public function pets(): HasMany
     {
         return $this->hasMany(Pet::class, 'shelter_id', 'shelter_id');
     }
@@ -52,5 +64,10 @@ class Shelter extends Model
     public function adopterReviews()
     {
         return $this->hasMany(AdopterReview::class, 'shelter_id', 'shelter_id');
+    }
+
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(ShelterVerification::class, 'shelter_id', 'shelter_id');
     }
 }

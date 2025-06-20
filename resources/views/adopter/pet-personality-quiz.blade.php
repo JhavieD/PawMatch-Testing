@@ -47,6 +47,98 @@
                     <span class="option-text">Protective</span>
                 </div>
             </div>
+
+            <div class="question-container" id="question3">
+                <div class="question-number">Question 3 of 7</div>
+                <div class="question-text">What's your preferred activity level?</div>
+                <div class="options-container">
+                    <div class="option-card" data-value="low">
+                        <span class="option-icon">🌙</span>
+                        <span class="option-text">Low - I prefer a relaxed lifestyle</span>
+                    </div>
+                    <div class="option-card" data-value="moderate">
+                        <span class="option-icon">🌅</span>
+                        <span class="option-text">Moderate - Balanced activity</span>
+                    </div>
+                    <div class="option-card" data-value="high">
+                        <span class="option-icon">⚡</span>
+                        <span class="option-text">High - Very active lifestyle</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" id="question4">
+                <div class="question-number">Question 4 of 7</div>
+                <div class="question-text">Could you manage a pet with special needs?</div>
+                <div class="options-container">
+                    <div class="option-card" data-value="yes">
+                        <span class="option-icon">❤️</span>
+                        <span class="option-text">Yes, I'm open to special needs pets</span>
+                    </div>
+                    <div class="option-card" data-value="no">
+                        <span class="option-icon">🤔</span>
+                        <span class="option-text">No, I prefer a healthy pet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" id="question5">
+                <div class="question-number">Question 5 of 7</div>
+                <div class="question-text">Do you have other pets at home?</div>
+                <div class="options-container">
+                    <div class="option-card" data-value="yes">
+                        <span class="option-icon">🐾</span>
+                        <span class="option-text">Yes, I have other pets</span>
+                    </div>
+                    <div class="option-card" data-value="no">
+                        <span class="option-icon">🏠</span>
+                        <span class="option-text">No, this would be my first pet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" id="question6">
+                <div class="question-number">Question 6 of 7</div>
+                <div class="question-text">Do you live with children or elderly?</div>
+                <div class="options-container">
+                    <div class="option-card" data-value="yes">
+                        <span class="option-icon">👶</span>
+                        <span class="option-text">Yes, I live with children or elderly</span>
+                    </div>
+                    <div class="option-card" data-value="no">
+                        <span class="option-icon">👤</span>
+                        <span class="option-text">No, it's just adults</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" id="question7">
+                <div class="question-number">Question 7 of 7</div>
+                <div class="question-text">Do you or anyone in the household have pet allergies?</div>
+                <div class="options-container">
+                    <div class="option-card" data-value="yes">
+                        <span class="option-icon">🤧</span>
+                        <span class="option-text">Yes, we have allergies</span>
+                    </div>
+                    <div class="option-card" data-value="no">
+                        <span class="option-icon">😊</span>
+                        <span class="option-text">No allergies here</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="result-container" id="result">
+            <div class="result-icon">🎉</div>
+            <h2 class="result-title">Your Perfect Pet Match</h2>
+            <div class="result-description" id="resultDescription"></div>
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="restartQuiz()">Take Quiz Again</button>
+                <button class="btn" onclick="window.location.href='pet-listings-LoggedIn.html'">Browse Pets</button>
+            </div>
+        </div>
+        <div class="navigation-buttons">
+            <button class="btn btn-secondary" id="prevBtn" disabled onclick="prevQuestion()">Previous</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()">Next</button>
         </div>
 
         <div class="question-container" id="question3">
@@ -231,5 +323,4 @@
 
     initQuiz();
 </script>
-
 @endsection

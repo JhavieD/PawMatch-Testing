@@ -3,19 +3,22 @@
 @section('title', 'Adopter Dashboard - PawMatch')
 
 @section('adopter-content')
+
 <main class="main-content">
     <!-- Centering Wrapper -->
     <div class="content-wrapper">
         <!-- Top Bar -->
         <div class="top-bar">
             <div class="welcome-section">
-                <h1>Welcome, Jan!</h1>
+                <h1>Welcome, {{ $user->first_name ?? 'User' }}!</h1>
                 <p>Here's what's happening with your pet adoption journey</p>
             </div>
             <div class="profile-section">
-                <div class="profile-img"><img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t1.15752-9/476486323_608751341590637_3882524015070156262_n.png?_nc_cat=111&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEAyCH12mIL6NzUvlgseqDY4rL9WdfeKM3isv1Z194ozYgZ-9UKbsk65TCe8Nkb-jswJb96y7c5-4ubO3YgvEiH&_nc_ohc=-1JlxoF7RywQ7kNvgESo7VP&_nc_oc=AdjsVM141uQAKT9LZBlLbPhWPJrXPxdO9KhelOerqjj8beDLoBzB7q5a_JIYRHov3Ig&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&oh=03_Q7cD1wH1X3E_IEqjyyt_Ac_XgN-bhjx9I83wi6IeMjVlQcDh1A&oe=67F7A820" style="width: 100%; height: 100%; border-radius: 50%;" /></div>
-                <div class="profile-info">
-                    <strong>Jan Vincent Dominguez</strong>
+            <div class="profile-img">
+                <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}" style="width: 100%; height: 100%; border-radius: 50%;" />
+            </div>
+            <div class="profile-info">
+                    <strong>{{ $user->first_name }} {{ $user->last_name }}</strong>
                 </div>
             </div>
         </div>
