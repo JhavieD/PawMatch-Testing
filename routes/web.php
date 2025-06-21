@@ -137,6 +137,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
     });
     // Adopter Routes
+    Route::get('/adopter/pets/{pet}', [AdopterPetListingsController::class, 'show'])->name('adopter.pets.show');
+    // ^Show Pet Images
     Route::middleware(['adopter'])->group(function () {
 
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
@@ -184,7 +186,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/adopter/messages', function () {
         return view('adopter.messages');
     })->name('adopter.messages');
-});
+
 
 // Pet Personality Quiz Routes
 Route::get('/quiz', [PetPersonalityQuizController::class, 'showQuiz'])->name('quiz.show');
@@ -200,6 +202,8 @@ Route::view('profile', 'profile')
 Route::get('/pets', function () {
     return 'Pet listings coming soon!';
 })->name('pets.index');
+
+Route::get('/api/pets/{pet}/images', [\App\Http\Controllers\ShelterDashboardController::class, 'getPetImages']);
 
 // Placeholder route for applications.index
 Route::get('/applications', function () {

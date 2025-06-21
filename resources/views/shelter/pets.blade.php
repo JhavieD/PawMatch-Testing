@@ -23,7 +23,11 @@
     <div class="pets-grid">
         @forelse($pets as $pet)
         <div class="pet-card">
-            <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
+        @if($pet->images->isNotEmpty())
+            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }}" class="pet-image">
+        @else
+            <img src="https://placehold.co/400x300" alt="{{ $pet->name }}" class="pet-image">
+        @endif
             <div class="pet-info">
                 <h3 class="pet-name">{{ $pet->name }}</h3>
                 <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>

@@ -53,8 +53,21 @@ class ShelterDashboardController extends Controller
     public function pets()
     {
         $shelter = auth()->user()->shelter;
-        $pets = $shelter->pets()->latest()->get();
+        $pets = $shelter->pets()->with('images')->latest()->get();
         return view('shelter.pets', compact('pets'));
+    }
+
+    public function getPetImages($petId)
+    {
+        $pet = \App\Models\Pet::with('images')->findOrFail($petId);
+        return response()->json([
+            'images' => $pet->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'image_url' => $image->image_url,
+                ];
+            }),
+        ]);
     }
     // for addingpets
     public function store(Request $request)
@@ -72,6 +85,7 @@ class ShelterDashboardController extends Controller
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
         $data['adoption_status'] = 'available'; // always set to available on add
         $data['shelter_id'] = $shelter->shelter_id;
@@ -81,6 +95,27 @@ class ShelterDashboardController extends Controller
         Log::info('Pet Add Validated Data', $data);
 
         $pet = \App\Models\Pet::create($data);
+
+        if ($request->hasFile('images')) {
+            try {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('petimages', 's3');
+                    \Storage::disk('s3')->setVisibility($path, 'public');
+                    $imageUrl = \Storage::disk('s3')->url($path);
+
+                    \App\Models\PetImage::create([
+                        'pet_id' => $pet->pet_id,
+                        'image_url' => $imageUrl,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error uploading pet images: ' . $e->getMessage());
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'error' => 'Image upload failed.'], 500);
+                }
+                return back()->withErrors(['images' => 'Image upload failed.']);
+            }
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true]);
@@ -206,4 +241,46 @@ class ShelterDashboardController extends Controller
         $user->delete();
         return redirect('/')->with('success', 'Account deleted.');
     }
+
+        // Add more photos to a pet
+    public function addImages(Request $request, $petId)
+    {
+        $request->validate([
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $pet = \App\Models\Pet::findOrFail($petId);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('petimages', 's3');
+                \Storage::disk('s3')->setVisibility($path, 'public');
+                $imageUrl = \Storage::disk('s3')->url($path);
+
+                \App\Models\PetImage::create([
+                    'pet_id' => $pet->pet_id,
+                    'image_url' => $imageUrl,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Images added successfully!');
+    }
+
+    // Delete a specific photo
+    public function deleteImage($imageId)
+    {
+        $image = \App\Models\PetImage::findOrFail($imageId);
+
+        // Delete from S3
+        $path = parse_url($image->image_url, PHP_URL_PATH);
+        $path = ltrim($path, '/');
+        \Storage::disk('s3')->delete($path);
+
+        // Delete from database
+        $image->delete();
+
+        return back()->with('success', 'Image deleted successfully!');
+    }
 }
+
