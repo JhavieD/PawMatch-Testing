@@ -18,7 +18,16 @@
                         <!-- Pet Images -->
                         <div>
                             <div class="relative">
-                                <img src="https://source.unsplash.com/random/800x600/?pet" alt="Pet" class="w-full h-96 object-cover rounded-lg">
+                                <pre>{{ print_r($pet->images->toArray(), true) }}</pre>
+                                @if ($pet->images->isNotEmpty())
+                            <div class="pet-gallery">
+                                @foreach ($pet->images as $image)
+                                    <img src="{{ $image->image_url }}" alt="{{ $pet->name }}" class="pet-detail-image">
+                                @endforeach
+                            </div>
+                                @else
+                                    <p>No images found for this pet.</p>
+                                @endif
                                 <div class="absolute top-4 right-4">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                         Available for Adoption

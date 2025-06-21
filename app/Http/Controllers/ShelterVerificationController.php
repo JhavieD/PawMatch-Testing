@@ -36,7 +36,7 @@ class ShelterVerificationController extends Controller
         }
 
         // Store the document
-        $path = $request->file('registration_doc')->store('shelter-verifications', 'public');
+        $path = $request->file('registration_doc')->store('shelter-verifications', 's3');
 
         // Create verification record
         ShelterVerification::create([

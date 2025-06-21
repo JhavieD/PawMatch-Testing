@@ -13,7 +13,7 @@ class AdopterPetListingsController extends Controller
         $petTypes = Pet::pluck('species')->unique()->values();
         $ageGroups = Pet::pluck('age')->unique()->values();
         $sizes = Pet::pluck('size')->unique()->values();
-
+        
         // Get pets, optionally filter by type, age, size, or search
         $query = Pet::query();
         if ($request->has('type')) {
@@ -99,8 +99,13 @@ class AdopterPetListingsController extends Controller
                   });
             });
         }
-        $pets = $query->with('shelter')->paginate(12);
+        $pets = $query->with('shelter', 'images')->paginate(12);
 
         return view('adopter.pet-listings', compact('petTypes', 'ageGroups', 'sizes', 'pets'));
+    }
+    public function show(\App\Models\Pet $pet)
+    {
+    $pet->load(['images', 'shelter']);
+    return view('adopter.pet-details', compact('pet'));
     }
 } 

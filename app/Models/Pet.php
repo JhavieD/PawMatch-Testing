@@ -20,4 +20,9 @@ class Pet extends Model
     {
         return $this->belongsTo(\App\Models\Shelter::class, 'shelter_id');
     }
+    //Pet Image Upload
+    public function images()
+    {
+    return $this->hasMany(\App\Models\PetImage::class, 'pet_id', 'pet_id');
+    }
 }   
