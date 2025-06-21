@@ -104,7 +104,6 @@ body {
     min-height: 100vh;
 }
 
-
 /* Main Content */
 .shelter-main-content {
     margin-left: 250px; /* Leaves space for the fixed sidebar */
@@ -301,22 +300,27 @@ body {
 }
 
 .status {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 4px 12px;
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 500;
-    margin-top: 0.5rem;
+    display: inline-block;
+    text-transform: capitalize;
+}
+
+.status-adopted {
+    background-color: #dbeafe; /* pastel blue */
+    color: #1d4ed8; /* blue text */
+}
+
+.status-available {
+    background-color: #e0f7fa;
+    color: #007bff;
 }
 
 .status-pending {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-approved {
-    background: #d1fae5;
-    color: #065f46;
+    background-color: #fff3cd;
+    color: #856404;
 }
 
 .btn {
@@ -496,6 +500,87 @@ body {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 1rem 0;
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    font-size: 1rem;
+    color: #1a1a1a;
+}
+
+.questionnaire {
+    margin-top: 1.5rem;
+}
+
+.questionnaire h4 {
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+}
+
+.question {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.question label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.question p {
+    color: #1a1a1a;
+}
+
+.modal-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.status-info-requested {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+@media (max-width: 640px) {
+    .modal-content {
+        margin: 1rem;
+        width: auto;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
 }
 
 /* Rating Display Styles */

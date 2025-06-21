@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\Message;
+use App\Models\User;
 
 class ShelterController extends Controller
 {
@@ -22,8 +24,15 @@ class ShelterController extends Controller
 
         // Recent items
         $recentPets = $shelter->pets()->latest()->take(2)->get();
-        $recentApplications = $shelter->applications()->latest()->take(2)->get();
-        $recentMessages = $shelter->receivedMessages()->latest()->take(2)->get();
+        $recentApplications = $shelter->applications()->with('adopter.user')->latest()->take(2)->get();
+        $recentMessages = $shelter->receivedMessages()
+            ->select('sender_id', \DB::raw('MAX(message_id) as max_id'))
+            ->groupBy('sender_id')
+            ->get()
+            ->pluck('max_id')
+            ->map(function ($id) {
+                return \App\Models\Message::with('sender')->find($id);
+            });
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
 
         return view('shelter.shelter_dashboard', compact(
@@ -116,5 +125,30 @@ class ShelterController extends Controller
         $pet = \App\Models\Pet::findOrFail($petId);
         $pet->delete();
         return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
+    }
+
+    public function messages(Request $request)
+    {
+
+        $shelter = auth()->user()->shelter;
+
+        $partnerIds = Message::where('sender_id', $shelter->user_id)
+            ->orWhere('receiver_id', $shelter->user_id)
+            ->get()
+            ->flatMap(function ($message) use ($shelter) {
+                return [
+                    $message->sender_id !== $shelter->user_id ? $message->sender_id : null,
+                    $message->receiver_id !== $shelter->user_id ? $message->receiver_id : null
+                ];
+            })
+            ->filter()
+            ->unique()
+            ->values();
+        
+        $partners = User::whereIn('user_id', $partnerIds)->get();
+
+        $receiver = $partners->first(); // default chat open to first partner
+
+        return view('shelter.messages', compact('partners', 'receiver'));
     }
 }
