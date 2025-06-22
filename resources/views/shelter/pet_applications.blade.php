@@ -24,15 +24,17 @@
                 <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image">
                 <div class="application-info">
                     <h3>Application for {{ $application->pet->name }}</h3>
-                    <p>From: {{ $application->adopter->user->name }} • Phone: {{ $application->adopter->user->phone }}</p>
+                    <p>From: {{ $application->adopter->user->name }} • Phone: {{ $application->adopter->user->phone_number }}</p>
                     <div class="application-meta">
                         <span>Submitted: {{ \Carbon\Carbon::parse($application->submitted_at)->format('F d, Y') }}</span>
-                        <span class="status-badge status-{{ $application->status }}">{{ ucfirst($application->status) }}</span>
+                        <span class="status-badge status-{{ $application->status }}" data-id="{{ $application->application_id }}">
+                            {{ ucfirst($application->status) }}
+                        </span>                    
                     </div>
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="showApplicationModal({{ $application->application_id }})">Review</button>
-                    <button class="btn btn-outline" onclick="messageApplicant('{{ $application->adopter->user->name }}')">Message</button>
+                    <button class="btn btn-outline" onclick="messageApplicant({{ $application->adopter->user->user_id }})">Message</button>
                 </div>
             </div>
         @endforeach
@@ -52,15 +54,39 @@
     </div>
 </div>
 
+<!-- Rejection Reason Modal -->
+<div id="rejectionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Reject Application</h2>
+            <button class="close-rejection-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <label for="rejectionReason">Please provide a reason for rejection:</label>
+            <textarea id="rejectionReason" rows="4" placeholder="Enter reason here..." style="width: 100%;"></textarea>
+            <div style="margin-top: 1rem; text-align: right;">
+                <button class="btn btn-outline" id="cancelRejectionBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmRejectionBtn">Confirm Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    let currentApplicationId = null;
+    const modal = document.getElementById('applicationModal');
+    const rejectionModal = document.getElementById('rejectionModal');
+    const closeBtn = document.querySelector('.close-btn');
+    const closeRejectionBtn = document.querySelector('.close-rejection-btn');
+    const cancelRejectionBtn = document.getElementById('cancelRejectionBtn');
+    const confirmRejectionBtn = document.getElementById('confirmRejectionBtn');
+
     function logout() {
         window.location.href = 'login.html';
     }
 
-    // Modal functionality
-    const modal = document.getElementById('applicationModal');
-    const closeBtn = document.querySelector('.close-btn');
     function showApplicationModal(id) {
+        currentApplicationId = id;
         fetch(`/shelter/applications/${id}`)
             .then(response => response.text())
             .then(html => {
@@ -70,69 +96,101 @@
                 attachActionHandlers(id);
             });
     }
-    function messageApplicant(applicantName) {
-        window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
+
+    function messageApplicant(adopterId) {
+        window.location.href = `/shelter/messages?receiver_id=${adopterId}`;
     }
-    closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
+
+    function closeModal(modalElement) {
+        modalElement.style.display = 'none';
         document.body.style.overflow = 'auto';
-    });
+    }
+
+    closeBtn?.addEventListener('click', () => closeModal(modal));
+    closeRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
+    cancelRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
+
     window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
+        if (e.target === modal) closeModal(modal);
+        if (e.target === rejectionModal) closeModal(rejectionModal);
     });
 
     function attachActionHandlers(id) {
         const approveBtn = document.getElementById('approveBtn');
         const rejectBtn = document.getElementById('rejectBtn');
         const requestInfoBtn = document.getElementById('requestInfoBtn');
+
         if (approveBtn) {
-            approveBtn.onclick = function() {
+            approveBtn.onclick = () => {
                 fetch(`/shelter/applications/${id}/approve`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                }).then(res => res.json()).then(data => {
-                    alert('Application approved!');
-                    location.reload();
-                });
-            };
-        }
-        if (rejectBtn) {
-            rejectBtn.onclick = function() {
-                const reason = prompt('Enter rejection reason:');
-                if (!reason) return;
-                fetch(`/shelter/applications/${id}/reject`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ rejection_reason: reason })
-                }).then(res => res.json()).then(data => {
-                    alert('Application rejected!');
-                    location.reload();
-                });
+                    body: JSON.stringify({}) // sending empty body to avoid Laravel errors
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to approve');
+                    return res.json();
+                })
+                .then(() => {
+                    updateStatusBadge(id, 'approved');
+                    closeModal(modal);
+                })
+                .catch(err => alert('Approval failed. Check console.'));
             };
         }
+
+        if (rejectBtn) {
+            rejectBtn.onclick = () => {
+                currentApplicationId = id;
+                rejectionModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            };
+        }
+
         if (requestInfoBtn) {
-            requestInfoBtn.onclick = function() {
+            requestInfoBtn.onclick = () => {
                 fetch(`/shelter/applications/${id}/request-info`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     }
-                }).then(res => res.json()).then(data => {
-                    alert('Information request sent to applicant!');
-                    location.reload();
+                }).then(res => res.json()).then(() => {
+                    updateStatusBadge(id, 'info-requested');
+                    closeModal(modal);
                 });
             };
+        }
+    }
+
+    confirmRejectionBtn?.addEventListener('click', () => {
+        const reason = document.getElementById('rejectionReason').value.trim();
+        if (!reason) return alert("Please enter a reason for rejection.");
+
+        fetch(`/shelter/applications/${currentApplicationId}/reject`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ rejection_reason: reason })
+        }).then(res => res.json()).then(() => {
+            updateStatusBadge(currentApplicationId, 'rejected');
+            closeModal(rejectionModal);
+            closeModal(modal);
+        });
+    });
+
+    function updateStatusBadge(id, newStatus) {
+        const badge = document.querySelector(`.status-badge[data-id="${id}"]`);
+        if (badge) {
+            badge.innerText = newStatus.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
+            badge.className = `status-badge status-${newStatus}`;
         }
     }
 </script>
