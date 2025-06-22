@@ -18,6 +18,7 @@ use App\Models\AdoptionApplication;
 use App\Http\Controllers\AdopterPetListingsController;
 use App\Http\Controllers\ShelterApplicationController;
 use App\Http\Controllers\AdopterApplicationController as AdopterApplicationControllerAlias;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ShelterVerificationController;
 
 // Public routes
@@ -77,6 +78,17 @@ Route::middleware(['auth'])->group(function () {
 
     // Shelter Routes
     Route::middleware(['auth', 'shelter'])->group(function () {
+        Route::get('/shelter/pet_applications', [AdoptionApplicationController::class, 'index'])
+            ->name('shelter.pet_applications');
+
+
+        // Shelter dashboard and pets
+        Route::get('/shelter/dashboard', [ShelterController::class, 'index'])->name('shelter.dashboard');
+        Route::post('/shelter/pets', [ShelterController::class, 'store'])->name('shelter.pets.store');
+        Route::get('/shelter/pets', [ShelterController::class, 'pets'])->name('shelter.pets');
+        // Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterController::class, 'update'])->name('shelter.pets.update');
+        // Route::delete('/shelter/pets/{pet}', [ShelterController::class, 'destroy'])->name('shelter.pets.destroy');
+        // Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
         Route::get('/shelter/pet_applications', [\App\Http\Controllers\Auth\AdoptionApplicationController::class, 'index'])
             ->name('shelter.pet_applications'); // Add route name for blade usage        // Add routes for review, approve, reject, message, etc.
         
@@ -102,22 +114,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])
             ->name('shelter.pets');
 
-        Route::get('/shelter/messages', function () {
-            return view('shelter.messages');
-        })->name('shelter.messages');
+        // Messages
+        Route::get('/shelter/messages', [MessageController::class, 'shelterMessages'])->name('shelter.messages');
 
-        
-        Route::get('/shelter/profile', [ShelterDashboardController::class, 'profile'])->name('shelter.profile');
+        // Profile
+        Route::get('/shelter/profile', fn() => view('shelter.profile'))->name('shelter.profile');
         Route::post('/shelter/profile/update', [ShelterDashboardController::class, 'updateProfile'])->name('shelter.profile.update');
         Route::post('/shelter/profile/password', [ShelterDashboardController::class, 'updatePassword'])->name('shelter.profile.password');
         Route::post('/shelter/profile/delete', [ShelterDashboardController::class, 'deleteAccount'])->name('shelter.profile.delete');
 
 
-        Route::get('/shelter/applications', [\App\Http\Controllers\ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
-        Route::get('/shelter/applications/{id}', [\App\Http\Controllers\ShelterApplicationController::class, 'show'])->name('shelter.applications.show');
-        Route::post('/shelter/applications/{id}/approve', [\App\Http\Controllers\ShelterApplicationController::class, 'approve'])->name('shelter.applications.approve');
-        Route::post('/shelter/applications/{id}/reject', [\App\Http\Controllers\ShelterApplicationController::class, 'reject'])->name('shelter.applications.reject');
-        Route::post('/shelter/applications/{id}/request-info', [\App\Http\Controllers\ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
+        // Custom Application Controller
+        Route::get('/shelter/applications', [ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
+        Route::get('/shelter/applications/{id}', [ShelterApplicationController::class, 'show'])->name('shelter.applications.show');
+        Route::post('/shelter/applications/{id}/approve', [ShelterApplicationController::class, 'approve'])->name('shelter.applications.approve');
+        Route::post('/shelter/applications/{id}/reject', [ShelterApplicationController::class, 'reject'])->name('shelter.applications.reject');
+        Route::post('/shelter/applications/{id}/request-info', [ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
 
         // edit pet details
         Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterDashboardController::class, 'update'])->name('shelter.pets.update');
@@ -125,6 +137,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
         // delete a pet
         Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
+    });
+
+    // Messages Routes
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
+        Route::post('/messages', [MessageController::class, 'send'])->name('messages.send');
     });
 
     // Rescuer Routes
@@ -177,14 +196,14 @@ Route::middleware(['auth'])->group(function () {
         return view('adopter.adoption-form');
     })->name('adopter.adoption-form');
 
+    // changed message route
+    Route::get(
+        '/adopter/messages',[AdopterDashboardController::class,'messages'])->name('adopter.messages');
+
     Route::get('/adopter/application-status', function () {
         return view('adopter.application-status');
     })->name('adopter.application-status');
 
-    Route::get('/adopter/messages', function () {
-        return view('adopter.messages');
-    })->name('adopter.messages');
-});
 
 // Pet Personality Quiz Routes
 Route::get('/quiz', [PetPersonalityQuizController::class, 'showQuiz'])->name('quiz.show');
@@ -207,9 +226,9 @@ Route::get('/applications', function () {
 })->name('applications.index');
 
 // Placeholder route for messages.index
-Route::get('/messages', function () {
-    return 'Messages page coming soon!';
-})->name('messages.index');
+// Route::get('/messages', function () {
+//     return 'Messages page coming soon!';
+// })->name('messages.index');
 
 // Placeholder route for profile.edit
 Route::get('/profile/edit', function () {

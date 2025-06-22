@@ -29,6 +29,8 @@ class User extends Authenticatable
         'role',
     ];
 
+    protected $appends = ['last_message', 'last_message_time'];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -108,6 +110,52 @@ class User extends Authenticatable
         return $this->hasOne(Rescuer::class, 'user_id', 'user_id');
     }
 
+    public function getAuthIdentifierName()
+    {
+        return 'user_id';
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id', 'user_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id', 'user_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    public function getLastMessageAttribute()
+    {
+        $message = \App\Models\Message::where(function ($q) {
+            $q->where('sender_id', auth()->id())
+                ->where('receiver_id', $this->user_id);
+        })->orWhere(function ($q) {
+            $q->where('sender_id', $this->user_id)
+                ->where('receiver_id', auth()->id());
+        })->orderByDesc('sent_at')->first();
+
+        return $message?->message_content;
+    }
+
+    public function getLastMessageTimeAttribute()
+    {
+        $message = \App\Models\Message::where(function ($q) {
+            $q->where('sender_id', auth()->id())
+                ->where('receiver_id', $this->user_id);
+        })->orWhere(function ($q) {
+            $q->where('sender_id', $this->user_id)
+                ->where('receiver_id', auth()->id());
+        })->orderByDesc('sent_at')->first();
+
+        return $message?->sent_at
+            ? \Carbon\Carbon::parse($message->sent_at)->timezone('Asia/Manila')
+            : null;
     //Upload New Photo Feature
     public function getProfileImageAttribute()
     {
@@ -129,4 +177,5 @@ class User extends Authenticatable
 
         return asset('images/default-profile.png');
     }
+}
 }
