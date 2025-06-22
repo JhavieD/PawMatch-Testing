@@ -14,7 +14,7 @@ class AdopterApplicationController extends Controller
             ->with(['pet.shelter'])
             ->orderByDesc('submitted_at')
             ->get();
-        return view('adopter.application_status', compact('applications'));
+        return view('adopter.application-status', compact('applications'));
     }
 
     public function store(\Illuminate\Http\Request $request)
