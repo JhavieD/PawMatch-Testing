@@ -156,6 +156,7 @@ class User extends Authenticatable
         return $message?->sent_at
             ? \Carbon\Carbon::parse($message->sent_at)->timezone('Asia/Manila')
             : null;
+    }
     //Upload New Photo Feature
     public function getProfileImageAttribute()
     {
