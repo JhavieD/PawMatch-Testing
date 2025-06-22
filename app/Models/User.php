@@ -179,4 +179,3 @@ class User extends Authenticatable
         return asset('images/default-profile.png');
     }
 }
-}
