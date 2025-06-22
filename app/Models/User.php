@@ -156,5 +156,26 @@ class User extends Authenticatable
         return $message?->sent_at
             ? \Carbon\Carbon::parse($message->sent_at)->timezone('Asia/Manila')
             : null;
+    //Upload New Photo Feature
+    public function getProfileImageAttribute()
+    {
+        $profilePic = \DB::table('user_profile_pic')
+            ->where('user_id', $this->user_id)
+            ->where('is_displayed', true)
+            ->first();
+
+        if ($profilePic && $profilePic->image_url) {
+            // Check S3 first
+            if (\Storage::disk('s3')->exists($profilePic->image_url)) {
+                return \Storage::disk('s3')->url($profilePic->image_url);
+            }
+            // Then check public storage (local fallback)
+            if (\Storage::disk('public')->exists($profilePic->image_url)) {
+                return \Storage::disk('public')->url($profilePic->image_url);
+            }
+        }
+
+        return asset('images/default-profile.png');
     }
+}
 }

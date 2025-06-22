@@ -1,128 +1,151 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Find Your Match') }}
-            </h2>
-            <a href="{{ route('pet-listings') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                View All Pets
-            </a>
-        </div>
-    </x-slot>
+@extends('layouts.pet-swipe')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <!-- Pet Card -->
-                    <div class="max-w-md mx-auto">
-                        <div class="relative">
-                            <!-- Main Image -->
-                            <div class="relative h-[600px] rounded-xl overflow-hidden">
-                                <img src="https://source.unsplash.com/random/800x1200/?dog" alt="Pet" class="w-full h-full object-cover">
-                                
-                                <!-- Pet Info Overlay -->
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-                                    <h3 class="text-2xl font-bold text-white">Max</h3>
-                                    <p class="text-white text-lg">2 years old • Golden Retriever</p>
-                                    <p class="text-white mt-2">Friendly and playful dog who loves long walks and playing fetch.</p>
-                                </div>
-                            </div>
+@section('adopter-content')
+<div class="swipe-container"></div>
 
-                            <!-- Action Buttons -->
-                            <div class="absolute bottom-[-60px] left-0 right-0 flex justify-center space-x-4">
-                                <button class="p-4 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow">
-                                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                                <button class="p-4 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow">
-                                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+<div class="action-buttons">
+    <button class="action-btn dislike" onclick="swipeLeft()">❌</button>
+    <button class="action-btn like" onclick="swipeRight()">❤️</button>
+</div>
 
-                        <!-- Additional Info -->
-                        <div class="mt-20">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h4 class="text-sm font-medium text-gray-500">Size</h4>
-                                    <p class="mt-1 text-sm text-gray-900">Large</p>
-                                </div>
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h4 class="text-sm font-medium text-gray-500">Gender</h4>
-                                    <p class="mt-1 text-sm text-gray-900">Male</p>
-                                </div>
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h4 class="text-sm font-medium text-gray-500">Good with</h4>
-                                    <p class="mt-1 text-sm text-gray-900">Children, Other Dogs</p>
-                                </div>
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h4 class="text-sm font-medium text-gray-500">Location</h4>
-                                    <p class="mt-1 text-sm text-gray-900">Happy Paws Shelter</p>
-                                </div>
-                            </div>
-                        </div>
+<div class="match-modal" id="matchModal" style="display:none;">
+    <div class="match-content">
+        <div class="match-icon">🎉</div>
+        <h2 class="match-title">It's a Match!</h2>
+        <p class="match-text">You've found a potential furry friend! Would you like to learn more about this pet?</p>
+        <button class="action-btn like" onclick="viewPetDetails()">View Details</button>
+        <button class="action-btn dislike" onclick="closeMatchModal()">Keep Swiping</button>
+    </div>
+</div>
 
-                        <!-- Progress Bar -->
-                        <div class="mt-8">
-                            <div class="flex items-center justify-between text-sm text-gray-500">
-                                <span>Pets viewed</span>
-                                <span>12/50</span>
-                            </div>
-                            <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-indigo-600 h-2 rounded-full" style="width: 24%"></div>
-                            </div>
-                        </div>
-                    </div>
+@php
+$petsArray = $pets->map(function($pet) {
+    return [
+        'id' => $pet->id ?? $pet->pet_id,
+        'name' => $pet->name,
+        'age' => $pet->age,
+        'breed' => $pet->breed,
+        'image' => $pet->image_url ?? 'https://source.unsplash.com/random/800x1200/?dog',
+        'description' => $pet->description,
+        'tags' => isset($pet->traits) ? array_map('trim', explode(',', $pet->traits)) : [],
+        'location' => $pet->location ?? '',
+    ];
+});
+@endphp
+
+<script>
+    const pets = @json($petsArray);
+
+    let currentPetIndex = 0;
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    function initSwipe() {
+        const container = document.querySelector('.swipe-container');
+        container.innerHTML = '';
+
+        if (currentPetIndex < pets.length) {
+            const pet = pets[currentPetIndex];
+            const card = createPetCard(pet);
+            container.appendChild(card);
+
+            // Add touch and mouse event listeners
+            card.addEventListener('touchstart', handleDragStart);
+            card.addEventListener('touchmove', handleDragMove);
+            card.addEventListener('touchend', handleDragEnd);
+
+            card.addEventListener('mousedown', handleDragStart);
+            card.addEventListener('mousemove', handleDragMove);
+            card.addEventListener('mouseup', handleDragEnd);
+        } else {
+            container.innerHTML = '<div class="pet-info"><h2>No more pets to show!</h2></div>';
+        }
+    }
+
+    function createPetCard(pet) {
+        const card = document.createElement('div');
+        card.className = 'pet-card';
+        card.innerHTML = `
+            <img src="${pet.image}" alt="${pet.name}" class="pet-image">
+            <div class="pet-info">
+                <h2 class="pet-name">${pet.name ?? 'Unknown Pet'}, ${pet.age ?? '?'} years</h2>
+                <div class="pet-details">
+                    <span class="pet-detail-item">${pet.breed ?? 'Unknown Breed'}</span>
+                    ${pet.location ? `<span class="pet-detail-item">📍 ${pet.location}</span>` : ''}
+                </div>
+                <p class="pet-description">${pet.description ?? 'No description available.'}</p>
+                <div class="pet-tags">
+                    ${pet.tags && pet.tags.length ? pet.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
                 </div>
             </div>
-        </div>
-    </div>
+        `;
+        return card;
+    }
 
-    @push('scripts')
-    <script>
-        // Add swipe functionality here
-        document.addEventListener('DOMContentLoaded', function() {
-            const card = document.querySelector('.relative');
-            let startX, startY, moveX, moveY;
-            
-            card.addEventListener('touchstart', function(e) {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            });
+    function handleDragStart(e) {
+        isDragging = true;
+        const card = e.target.closest('.pet-card');
+        startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
+        currentX = startX;
+        card.style.transition = 'none';
+    }
 
-            card.addEventListener('touchmove', function(e) {
-                moveX = e.touches[0].clientX;
-                moveY = e.touches[0].clientY;
-                
-                const diffX = moveX - startX;
-                const diffY = moveY - startY;
-                
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.1}deg)`;
+    function handleDragMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const card = e.target.closest('.pet-card');
+        currentX = e.type === 'mousemove' ? e.pageX : e.touches[0].pageX;
+        const diff = currentX - startX;
+        card.style.transform = `translateX(${diff}px) rotate(${diff * 0.1}deg)`;
+    }
+
+    function handleDragEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        const card = e.target.closest('.pet-card');
+        const diff = currentX - startX;
+        card.style.transition = 'transform 0.3s ease';
+        if (Math.abs(diff) > 100) {
+            card.style.transform = `translateX(${diff > 0 ? 1000 : -1000}px) rotate(${diff * 0.1}deg)`;
+            setTimeout(() => {
+                if (diff > 0) {
+                    swipeRight();
+                } else {
+                    swipeLeft();
                 }
-            });
+            }, 300);
+        } else {
+            card.style.transform = 'translateX(0) rotate(0)';
+        }
+    }
 
-            card.addEventListener('touchend', function() {
-                const diffX = moveX - startX;
-                
-                if (Math.abs(diffX) > 100) {
-                    // Swipe threshold reached
-                    if (diffX > 0) {
-                        // Swipe right - like
-                        console.log('Liked');
-                    } else {
-                        // Swipe left - dislike
-                        console.log('Disliked');
-                    }
-                }
-                
-                card.style.transform = '';
-            });
-        });
-    </script>
-    @endpush
-</x-app-layout> 
+    function swipeLeft() {
+        currentPetIndex++;
+        initSwipe();
+    }
+
+    function swipeRight() {
+        showMatchModal();
+        currentPetIndex++;
+        initSwipe();
+    }
+
+    function showMatchModal() {
+        const modal = document.getElementById('matchModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeMatchModal() {
+        const modal = document.getElementById('matchModal');
+        modal.style.display = 'none';
+    }
+
+    function viewPetDetails() {
+        closeMatchModal();
+        window.location.href = `/pet-details/${pets[currentPetIndex - 1].id}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', initSwipe);
+</script>
+@endsection

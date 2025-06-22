@@ -8,15 +8,18 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\AdopterDashboardController;
-use App\Http\Controllers\ShelterController;
-use App\Http\Controllers\RescuerController;
+use App\Http\Controllers\ShelterDashboardController;
+use App\Http\Controllers\RescuerDashboardController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PetPersonalityQuizController;
+use App\Http\Controllers\PetSwipeController;
 use App\Http\Controllers\Auth\AdoptionApplicationController;
 use App\Models\AdoptionApplication;
 use App\Http\Controllers\AdopterPetListingsController;
 use App\Http\Controllers\ShelterApplicationController;
 use App\Http\Controllers\AdopterApplicationController as AdopterApplicationControllerAlias;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ShelterVerificationController;
 
 // Public routes
 Route::get('/', function () {
@@ -65,6 +68,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 // Protected Routes with Authentication and Role-Based Middleware
 Route::middleware(['auth'])->group(function () {
+    });
 
     // Admin Routes
     Route::middleware(['admin'])->group(function () {
@@ -85,12 +89,40 @@ Route::middleware(['auth'])->group(function () {
         // Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterController::class, 'update'])->name('shelter.pets.update');
         // Route::delete('/shelter/pets/{pet}', [ShelterController::class, 'destroy'])->name('shelter.pets.destroy');
         // Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
+        Route::get('/shelter/pet_applications', [\App\Http\Controllers\Auth\AdoptionApplicationController::class, 'index'])
+            ->name('shelter.pet_applications'); // Add route name for blade usage        // Add routes for review, approve, reject, message, etc.
+        
+        // Shelter Verification Routes
+        Route::get('/shelter/verification', [ShelterVerificationController::class, 'showVerificationForm'])
+            ->name('shelter.verification.form');
+        Route::post('/shelter/verification', [ShelterVerificationController::class, 'submitVerification'])
+            ->name('shelter.verification.submit');
+
+        Route::get('/shelter/dashboard', [ShelterController::class, 'dashboard'])->name('shelter.dashboard');
+        Route::get('/shelter/profile', [ShelterController::class, 'profile'])->name('shelter.profile');
+        Route::put('/shelter/profile', [ShelterController::class, 'updateProfile'])->name('shelter.profile.update');
+        Route::put('/shelter/password', [ShelterController::class, 'updatePassword'])->name('shelter.password.update');
+        Route::put('/shelter/notifications', [ShelterController::class, 'updateNotifications'])->name('shelter.notifications.update');
+    });
+    Route::middleware(['shelter'])->group(function () {
+        Route::get('/shelter/dashboard', [ShelterDashboardController::class, 'index'])
+            ->name('shelter.dashboard');
+
+        Route::post('/shelter/pets', [ShelterDashboardController::class, 'store'])
+            ->name('shelter.pets.store');
+
+        Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])
+            ->name('shelter.pets');
 
         // Messages
         Route::get('/shelter/messages', [MessageController::class, 'shelterMessages'])->name('shelter.messages');
 
         // Profile
         Route::get('/shelter/profile', fn() => view('shelter.profile'))->name('shelter.profile');
+        Route::post('/shelter/profile/update', [ShelterDashboardController::class, 'updateProfile'])->name('shelter.profile.update');
+        Route::post('/shelter/profile/password', [ShelterDashboardController::class, 'updatePassword'])->name('shelter.profile.password');
+        Route::post('/shelter/profile/delete', [ShelterDashboardController::class, 'deleteAccount'])->name('shelter.profile.delete');
+
 
         // Custom Application Controller
         Route::get('/shelter/applications', [ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
@@ -100,11 +132,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/shelter/applications/{id}/request-info', [ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
 
         // edit pet details
-        Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterController::class, 'update'])->name('shelter.pets.update');
+        Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterDashboardController::class, 'update'])->name('shelter.pets.update');
         // view pet details
         Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
         // delete a pet
-        Route::delete('/shelter/pets/{pet}', [ShelterController::class, 'destroy'])->name('shelter.pets.destroy');
+        Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
     });
 
     // Messages Routes
@@ -116,11 +148,26 @@ Route::middleware(['auth'])->group(function () {
 
     // Rescuer Routes
     Route::middleware(['rescuer'])->group(function () {
-        Route::get('/rescuer/dashboard', [RescuerController::class, 'index'])
+        Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])
             ->name('rescuer.dashboard');
+        Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
+        Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
+        Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
+        Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
     });
     // Adopter Routes
     Route::middleware(['adopter'])->group(function () {
+
+    Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
+        ->name('adopter.dashboard');
+
+    Route::get('/adopter/pet-swipe', [PetSwipeController::class, 'index'])
+        ->name('adopter.pet-swipe');
+
+    Route::get('/adopter/pet-listings', function () {
+        return view('adopter.pet-listings');
+    })->name('adopter.pet-listings');
+
         Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
             ->name('adopter.dashboard');
         Route::get('/adopter/profile', [\App\Http\Controllers\AdopterDashboardController::class, 'profile'])->name('adopter.profile');
@@ -140,22 +187,30 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/adopter/pet-details', function () {
         return view('adopter.pet-details');
     })->name('adopter.pet-details');
+
     Route::get('/adopter/pet-personality-quiz', function () {
         return view('adopter.pet-personality-quiz');
     })->name('adopter.pet-personality-quiz');
+
     Route::get('/adopter/adoption-form', function () {
         return view('adopter.adoption-form');
     })->name('adopter.adoption-form');
+
     // changed message route
     Route::get(
-        '/adopter/messages',
-        [
-            AdopterDashboardController::class,
-            'messages'
-        ]
-    )->name('adopter.messages');
-});
+        '/adopter/messages',[AdopterDashboardController::class,'messages'])->name('adopter.messages');
 
+    Route::get('/adopter/application-status', function () {
+        return view('adopter.application-status');
+    })->name('adopter.application-status');
+
+
+// Pet Personality Quiz Routes
+Route::get('/quiz', [PetPersonalityQuizController::class, 'showQuiz'])->name('quiz.show');
+Route::post('/quiz', [PetPersonalityQuizController::class, 'submitQuiz'])->name('quiz.submit');
+Route::get('/adopter.pet-swipe', [PetSwipeController::class, 'index'])->name('adopter.pet-swipe');
+
+    
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
@@ -182,9 +237,29 @@ Route::get('/profile/edit', function () {
 
 // Admin routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.admin_dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/users', [AdminDashboardController::class, 'users'])->name('admin.users');
+    Route::get('/verifications', [AdminDashboardController::class, 'verifications'])->name('admin.verifications');
+    Route::get('/verifications/{id}', [AdminDashboardController::class, 'showVerification'])->name('admin.verifications.show');
+    Route::post('/verifications/{id}/approve', [AdminDashboardController::class, 'approveVerification'])->name('admin.verifications.approve');
+    Route::post('/verifications/{id}/reject', [AdminDashboardController::class, 'rejectVerification'])->name('admin.verifications.reject');
+    Route::get('/stray-reports', [AdminDashboardController::class, 'strayReports'])->name('admin.stray-reports');
+    Route::get('/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
+    
+    // User Management
+    Route::post('/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
+    Route::put('/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/users/{user}', [AdminDashboardController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/users/{user}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])->name('admin.users.toggle-status');
+    Route::post('/users/bulk-action', [AdminDashboardController::class, 'bulkAction'])->name('admin.users.bulk-action');
+    Route::get('/users/export', [AdminDashboardController::class, 'exportUsers'])->name('admin.users.export');
+
+    // Stray Reports Management
+    Route::post('/stray-reports/{report}/assign', [AdminDashboardController::class, 'assignReport'])->name('admin.stray-reports.assign');
+    Route::post('/stray-reports/{report}/status', [AdminDashboardController::class, 'updateReportStatus'])->name('admin.stray-reports.status');
+
+    // Settings Management
+    Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('admin.settings.update');
 });
 
 Route::get('/dashboard-redirect', function () {
@@ -242,6 +317,7 @@ Route::post('/upload', function (Request $request) {
     }
     return 'No file uploaded.';
 });
+
 
 Route::post('/adopter/profile/update', [AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
 
