@@ -140,10 +140,27 @@ class ShelterDashboardController extends Controller
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
         ]);
-        $pet->update($data);
+        $pet->update($request->only([
+            'name', 'species', 'breed', 'age', 'gender', 'size',
+            'description', 'adoption_status', 'behavior',
+            'daily_activity', 'special_needs', 'compatibility',
+        ]));
 
-        if ($request->ajax() || $request->wantsJson()) {
+        if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('petimages', 's3');
+            \Storage::disk('s3')->setVisibility($path, 'public');
+            $imageUrl = \Storage::disk('s3')->url($path);
+
+            \App\Models\PetImage::create([
+                'pet_id' => $pet->pet_id,
+                'image_url' => $imageUrl,
+            ]);
+        }
+        }
+        if ($request->expectsJson()) {
             return response()->json(['success' => true]);
         }
 
@@ -241,32 +258,6 @@ class ShelterDashboardController extends Controller
         $user->delete();
         return redirect('/')->with('success', 'Account deleted.');
     }
-
-        // Add more photos to a pet
-    public function addImages(Request $request, $petId)
-    {
-        $request->validate([
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $pet = \App\Models\Pet::findOrFail($petId);
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('petimages', 's3');
-                \Storage::disk('s3')->setVisibility($path, 'public');
-                $imageUrl = \Storage::disk('s3')->url($path);
-
-                \App\Models\PetImage::create([
-                    'pet_id' => $pet->pet_id,
-                    'image_url' => $imageUrl,
-                ]);
-            }
-        }
-
-        return back()->with('success', 'Images added successfully!');
-    }
-
     // Delete a specific photo
     public function deleteImage($imageId)
     {
@@ -279,6 +270,10 @@ class ShelterDashboardController extends Controller
 
         // Delete from database
         $image->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Image deleted successfully!');
     }
