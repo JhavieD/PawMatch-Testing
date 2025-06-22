@@ -125,6 +125,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
         // delete a pet
         Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
+        //Shelter Update
+        Route::put('/shelter/pets/{id}', [ShelterDashboardController::class, 'update'])->name('shelter.pets.update');
     });
 
     // Rescuer Routes
@@ -139,6 +141,8 @@ Route::middleware(['auth'])->group(function () {
     // Adopter Routes
     Route::get('/adopter/pets/{pet}', [AdopterPetListingsController::class, 'show'])->name('adopter.pets.show');
     // ^Show Pet Images
+    Route::delete('/shelter/pet-images/{id}', [ShelterDashboardController::class, 'deleteImage'])->name('shelter.pet-images.destroy');
+    // ^Delete Pet Image
     Route::middleware(['adopter'])->group(function () {
 
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
