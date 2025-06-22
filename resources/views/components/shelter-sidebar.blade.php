@@ -4,7 +4,7 @@
     </div>
     <nav class="shelter-sidebar-nav">
         <a href="{{ route('shelter.dashboard') }}" class="shelter-nav-item {{ request()->routeIs('shelter.dashboard') ? 'active' : '' }}">
-            <i class="fas fa-home"></i>
+            <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
         <a href="{{ route('shelter.pets') }}" class="shelter-nav-item {{ request()->routeIs('shelter.pets') ? 'active' : '' }}">

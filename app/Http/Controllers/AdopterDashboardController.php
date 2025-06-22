@@ -24,6 +24,7 @@ class AdopterDashboardController extends Controller
         $recentMessages = collect();
 
         return view('adopter.adopter_dashboard', compact(
+            'user',
             'favoritePets',
             'recentApplications',
             'recentMessages'
@@ -36,7 +37,7 @@ class AdopterDashboardController extends Controller
         $adopter = $user->adopter;
         return view('adopter.profile', compact('user', 'adopter'));
     }
-
+    //Upload New Photo Feature
     public function updateProfile(Request $request)
     {
         \Log::info('updateProfile called');
