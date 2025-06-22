@@ -295,6 +295,16 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                        <label for="edit-eating_habits">Eating Habits</label>
+                        <select name="eating_habits" id="edit-eating_habits" required>
+                            <option value="">Select Eating Habits</option>
+                            <option value="Balanced Diet">Balanced Diet</option>
+                            <option value="Portion Control">Portion Control</option>
+                            <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
+                        </select>
+                    </div>
+
                 <div class="image-upload">
                     <h3>Pet Images</h3>
                     <div class="image-grid">
