@@ -43,7 +43,8 @@
                         data-behavior="{{ $pet->behavior }}"
                         data-daily_activity="{{ $pet->daily_activity }}"
                         data-special_needs="{{ $pet->special_needs }}"
-                        data-compatibility="{{ $pet->compatibility }}">
+                        data-compatibility="{{ $pet->compatibility }}"
+                        data-eating_habits="{{ $pet->eating_habits}}">
                         Edit
                     </button>
                     <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}" data-pet-name="{{ $pet->name }}">View Applications</button>
@@ -156,6 +157,16 @@
                             <option value="No">No</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="edit-eating_habits">Eating Habits</label>
+                        <select name="eating_habits" id="edit-eating_habits" required>
+                            <option value="">Select Eating Habits</option>
+                            <option value="Balanced Diet">Balanced Diet</option>
+                            <option value="Portion Control">Portion Control</option>
+                            <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
+                        </select>
+                    </div>
                     <div class="modal-actions">
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                         <button type="button" class="btn btn-outline" onclick="closeModal(editModal)">Cancel</button>
@@ -255,6 +266,16 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label for="edit-eating_habits">Eating Habits</label>
+                        <select name="eating_habits" id="edit-eating_habits" required>
+                            <option value="">Select Eating Habits</option>
+                            <option value="Balanced Diet">Balanced Diet</option>
+                            <option value="Portion Control">Portion Control</option>
+                            <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
+                        </select>
+                    </div>
+
                     <div class="image-upload">
                         <h3>Pet Images</h3>
                         <div class="image-grid">
@@ -321,9 +342,10 @@
             const dailyActivity = btn.getAttribute('data-daily_activity');
             const specialNeeds = btn.getAttribute('data-special_needs');
             const compatibility = btn.getAttribute('data-compatibility');
+            const eatingHabits = btn.getAttribute('data-eating_habits');
 
             // Debug log
-            console.log({size, behavior, dailyActivity, specialNeeds, compatibility});
+            console.log({size, behavior, dailyActivity, specialNeeds, compatibility, eatingHabits});
 
             // Populate the edit form with the pet's current details
             document.getElementById('edit-name').value = name;
@@ -338,6 +360,7 @@
             document.getElementById('edit-daily_activity').value = dailyActivity;
             document.getElementById('edit-special_needs').value = specialNeeds;
             document.getElementById('edit-compatibility').value = compatibility;
+            document.getElementById('edit-eating_habits').value = eatingHabits; 
 
             // Update the form action to the correct pet ID
             const form = document.getElementById('editPetForm');

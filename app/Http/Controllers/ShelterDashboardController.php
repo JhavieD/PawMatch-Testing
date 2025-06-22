@@ -81,6 +81,7 @@ class ShelterDashboardController extends Controller
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
+            'eating_habits' => 'nullable|string',
         ]);
         $data['adoption_status'] = 'available'; // always set to available on add
         $data['shelter_id'] = $shelter->shelter_id;
@@ -114,6 +115,7 @@ class ShelterDashboardController extends Controller
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
+            'eating_habits' => 'nullable|string',
         ]);
         $pet->update($data);
 
