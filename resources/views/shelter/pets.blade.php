@@ -23,7 +23,11 @@
     <div class="pets-grid">
         @forelse($pets as $pet)
         <div class="pet-card">
-            <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
+        @if($pet->images->isNotEmpty())
+            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }}" class="pet-image">
+        @else
+            <img src="https://placehold.co/400x300" alt="{{ $pet->name }}" class="pet-image">
+        @endif
             <div class="pet-info">
                 <h3 class="pet-name">{{ $pet->name }}</h3>
                 <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>
@@ -44,6 +48,7 @@
                         data-daily_activity="{{ $pet->daily_activity }}"
                         data-special_needs="{{ $pet->special_needs }}"
                         data-compatibility="{{ $pet->compatibility }}"
+                        data-images='@json($pet->images)'
                         data-eating_habits="{{ $pet->eating_habits}}">
                         Edit
                     </button>
@@ -69,7 +74,7 @@
                 <button class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="editPetForm" method="POST" action="/shelter/pets/__PET_ID__">
+                <form id="editPetForm" method="POST" enctype="multipart/form-data" action="/shelter/pets/__PET_ID__">
                     @csrf
                     @method('PUT')
                     <div class="form-grid">
@@ -157,6 +162,34 @@
                             <option value="No">No</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <!-- <label for="edit-images">Add More Photos</label> -->
+                        <label>Upload New Images</label><br>
+                        <label class="custom-upload">
+                            Upload New Image
+                        <input type="file" name="images[]" id="edit-images" multiple accept="image/*" hidden>
+                        </label>
+                    </div>
+                    <div class="thumbnail-grid"></div>
+                    <!-- ^Add More Images -->
+                    <!-- @if(isset($pet) && $pet->images->count())
+                        <div class="thumbnail-grid">
+                            @foreach ($pet->images as $image)
+                                <div class="thumbnail-wrapper">
+                                    <img src="{{ $image->image_url }}" class="thumbnail" alt="Pet Image">
+
+                                    @if(auth()->user() && auth()->user()->role === 'shelter')
+                                        <form action="{{ route('shelter.pet-images.destroy', $image->id) }}" method="POST" class="delete-image-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="delete-image-btn">&times;</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif -->
+                    <!-- ^Display Existing Images -->
 
                     <div class="form-group">
                         <label for="edit-eating_habits">Eating Habits</label>
@@ -326,6 +359,36 @@
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
+    
+    
+    document.addEventListener('submit', async (e) => {
+            if (e.target.matches('.delete-image-form')) {
+                e.preventDefault();
+
+                if (!confirm('Delete this photo?')) return;
+
+                const form = e.target;
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        form.closest('.thumbnail-wrapper').remove();
+                    } else {
+                        alert('Image delete failed.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Something went wrong.');
+                }
+            }
+        });
+        // Auto reload of Pet Details
 
     editBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -343,6 +406,45 @@
             const specialNeeds = btn.getAttribute('data-special_needs');
             const compatibility = btn.getAttribute('data-compatibility');
             const eatingHabits = btn.getAttribute('data-eating_habits');
+
+            // Display existing images and Delete
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-species').value = species;
+            document.getElementById('edit-breed').value = breed;
+            document.getElementById('edit-age').value = age;
+            document.getElementById('edit-gender').value = gender;
+            document.getElementById('edit-size').value = size;
+            document.getElementById('edit-description').value = description;
+            document.getElementById('edit-adoption_status').value = adoptionStatus;
+            document.getElementById('edit-behavior').value = behavior;
+            document.getElementById('edit-daily_activity').value = dailyActivity;
+            document.getElementById('edit-special_needs').value = specialNeeds;
+            document.getElementById('edit-compatibility').value = compatibility;
+            document.getElementById('editPetForm').action = `/shelter/pets/${petId}`;
+
+            const thumbnailGrid = document.querySelector('.thumbnail-grid');
+            if (thumbnailGrid) {
+                thumbnailGrid.innerHTML = ''; // clear old thumbnails
+
+                const images = JSON.parse(btn.getAttribute('data-images') || '[]');
+
+                images.forEach(image => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'thumbnail-wrapper';
+
+                    wrapper.innerHTML = `
+                        <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
+                        <form action="/shelter/pet-images/${image.id}" method="POST" class="delete-image-form" onsubmit="return confirm('Delete this photo?')">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="delete-image-btn">Delete Image</button>
+                        </form>
+                    `;
+
+                    thumbnailGrid.appendChild(wrapper);
+                });
+            }
+            // ^Display existing images and Delete
 
             // Debug log
             console.log({size, behavior, dailyActivity, specialNeeds, compatibility, eatingHabits});
@@ -394,6 +496,7 @@
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
+        formData.append('_method', 'PUT');
 
         fetch(form.action, {
             method: 'POST',
