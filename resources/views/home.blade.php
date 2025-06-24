@@ -37,8 +37,11 @@
         <div class="cta-content">
             <h2>Report a Stray</h2>
             <p>Help us connect stray animals with local rescuers. Report a stray animal in your area.</p>
-            <a href="{{ route('report-stray') }}" id="report-now-btn">Report Now</a>
+            <a href="{{ route('adopter.report-stray') }}" id="report-now-btn">Report Now</a>
         </div>
     </section>
-    <link rel="stylesheet" href="{{ asset('css/marketing.css') }}">
+    @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/shared/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/marketing.css') }}">
+    @endsection
 @endsection 

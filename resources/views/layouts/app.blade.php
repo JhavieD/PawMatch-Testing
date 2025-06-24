@@ -7,8 +7,11 @@
         <title>@yield('title', 'PawMatch - Find Your Perfect Pet Companion')</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/shared/navbar.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/marketing.css') }}">
         @yield('styles')
+        @stack('styles')
     </head>
     <body>
         @section('navbar')

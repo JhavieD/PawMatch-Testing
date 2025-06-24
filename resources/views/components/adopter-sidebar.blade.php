@@ -27,6 +27,10 @@
             <i class="fas fa-envelope"></i>
             <span>Messages</span>
         </a>
+        <a href="{{ route('adopter.report-stray') }}" class="nav-item {{ request()->routeIs('adopter.report-stray') ? 'active' : '' }}">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>Report a Stray</span>
+</a>
     </nav>
     <form method="POST" action="{{ route('logout') }}" style="margin-top:2rem;">
         @csrf
