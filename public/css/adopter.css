@@ -94,6 +94,7 @@ body {
     padding: 2rem;
 }
 
+
 /* Centering Container */
 .content-wrapper {
     /* Set a max width and center the wrapper */
@@ -531,3 +532,11 @@ input:checked + .slider:before {
         text-align: center;
     }
 }
+    body,
+    .adopter-layout,
+    .adopter-content,
+    .main-content,
+    .main-container {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
