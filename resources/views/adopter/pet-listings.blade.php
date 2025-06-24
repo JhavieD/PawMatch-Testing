@@ -135,6 +135,7 @@
             </div>
 
             <div class="modal-actions">
+                <button id="message-shelter" class="btn-messages"> Message Shelter </button>
                 <button id="applyButton" class="btn">Apply for Adoption</button>
                 <button id="favoriteButton" class="btn" style="background: #f3f4f6; color: #4b5563;">Save to Favorites</button>
             </div>
@@ -210,6 +211,8 @@
     const thumbnailGrid = document.getElementById('thumbnailGrid');
     const applyButton = document.getElementById('applyButton');
     const favoriteButton = document.getElementById('favoriteButton');
+    const messageShelterButton = document.getElementById('message-shelter');
+    let currentShelterUserId = null;
 
     function closeModal() {
         modal.style.display = 'none';
@@ -217,58 +220,92 @@
     }
 
     petCards.forEach(card => {
-    card.addEventListener('click', async () => {
-        const petId = card.dataset.petId;
-        console.log('Pet card clicked, petId:', petId);
-        try {
-            // Fetch pet details
-            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
-            const petDetails = await petDetailsResponse.json();
+        card.addEventListener('click', async () => {
+            const petId = card.dataset.petId;
+            console.log('Pet card clicked, petId:', petId);
+            try {
+                // Fetch pet details
+                const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+                const petDetails = await petDetailsResponse.json();
 
-            // Fetch pet images
-            const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
-            const petImagesData = await petImagesResponse.json();
+                // Fetch pet images
+                const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
+                const petImagesData = await petImagesResponse.json();
 
-            // Update modal content
-            document.getElementById('petName').textContent = petDetails.name;
-            document.getElementById('petNameDesc').textContent = petDetails.name;
-            document.getElementById('petBreed').textContent = petDetails.breed;
-            document.getElementById('petAge').textContent = `${petDetails.age} years`;
-            document.getElementById('petGender').textContent = petDetails.gender;
-            document.getElementById('petSize').textContent = petDetails.size;
-            document.getElementById('petStatus').textContent = petDetails.status;
-            document.getElementById('petDescription').textContent = petDetails.description;
-            document.getElementById('shelterName').textContent = petDetails.shelter.name;
-            document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
-            document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
+                // Update modal content
+                document.getElementById('petName').textContent = petDetails.name;
+                document.getElementById('petNameDesc').textContent = petDetails.name;
+                document.getElementById('petBreed').textContent = petDetails.breed;
+                document.getElementById('petAge').textContent = `${petDetails.age} years`;
+                document.getElementById('petGender').textContent = petDetails.gender;
+                document.getElementById('petSize').textContent = petDetails.size;
+                document.getElementById('petStatus').textContent = petDetails.status;
+                document.getElementById('petDescription').textContent = petDetails.description;
+                document.getElementById('shelterName').textContent = petDetails.shelter.name;
+                document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
+                document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
 
-            // Update images
-            if (petImagesData.images.length > 0) {
-                mainImage.src = petImagesData.images[0].image_url;
-                thumbnailGrid.innerHTML = petImagesData.images.map(img => 
-                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail">`
-                ).join('');
-            } else {
-                mainImage.src = '';
-                thumbnailGrid.innerHTML = '<p>No images available.</p>';
-            }
+                // Update images
+                if (petImagesData.images.length > 0) {
+                    mainImage.src = petImagesData.images[0].image_url;
+                    thumbnailGrid.innerHTML = petImagesData.images.map(img => 
+                        `<img src="${img.image_url}" alt="Pet photo" class="thumbnail">`
+                    ).join('');
+                } else {
+                    mainImage.src = '';
+                    thumbnailGrid.innerHTML = '<p>No images available.</p>';
+                }
 
-            // Update buttons
-            applyButton.dataset.petId = petId;
-            applyButton.onclick = function() {
-                adoptionModal.style.display = 'block';
+                // Update buttons
+                applyButton.dataset.petId = petId;
+                applyButton.onclick = function() {
+                    adoptionModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    adoptionPetId.value = petId;
+                };
+                favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+                favoriteButton.dataset.petId = petId;
+
+                // Set the message button handler for this pet
+                const messageShelterBtn = document.getElementById('message-shelter');
+                messageShelterBtn.onclick = async function () {
+                    const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
+                    console.log('Message Shelter button clicked, shelter user id:', shelterUserId);
+                    if (shelterUserId) {
+                        try {
+                            const res = await fetch('/messages', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({
+                                    receiver_id: shelterUserId,
+                                    message: `Hi! I'm interested in adopting ${petDetails.name} from your shelter.`
+                                })
+                            });
+                            const data = await res.json();
+                            if (!res.ok) {
+                                alert('Failed to send message: ' + (data.message || res.status));
+                                return;
+                            }
+                            window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                        } catch (e) {
+                            alert('Error sending message: ' + e);
+                        }
+                    } else {
+                        alert('Shelter user ID not found. Please try again later.');
+                    }
+                };
+
+                modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
-                adoptionPetId.value = petId;
-            };
-            favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
-            favoriteButton.dataset.petId = petId;
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            console.error('Error fetching pet details:', error);
-        }
+            } catch (error) {
+                console.error('Error fetching pet details:', error);
+            }
+        });
     });
-});
+
     closeBtn.addEventListener('click', closeModal);
 
     window.addEventListener('click', (e) => {

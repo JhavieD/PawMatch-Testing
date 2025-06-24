@@ -209,7 +209,9 @@ Route::middleware(['auth'])->group(function () {
             'status' => $pet->adoption_status ?? $pet->status ?? 'available',
             'description' => $pet->description,
             'images' => [$pet->image_url ?? 'https://placehold.co/400x300'],
-            'is_favorite' => false,
+            'is_favorite' => false, // Placeholder, implement favorite logic if needed
+            'shelter_id' => $pet->shelter->shelter_id ?? null,
+            'user_id' => $pet->shelter->user_id ?? null,
             'shelter' => [
                 'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
                 'address' => $pet->shelter->location ?? 'Unknown Address',
