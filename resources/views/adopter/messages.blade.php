@@ -1,85 +1,175 @@
 @extends('layouts.adopter-messages')
 
 
-@section('title', 'Application Status - PawMatch')
+@section('title', 'Messages - PawMatch')
 
 @section('adopter-content')
-<div class="main-container">
-    <!-- Conversations List -->
-    <div class="conversations">
-        <div class="conversation active">
-            <div class="conversation-header">
-                <span class="conversation-name">Strays Worth Saving</span>
-                <span class="conversation-time">2:30 PM</span>
-            </div>
-            <div class="conversation-preview">
-                Thank you for your interest in Ester! We'd be happy to...
-            </div>
+
+@php
+    use Illuminate\Support\Str;
+    use Carbon\Carbon;
+@endphp
+
+    <div class="main-container">
+        <!-- Conversations List -->
+        <div class="conversations">
+            @foreach ($partners as $partner)
+                <div class="conversation {{ $receiver && $partner->user_id == $receiver->user_id ? 'active' : '' }}"
+                    onclick="window.location.href='{{ route('adopter.messages', ['receiver_id' => $partner->user_id]) }}'">
+                    <div class="conversation-header">
+                        <span class="conversation-name">{{ $partner->shelterProfile->shelter_name ?? 'Unknown Shelter' }}</span>
+                        <span class="conversation-time">
+                            {{ $partner->last_message_time ? \Carbon\Carbon::parse($partner->last_message_time)->diffForHumans() : '' }}
+                        </span>
+                    </div>
+                    <div class="conversation-preview">
+                        {{ !empty($partner->last_message) ? \Illuminate\Support\Str::limit($partner->last_message, 50) : 'No messages yet.' }}
+                    </div>
+                </div>
+            @endforeach
         </div>
 
-        <div class="conversation">
-            <div class="conversation-header">
-                <span class="conversation-name">Lara's Ark
-                </span>
-                <span class="conversation-time">Yesterday</span>
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                @if($receiver)
+                    <img src="{{ $receiver->profile_picture_url ?? 'https://via.placeholder.com/40' }}" alt="Profile Image" class="profile-image" />
+                    <div class="chat-name">{{ $receiver->shelterProfile->shelter_name ?? 'Unknown Shelter' }}</div>
+                @else
+                    <div class="chat-name">No Active Chats</div>
+                @endif
             </div>
-            <div class="conversation-preview">
-                Fort is still available for adoption. Would you like to...
-            </div>
-        </div>
 
-        <div class="conversation">
-            <div class="conversation-header">
-                <span class="conversation-name">Biyaya Animal Welfare</span>
-                <span class="conversation-time">2 days ago</span>
-            </div>
-            <div class="conversation-preview">
-                We received your application and would like to schedule...
+            <div class="chat-messages" id="chat-messages"></div>
+
+            <div class="chat-input">
+                <textarea class="message-input" id="message-input" placeholder="Type your message..."></textarea>
+                <button class="send-btn">Send</button>
             </div>
         </div>
     </div>
 
-    <!-- Chat Area -->
-    <div class="chat-area">
-        <div class="chat-header">
-            <img src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t39.30808-6/347439792_262689872915779_1734511534281161924_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEx3xFl7u5jfTV_5eckNDfEgqlXj1z3avOCqVePXPdq89whJ29W46pl6MVM84KD1wjFepXD-UaW6DDSW4eQHod7&_nc_ohc=m_7I_NE9-K0Q7kNvgFi0lNg&_nc_oc=AdiRt7GPOP7QJ-gxFl1lG4A2UBe1eZ6L8UajEeeXX8PUb4BGMftVOv8-jx1oI9sk0LA&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&_nc_gid=ApMVLbMVp0Xh_QdDjSWwWuS&oh=00_AYHRwxYGUVlma7qO1-YvO5im2ZUUEf-Y_wPUtUTpjQBrEg&oe=67D60523" alt="Profile Image" class="profile-image" style="width: 40px; height: 40px; border-radius: 50%;" />
-            <div class="chat-name">Strays Worth Saving</div>
-        </div>
+    <input type="hidden" id="receiver-id" value="{{ $receiver->user_id ?? '' }}">
+    <input type="hidden" id="current-user-id" value="{{ auth()->id() }}">
 
-        <div class="chat-messages">
-            <div class="message received">
-                <div class="message-content">
-                    Hi! Thank you for your interest in adopting Ester. He's a wonderful Tabby Cat with a gentle temperament.
-                </div>
-                <div class="message-time">2:30 PM</div>
-            </div>
+<script>
+        const receiverId = Number("{{ $receiver?->user_id ?? 0 }}");
+        const currentUserId = Number("{{ auth()->id() }}");
+        const chatMessages = document.getElementById('chat-messages');
+        const sendBtn = document.querySelector('.send-btn');
 
-            <div class="message sent">
-                <div class="message-content">
-                    Thanks for getting back to me! I'd love to learn more about Ester. Is he good with children?
-                </div>
-                <div class="message-time">2:31 PM</div>
-            </div>
+        if (receiverId) {
+            fetch(`/messages?receiver_id=${receiverId}`)
+                .then(res => res.json())
+                .then(messages => {
+                    if (chatMessages) {
+                        messages.forEach(message => {
+                            if (message && message.message_content && message.sender_id) {
+                                renderMessage(message);
+                            }
+                        });
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                });
 
-            <div class="message received">
-                <div class="message-content">
-                    Yes, Ester is great with children! He's very patient and gentle. He's been living in a foster home with kids ages 5 and 8.
-                </div>
-                <div class="message-time">2:33 PM</div>
-            </div>
+            if (sendBtn) {
+                sendBtn.addEventListener('click', function (event) {
+                    const input = document.getElementById('message-input');
+                    if (!input || sendBtn.disabled || sendBtn.offsetParent === null) {
+                        event.preventDefault();
+                        return;
+                    }
+                    const content = input.value ? input.value.trim() : '';
+                    if (!content) {
+                        event.preventDefault();
+                        return;
+                    }
 
-            <div class="message sent">
-                <div class="message-content">
-                    That's perfect! Would it be possible to schedule a visit to meet him?
-                </div>
-                <div class="message-time">2:34 PM</div>
-            </div>
-        </div>
+                    // CSRF token null check
+                    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                    const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : '';
 
-        <div class="chat-input">
-            <textarea class="message-input" placeholder="Type your message..."></textarea>
-            <button class="send-btn">Send</button>
-        </div>
-    </div>
-</div>
+                    fetch('/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            receiver_id: receiverId,
+                            message: content
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(message => {
+                        if (message && message.message_content && message.sender_id) {
+                            renderMessage(message);
+                            input.value = '';
+                            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                            // --- Update conversation preview and time in sidebar ---
+                            const activeConv = document.querySelector('.conversation.active');
+                            if (activeConv) {
+                                const preview = activeConv.querySelector('.conversation-preview');
+                                if (preview) preview.textContent = message.message_content.length > 50 ? message.message_content.slice(0, 50) + '...' : message.message_content;
+                                const time = activeConv.querySelector('.conversation-time');
+                                if (time) time.textContent = timeAgo(message.sent_at);
+                            }
+                            // --------------------------------------------------------
+                        } else if (message && message.errors) {
+                            alert('Validation error: ' + Object.values(message.errors).join('\n'));
+                        } else {
+                            alert('An error occurred. Please try again.');
+                        }
+                    });
+                });
+            }
+
+            window.Echo.private(`chat.${currentUserId}`)
+                .listen('MessageSent', (e) => {
+                    if (e.message && e.message.sender_id === receiverId) {
+                        if (chatMessages && e.message && e.message.message_content && e.message.sender_id) {
+                            renderMessage(e.message);
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }
+                    }
+                });
+
+            function renderMessage(message) {
+                if (!message || !message.message_content || !message.sender_id) return;
+                if (!chatMessages) return;
+                const bubble = document.createElement('div');
+                bubble.classList.add('message');
+                bubble.classList.add(message.sender_id === currentUserId ? 'sent' : 'received');
+
+                const content = document.createElement('div');
+                content.classList.add('message-content');
+                content.textContent = message.message_content;
+
+                const time = document.createElement('div');
+                time.classList.add('message-time');
+                time.textContent = new Date(message.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                bubble.appendChild(content);
+                bubble.appendChild(time);
+
+                chatMessages.appendChild(bubble);
+            }
+
+            // Helper to format time as 'x seconds/minutes/hours/days ago'
+            function timeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const seconds = Math.floor((now - date) / 1000);
+                if (seconds < 60) return 'just now';
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return minutes + (minutes === 1 ? ' minute ago' : ' minutes ago');
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return hours + (hours === 1 ? ' hour ago' : ' hours ago');
+                const days = Math.floor(hours / 24);
+                if (days === 1) return 'yesterday';
+                return days + ' days ago';
+            }
+        }
+</script>
 @endsection

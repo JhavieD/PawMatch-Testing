@@ -126,9 +126,11 @@ $petsArray = $pets->map(function($pet) {
     }
 
     function swipeRight() {
+    if (currentPetIndex < pets.length) {
         showMatchModal();
         currentPetIndex++;
         initSwipe();
+    }
     }
 
     function showMatchModal() {
