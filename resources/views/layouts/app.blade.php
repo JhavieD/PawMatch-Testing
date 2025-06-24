@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="csrf-token" content="{{ csrf_token() }}">  {{-- pls don't remove yaw q na mag debug ng messages -allainne --}}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>@yield('title', 'PawMatch - Find Your Perfect Pet Companion')</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -31,11 +32,11 @@
         </nav>
         @show
 
-        <!-- Main Content -->
-        <main>
-            @yield('content')
-        </main>
+    <!-- Main Content -->
+    <main>
+        @yield('content')
+    </main>
 
-        @stack('scripts')
-    </body>
+    @stack('scripts')
+</body>
 </html>

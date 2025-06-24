@@ -19,7 +19,7 @@ class Adopter extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'user_id', 'user_id');
     }
 
     public function savedPets()

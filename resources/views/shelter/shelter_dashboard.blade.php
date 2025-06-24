@@ -79,7 +79,7 @@
                         <div class="pet-info">
                             <div class="pet-name">{{ $pet->name }}</div>
                             <div class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years</div>
-                            <span class="status status-{{ $pet->adoption_status == 'available' ? 'approved' : 'pending'}}">
+                            <span class="status status-{{ $pet->adoption_status }}">
                                 {{ ucfirst($pet->adoption_status)}}
                             </span>
                         </div>
@@ -100,12 +100,12 @@
                     @forelse($recentApplications as $app)
                     <li class="application-item">
                         <div class="applicant-info">
-                            <strong>{{ $app->user->name ?? 'Applicant'}}</strong> applied to adopt <strong>{{ $app->pet->name ?? 'Pet' }}</strong>
+                            <strong>{{ $app->adopter->user->first_name ?? 'Applicant' }}</strong> applied to adopt <strong>{{ $app->pet->name ?? 'Pet' }}</strong>
                         </div>
                         <div class="pet-details">{{ $app->created_at->diffForHumans() }}</div>
                         <div class="btn-group" style="margin-top: 0.5rem;">
-                            <button onclick="viewApplicationDetails('{{ $app->id }}')" class="btn btn-primary">Review Application</button>
-                            <button onclick="messageApplicant('{{$app->user->name ?? 'Applicant' }}')" class="btn btn-outline">Message</button>
+                            <button class="btn btn-primary" onclick="showApplicationModal({{ $app->application_id }})">Review Application</button>
+                            <button onclick="window.location.href= '{{route('shelter.messages', ['receiver_id' => $app->adopter->user->user_id]) }}'" class="btn btn-outline">Message</button>
                         </div>
                     </li>
                     @empty
@@ -132,7 +132,7 @@
                         <div class="pet-details">
                             {{ Str::limit($msg->content, 60) }}
                         </div>
-                        <button class="btn btn-outline" style="margin-top: 0.5rem;">
+                        <button onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id]) }}'" class="btn btn-outline" style="margin-top: 0.5rem;">
                             Reply
                         </button>
                     </li>
@@ -216,9 +216,9 @@
                         <input type="text" id="name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="type">Type</label>
-                        <select id="type" name="type" required>
-                            <option value="">Select Type</option>
+                        <label for="species">Species</label>
+                        <select id="species" name="species" required>
+                            <option value="">Select Species</option>
                             <option value="dog">Dog</option>
                             <option value="cat">Cat</option>
                             <option value="other">Other</option>
@@ -249,32 +249,62 @@
                             <option value="large">Large</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="species">Species</label>
-                        <select id="species" name="species" required>
-                            <option value="">Select Species</option>
-                            <option value="canine">Canine</option>
-                            <option value="feline">Feline</option>
-                            <option value="avian">Avian</option>
-                            <option value="rodent">Rodent</option>
-                            <option value="reptile">Reptile</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
                 </div>
+                
+                
+
                 <div class="form-group">
                     <label for="description">Description</label>
                     <textarea id="description" name="description" rows="4" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="adoption_status">Status</label>
-                    <select id="adoption_status" name="adoption_status" required>
-                        <option value="">Select Status</option>
-                        <option value="available">Available</option>
-                        <option value="pending">Application Pending</option>
-                        <option value="adopted">Adopted</option>
+                    <label for="behavior">Behavior</label>
+                    <select name="behavior" id="behavior" required>
+                        <option value="">Select Behavior</option>
+                        <option value="Calm and Relaxed">Calm and Relaxed</option>
+                        <option value="Playful and Energetic">Playful and Energetic</option>
+                        <option value="Independent">Independent</option>
+                        <option value="Protective">Protective</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="daily_activity">Daily Activity</label>
+                    <select name="daily_activity" id="daily_activity" required>
+                        <option value="">Select Activity Level</option>
+                        <option value="Low">Low</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="special_needs">Special Needs</label>
+                    <select name="special_needs" id="special_needs" required>
+                        <option value="">Select Option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="compatibility">Compatibility</label>
+                    <select name="compatibility" id="compatibility">
+                        <option value="">Select Option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                        <label for="edit-eating_habits">Eating Habits</label>
+                        <select name="eating_habits" id="edit-eating_habits" required>
+                            <option value="">Select Eating Habits</option>
+                            <option value="Balanced Diet">Balanced Diet</option>
+                            <option value="Portion Control">Portion Control</option>
+                            <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
+                        </select>
+                    </div>
+
                 <div class="image-upload">
                     <h3>Pet Images</h3>
                     <div class="image-grid">
@@ -292,6 +322,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- Add this modal HTML at the end of the body -->
 <div id="shelterModal" class="modal">
@@ -332,6 +364,40 @@
         </div>
     </div>
 </div>
+
+<!-- Application Review Modal -->
+<div id="applicationModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Application Details</h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body" id="applicationModalBody">
+
+            <!-- Application details will be loaded here via AJAX -->
+
+        </div>
+    </div>
+</div>
+
+<!-- Rejection Reason Modal -->
+<div id="rejectionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Reject Application</h2>
+            <button class="close-rejection-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <label for="rejectionReason">Please provide a reason for rejection:</label>
+            <textarea id="rejectionReason" rows="4" placeholder="Enter reason here..." style="width: 100%;"></textarea>
+            <div style="margin-top: 1rem; text-align: right;">
+                <button class="btn btn-outline" id="cancelRejectionBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmRejectionBtn">Confirm Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     // Select modals
@@ -424,8 +490,7 @@
         const modal = document.getElementById('shelterModal');
         modal.style.display = 'block';
 
-        // Here you would fetch the shelter's rating and reviews data
-        // and populate the modal dynamically
+        // fetch the shelter's rating and reviews data
         fetchShelterData(shelterId);
     }
 
@@ -468,5 +533,116 @@
             closeShelterModal();
         }
     });
+
+    function showApplicationModal(id) {
+        fetch(`/shelter/applications/${id}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('applicationModalBody').innerHTML = html;
+                const modal = document.getElementById('applicationModal');
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                attachActionHandlers(id);
+            });
+    }
+
+    document.querySelector('#applicationModal .close-btn')?.addEventListener('click', () => {
+    const modal = document.getElementById('applicationModal');
+    closeModal(modal);
+    });
+
+    const csrf = '{{ csrf_token() }}';
+    let currentApplicationId = null;
+const modal = document.getElementById('applicationModal');
+const rejectionModal = document.getElementById('rejectionModal');
+const closeBtn = document.querySelector('.close-btn');
+const closeRejectionBtn = document.querySelector('.close-rejection-btn');
+const cancelRejectionBtn = document.getElementById('cancelRejectionBtn');
+const confirmRejectionBtn = document.getElementById('confirmRejectionBtn');
+
+closeBtn?.addEventListener('click', () => closeModal(modal));
+closeRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
+cancelRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
+
+window.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal(modal);
+    if (e.target === rejectionModal) closeModal(rejectionModal);
+});
+
+        function attachActionHandlers(id) {
+            const approveBtn = document.getElementById('approveBtn');
+            const rejectBtn = document.getElementById('rejectBtn');
+            const requestInfoBtn = document.getElementById('requestInfoBtn');
+
+            if (approveBtn) {
+                approveBtn.onclick = () => {
+                    fetch(`/shelter/applications/${id}/approve`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(res => res.json())
+                    .then(() => {
+                        updateStatusBadge(id, 'approved');
+                        closeModal(modal);
+                    })
+                    .catch(err => alert('Approval failed.'));
+                };
+            }
+
+            if (rejectBtn) {
+                rejectBtn.onclick = () => {
+                    currentApplicationId = id;
+                    rejectionModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                };
+            }
+
+            if (requestInfoBtn) {
+                requestInfoBtn.onclick = () => {
+                    fetch(`/shelter/applications/${id}/request-info`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    }).then(res => res.json()).then(() => {
+                        updateStatusBadge(id, 'info-requested');
+                        closeModal(modal);
+                    });
+                };
+            }
+        }
+
+        confirmRejectionBtn?.addEventListener('click', () => {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            if (!reason) return alert("Please enter a reason for rejection.");
+
+            fetch(`/shelter/applications/${currentApplicationId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ rejection_reason: reason })
+            }).then(res => res.json()).then(() => {
+                updateStatusBadge(currentApplicationId, 'rejected');
+                closeModal(rejectionModal);
+                closeModal(modal);
+            });
+        });
+
+        function updateStatusBadge(id, newStatus) {
+            const badge = document.querySelector(`.status-badge[data-id="${id}"]`);
+            if (badge) {
+                badge.innerText = newStatus.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
+                badge.className = `status-badge status-${newStatus}`;
+            }
+        }
 </script>
 @endsection

@@ -9,7 +9,9 @@ body {
     background: #f0f2f5;
     min-height: 100vh;
 }
+
 /* Sidebar */
+
 .adopter-sidebar {
     background: white;
     border-right: 1px solid #e5e7eb;
@@ -83,6 +85,7 @@ body {
         display: none;
     }
 }
+
 
 /* Main Content Wrapper */
 .main-content {

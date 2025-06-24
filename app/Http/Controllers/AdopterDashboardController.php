@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Pet;
 use App\Models\Application;
 use App\Models\Message;
+use App\Models\User;
 
 class AdopterDashboardController extends Controller
 {
@@ -71,19 +72,19 @@ class AdopterDashboardController extends Controller
             $fileType = $file->getClientMimeType();
 
             \DB::table('user_profile_pic')->updateOrInsert(
-            ['user_id' => $user->user_id],
-            [
-                'image_url' => $profileImagePath,
-                'file_type' => $fileType,
-                'uploaded_at' => now(),
-                'is_displayed' => true,
-            ]
+                ['user_id' => $user->user_id],
+                [
+                    'image_url' => $profileImagePath,
+                    'file_type' => $fileType,
+                    'uploaded_at' => now(),
+                    'is_displayed' => true,
+                ]
             );
         }
         if ($request->has('remove_photo')) {
             \DB::table('user_profile_pic')
-            ->where('user_id', $user->user_id)
-            ->update(['is_displayed' => false]); // hide image
+                ->where('user_id', $user->user_id)
+                ->update(['is_displayed' => false]); // hide image
         }
 
         return back()->with('success', 'Profile updated!');
@@ -123,4 +124,20 @@ class AdopterDashboardController extends Controller
         $user->delete();
         return redirect('/')->with('success', 'Account deleted.');
     }
-} 
+
+    public function messages(Request $request)
+    {
+        $adopter = auth()->user();
+
+        // Get all shelter users who messaged or were messaged by this adopter
+        $partners = User::whereHas('sentMessages', function ($q) use ($adopter) {
+            $q->where('receiver_id', $adopter->user_id);
+        })->orWhereHas('receivedMessages', function ($q) use ($adopter) {
+            $q->where('sender_id', $adopter->user_id);
+        })->get();
+
+        $receiver = $partners->first(); // default to first shelter
+
+        return view('adopter.messages', compact('partners', 'receiver'));
+    }
+}

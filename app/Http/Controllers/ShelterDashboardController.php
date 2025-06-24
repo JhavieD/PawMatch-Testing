@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Log;
+use App\Models\Message;
+use App\Models\User;
 
 class ShelterDashboardController extends Controller
 {
@@ -26,8 +28,15 @@ class ShelterDashboardController extends Controller
 
         // Recent items
         $recentPets = $shelter->pets()->latest()->take(2)->get();
-        $recentApplications = $shelter->applications()->latest()->take(2)->get();
-        $recentMessages = $shelter->receivedMessages()->latest()->take(2)->get();
+        $recentApplications = $shelter->applications()->with('adopter.user')->latest()->take(2)->get();
+        $recentMessages = $shelter->receivedMessages()
+            ->select('sender_id', \DB::raw('MAX(message_id) as max_id'))
+            ->groupBy('sender_id')
+            ->get()
+            ->pluck('max_id')
+            ->map(function ($id) {
+                return \App\Models\Message::with('sender')->find($id);
+            });
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
 
         return view('shelter.shelter_dashboard', compact(
@@ -72,6 +81,7 @@ class ShelterDashboardController extends Controller
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
+            'eating_habits' => 'nullable|string',
         ]);
         $data['adoption_status'] = 'available'; // always set to available on add
         $data['shelter_id'] = $shelter->shelter_id;
@@ -105,6 +115,7 @@ class ShelterDashboardController extends Controller
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
+            'eating_habits' => 'nullable|string',
         ]);
         $pet->update($data);
 
@@ -123,6 +134,31 @@ class ShelterDashboardController extends Controller
         return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
     }
 
+    public function messages(Request $request)
+    {
+
+        $shelter = auth()->user()->shelter;
+
+        $partnerIds = Message::where('sender_id', $shelter->user_id)
+            ->orWhere('receiver_id', $shelter->user_id)
+            ->get()
+            ->flatMap(function ($message) use ($shelter) {
+                return [
+                    $message->sender_id !== $shelter->user_id ? $message->sender_id : null,
+                    $message->receiver_id !== $shelter->user_id ? $message->receiver_id : null
+                ];
+            })
+            ->filter()
+            ->unique()
+            ->values();
+        
+        $partners = User::whereIn('user_id', $partnerIds)->get();
+
+        $receiver = $partners->first(); // default chat open to first partner
+
+        return view('shelter.messages', compact('partners', 'receiver'));
+    }
+    
     public function profile()
     {
         $user = auth()->user();
