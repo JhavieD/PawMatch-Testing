@@ -39,4 +39,43 @@ class AdoptionApplicationController extends Controller
 
         return response()->json(['applications' => $formatted]);
     }
+
+    // for pet aadoption application modal
+
+    public function show($id)
+    {
+        $application = AdoptionApplication::with(['adopter.user', 'pet'])->findOrFail($id);
+        return view('shelter.application_modal', compact('application'));
+    }
+
+    public function approve($id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'approved';
+        $application->save();
+
+        // Optionally, you can redirect or return a response
+        return response()->json(['success' => true]);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $request->validate(['rejection_reason' => 'required|string|max:255']);
+        $application->status = 'rejected';
+        $application->rejection_reason = $request->input('rejection_reason');
+        $application->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function requestInfo($id)
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Request sent.'
+        ]);
+    }
+
+
 }
