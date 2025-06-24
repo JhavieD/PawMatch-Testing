@@ -25,7 +25,16 @@ class LoginController extends Controller
             $user = Auth::user();
             $request->session()->regenerate();
 
-            // Redirect based on role
+            // If user is adopter and intended URL is report-stray, redirect there
+            $intended = session()->pull('url.intended');
+            if (
+                $user->role === 'adopter' &&
+                $intended &&
+                str_contains($intended, route('adopter.report-stray', [], false))
+            ) {
+                return redirect()->intended(route('adopter.report-stray'));
+            }
+
             switch ($user->role) {
                 case 'adopter':
                     return redirect()->route('adopter.dashboard');
@@ -53,4 +62,4 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
         return redirect('/');
     }
-} 
+}

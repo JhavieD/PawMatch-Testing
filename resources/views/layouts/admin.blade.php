@@ -76,26 +76,33 @@
 
         <!-- Main Content Area -->
         <div class="admin-content">
-            <!-- Top Navigation Bar -->
-            <div class="top-bar">
-                <div class="welcome-section">
-                    <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
-                    <p class="page-subtitle">@yield('page-subtitle', 'Welcome back, Admin')</p>
+    <!-- Top Navigation Bar -->
+    @if (!Request::routeIs('admin.stray-reports'))
+    <div class="top-bar">
+        <div class="welcome-section">
+            @if (Request::routeIs('admin.dashboard'))
+                <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
+                <p class="page-subtitle">@yield('page-subtitle', 'Welcome back, Admin')</p>
+            @else
+                <h1 class="page-title">@yield('page-title')</h1>
+                <p class="page-subtitle">@yield('page-subtitle')</p>
+            @endif
+        </div>
+        <div class="profile-section">
+            @if(auth()->user()->profile_photo_path)
+                <img src="{{ asset(auth()->user()->profile_photo_path) }}" alt="Profile Picture" class="profile-img">
+            @else
+                <div class="profile-img-placeholder">
+                    {{ substr(auth()->user()->name, 0, 2) }}
                 </div>
-                <div class="profile-section">
-                    @if(auth()->user()->profile_photo_path)
-                        <img src="{{ asset(auth()->user()->profile_photo_path) }}" alt="Profile Picture" class="profile-img">
-                    @else
-                        <div class="profile-img-placeholder">
-                            {{ substr(auth()->user()->name, 0, 2) }}
-                        </div>
-                    @endif
-                    <div class="profile-info">
-                        <strong>{{ auth()->user()->name }}</strong>
-                        <span class="role-badge">Admin</span>
-                    </div>
-                </div>
+            @endif
+            <div class="profile-info">
+                <strong>{{ auth()->user()->name }}</strong>
+                <span class="role-badge">Admin</span>
             </div>
+        </div>
+    </div>
+    @endif
 
             <!-- Page Content -->
             <div class="content-wrapper">
