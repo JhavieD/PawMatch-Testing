@@ -7,7 +7,7 @@
         </div>
         <div class="info-item">
             <label>Phone</label>
-            <p>{{ $application->adopter->user->phone ?? '' }}</p>
+            <p>{{ $application->adopter->user->phone_number ?? '' }}</p>
         </div>
         <div class="info-item">
             <label>Email</label>
@@ -15,7 +15,7 @@
         </div>
         <div class="info-item">
             <label>Address</label>
-            <p>{{ $application->adopter->user->address ?? '' }}</p>
+            <p>{{ $application->adopter->address ?? '' }}</p>
         </div>
     </div>
 </div>

@@ -28,7 +28,7 @@ class ShelterApplicationController extends Controller
         if (request()->ajax()) {
             return response()->view('shelter.application_modal', compact('application'));
         }
-        return view('shelter.applications.show', compact('application'));
+        return view('shelter.application_modal', compact('application'));
     }
 
     // Approve an application
@@ -36,29 +36,39 @@ class ShelterApplicationController extends Controller
     {
         $application = AdoptionApplication::findOrFail($id);
         $application->status = 'approved';
-        $application->reviewed_at = now();
         $application->save();
-        // Optionally notify adopter here
-        return back()->with('success', 'Application approved!');
+
+        return response()->json(['success' => true]);
     }
 
     // Reject an application
     public function reject(Request $request, $id)
     {
         $application = AdoptionApplication::findOrFail($id);
+
+        // ✅ If you're sending JSON, you must decode it properly
+        $rejectionReason = $request->input('rejection_reason'); // This will work for both JSON and form data
+
+        if (!$rejectionReason) {
+            return response()->json(['error' => 'Rejection reason required.'], 400);
+        }
+
         $application->status = 'rejected';
-        $application->reviewed_at = now();
-        $application->rejection_reason = $request->input('rejection_reason');
+        $application->rejection_reason = $rejectionReason; // Make sure this column exists in your DB
         $application->save();
-        // Optionally notify adopter here
-        return back()->with('success', 'Application rejected.');
+
+        return response()->json(['message' => 'Application rejected successfully.']);
     }
 
     // Request more info from applicant
     public function requestInfo(Request $request, $id)
     {
-        // You can implement messaging or notification logic here
-        // For now, just a placeholder
-        return back()->with('info', 'Information request sent to applicant!');
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'info-requested';
+        $application->reviewed_at = now();
+        $application->save();
+
+
+        return response()->json(['message' => 'Information request sent successfully.']);
     }
-} 
+}

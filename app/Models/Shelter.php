@@ -53,12 +53,12 @@ class Shelter extends Model
 
     public function receivedMessages()
     {
-        return $this->hasMany(Message::class, 'receiver_id', 'shelter_id');
+        return $this->hasMany(Message::class, 'receiver_id', 'user_id');
     }
 
     public function sentMessages()
     {
-        return $this->hasMany(Message::class, 'sender_id', 'shelter_id');
+        return $this->hasMany(Message::class, 'sender_id', 'user_id');
     }
 
     public function adopterReviews()
