@@ -41,11 +41,12 @@
             </div>
 
             <div class="chat-messages" id="chat-messages"></div>
-
-            <div class="chat-input">
-                <textarea class="message-input" id="message-input" placeholder="Type your message..."></textarea>
-                <button class="send-btn">Send</button>
-            </div>
+            @if($receiver)
+                <div class="chat-input">
+                    <textarea class="message-input" id="message-input" placeholder="Type your message..."></textarea>
+                    <button class="send-btn">Send</button>
+                </div>
+            @endif
         </div>
     </div>
 

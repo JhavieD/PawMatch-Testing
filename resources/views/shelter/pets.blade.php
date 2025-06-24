@@ -10,7 +10,7 @@
     </div>
 
     <div class="search-bar">
-        <input type="text" class="search-input" placeholder="Search pets by name, breed, or ID...">
+        <input type="text" id="petSearchInput" class="search-input" placeholder="Search pets by name, breed, or ID...">
         <select class="filter-dropdown">
             <option value="all">All Status</option>
             <option value="available">Available</option>
@@ -22,7 +22,10 @@
     <!-- Pet Cards -->
     <div class="pets-grid">
         @forelse($pets as $pet)
-        <div class="pet-card">
+        <div class="pet-card"
+            data-name="{{ $pet->name }}"
+            data-breed="{{ $pet->breed }}"
+            data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}">
             <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
             <div class="pet-info">
                 <h3 class="pet-name">{{ $pet->name }}</h3>
@@ -258,7 +261,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="compatibility">Compatibility</label>
+                        <label for="compatibility">Compatibile with elders</label>
                         <select name="compatibility" id="compatibility">
                             <option value="">Select Option</option>
                             <option value="Yes">Yes</option>
@@ -267,8 +270,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="edit-eating_habits">Eating Habits</label>
-                        <select name="eating_habits" id="edit-eating_habits" required>
+                        <label for="eating_habits">Eating Habits</label>
+                        <select name="eating_habits" id="eating_habits" required>
                             <option value="">Select Eating Habits</option>
                             <option value="Balanced Diet">Balanced Diet</option>
                             <option value="Portion Control">Portion Control</option>
@@ -513,13 +516,20 @@
                     if (data.applications.length > 0) {
                         data.applications.forEach(application => {
                             const applicationItem = document.createElement('div');
-                            applicationItem.classList.add('application-item');
+                            applicationItem.classList.add('application-item', 'modal-application-item');
+                            
+                            let statusClass = application.status.toLowerCase();
+                            if (statusClass.includes('pending')) statusClass = 'pending';
+                            else if (statusClass.includes('approved')) statusClass = 'approved';
+                            else if (statusClass.includes('rejected')) statusClass = 'rejected';
+                            else if (statusClass.includes('available')) statusClass = 'available';
+
 
                             applicationItem.innerHTML = `
                                 <div class="applicant-info">
                                     <h3>${application.applicant_name}</h3>
                                     <p>Submitted: ${new Date(application.submitted_at).toLocaleString()}</p>
-                                    <span class="status-badge status-${application.status.toLowerCase()}">${application.status}</span>
+                                    <span class="status-badge status-${statusClass}">${application.status}</span>
                                 </div>
                                 <div class="btn-group">
                                     <button class="btn btn-primary" onclick="viewApplicationDetails(${application.id})">View Details</button>
@@ -548,5 +558,35 @@
         // Redirect to messages with the applicant
         window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
     }
+// filtering
+    document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('petSearchInput');
+    const statusFilter = document.querySelector('.filter-dropdown');
+    const petCards = document.querySelectorAll('.pet-card');
+
+    function filterPets() {
+        const search = searchInput.value.trim().toLowerCase();
+        const status = statusFilter.value;
+
+        petCards.forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const breed = (card.getAttribute('data-breed') || '').toLowerCase();
+            const cardStatus = (card.getAttribute('data-status') || '').toLowerCase();
+
+            const matchesSearch = !search ||
+                name.includes(search) ||
+                breed.includes(search);
+
+            const matchesStatus = status === 'all' || cardStatus === status;
+
+            card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterPets);
+    statusFilter.addEventListener('change', filterPets);
+});
+
+
 </script>
 @endsection

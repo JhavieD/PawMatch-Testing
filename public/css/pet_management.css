@@ -179,6 +179,11 @@ body {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.pet-card:hover {
+    transform: translateY(-5px);
 }
 
 .pet-image {
@@ -215,16 +220,56 @@ body {
 .status-available {
     background: #dcfce7;
     color: #15803d;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 9999px;
 }
 
 .status-pending {
     background: #fef9c3;
     color: #854d0e;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 9999px;
 }
 
 .status-adopted {
     background: #dbeafe;
     color: #1e40af;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 9999px;
+}
+
+.status-approved {
+    background: #dcfce7;
+    color: #15803d;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 9999px;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 9999px;
 }
 
 .card-actions {
@@ -435,4 +480,52 @@ body {
     .modal-actions button {
         width: 100%;
     }
+}
+
+.modal-application-item {
+    background: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(60,70,80,0.08);
+    padding: 1.5rem 1.2rem;
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.modal-application-item:hover {
+    box-shadow: 0 4px 10px rgba(00,00,00,0.16);
+    transform: translateY(-3px) scale(1.01);
+}
+.modal-application-item:last-child {
+    margin-bottom: 0;
+}
+
+.modal-application-item .applicant-info h3 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.modal-application-item .applicant-info p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.90rem;
+    margin: 0.1rem 0 0.2rem 0;
+}
+
+.modal-application-item .status-badge {
+    display: inline-block;
+    margin-top: 0.3rem;
+    padding: 0.2em 0.8em;
+    border-radius: 9999px;
+    font-size: 0.95em;
+}
+
+.modal-application-item .btn-group {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.7rem;
 }

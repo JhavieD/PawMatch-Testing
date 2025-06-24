@@ -130,6 +130,7 @@
             </div>
 
             <div class="modal-actions">
+                <button id="message-shelter" class="btn-messages"> Message Shelter </button>
                 <button id="applyButton" class="btn">Apply for Adoption</button>
                 <button id="favoriteButton" class="btn" style="background: #f3f4f6; color: #4b5563;">Save to Favorites</button>
             </div>
@@ -205,6 +206,8 @@
     const thumbnailGrid = document.getElementById('thumbnailGrid');
     const applyButton = document.getElementById('applyButton');
     const favoriteButton = document.getElementById('favoriteButton');
+    const messageShelterButton = document.getElementById('message-shelter');
+    let currentShelterUserId = null;
 
     function closeModal() {
         modal.style.display = 'none';
@@ -244,6 +247,36 @@
                 };
                 favoriteButton.textContent = pet.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
                 favoriteButton.dataset.petId = petId;
+
+                // Set the message button handler for this pet
+                const messageShelterBtn = document.getElementById('message-shelter');
+                messageShelterBtn.onclick = async function () {
+                    console.log('Message Shelter button clicked, shelter user id:', pet.shelter.user_id);
+                    if (pet.shelter.user_id) {
+                        try {
+                            const res = await fetch('/messages', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({
+                                    receiver_id: pet.shelter.user_id,
+                                    message: `Hi! I'm interested in adopting ${pet.name} from your shelter.`
+                                })
+                            });
+                            const data = await res.json();
+                            if (!res.ok) {
+                                alert('Failed to send message: ' + (data.message || res.status));
+                                return;
+                            }
+                            window.location.href = '/adopter/messages?receiver_id=' + pet.shelter.user_id;
+                        } catch (e) {
+                            alert('Error sending message: ' + e);
+                        }
+                    }
+                };
+
                 modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
             } catch (error) {

@@ -167,9 +167,10 @@ Route::middleware(['adopter'])->group(function () {
     Route::get('/adopter/pet-swipe', [PetSwipeController::class, 'index'])
         ->name('adopter.pet-swipe');
 
-    Route::get('/adopter/pet-listings', function () {
-        return view('adopter.pet-listings');
-    })->name('adopter.pet-listings');
+    Route::get('/adopter/pet-listings', [\App\Http\Controllers\AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
+    Route::get('/adopter/pet-details', function () {
+        return view('adopter.pet-details');
+    })->name('adopter.pet-details');
 
     Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
         ->name('adopter.dashboard');
@@ -186,6 +187,7 @@ Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
 Route::get('/adopter/pet-swipe', function () {
     return view('adopter.pet-swipe');
 })->name('adopter.pet-swipe');
+
 Route::get('/adopter/pet-listings', [\App\Http\Controllers\AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
 Route::get('/adopter/pet-details', function () {
     return view('adopter.pet-details');
@@ -341,6 +343,8 @@ Route::get('/api/pets/{id}', function ($id) {
         'images' => [$pet->image_url ?? 'https://placehold.co/400x300'], // Placeholder for now
         'is_favorite' => false, // Placeholder, implement favorite logic if needed
         'shelter' => [
+            'shelter_id' => $pet->shelter->shelter_id ?? null,
+            'user_id' => $pet->shelter->user_id ?? null,
             'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
             'address' => $pet->shelter->location ?? 'Unknown Address',
             'phone' => $pet->shelter->contact_info ?? 'Unknown Phone',
