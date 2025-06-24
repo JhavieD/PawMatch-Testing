@@ -62,7 +62,7 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists('admin_actions');
-        Schema::dropIfExists('stray_reports');
+        Schema::dropIfExists('stray-reports');
         Schema::dropIfExists('adopters');
         Schema::dropIfExists('password_resets');
         Schema::dropIfExists('users');
