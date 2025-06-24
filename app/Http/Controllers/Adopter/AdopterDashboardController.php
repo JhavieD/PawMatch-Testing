@@ -130,15 +130,23 @@ class AdopterDashboardController extends Controller
     {
         $adopter = auth()->user();
 
-        // Get all shelter users who messaged or were messaged by this adopter
+        // Get all shelter users who messaged or were messaged by this adopter, eager load shelterProfile
         $partners = User::whereHas('sentMessages', function ($q) use ($adopter) {
             $q->where('receiver_id', $adopter->user_id);
         })->orWhereHas('receivedMessages', function ($q) use ($adopter) {
             $q->where('sender_id', $adopter->user_id);
-        })->get();
+        })->with('shelterProfile')->get();
 
-        $receiver = $partners->first(); // default to first shelter
+        // Use receiver_id from query if present
+        $receiver = null;
+        if ($request->has('receiver_id')) {
+            $receiver = $partners->where('user_id', $request->receiver_id)->first();
+        }
+        if (!$receiver) {
+            $receiver = $partners->first();
+        }
 
         return view('adopter.messages', compact('partners', 'receiver'));
     }
+    
 }
