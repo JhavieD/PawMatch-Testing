@@ -32,7 +32,11 @@
         </div>
         <div class="info-item">
             <label>Status</label>
-            <p>{{ ucfirst($application->status ?? '') }}</p>
+            <p>
+                <span class="status-badge status-{{$application->status ?? 'pending'}}">
+                    {{ ucfirst($application->status ?? '')}}
+                </span>
+            </p>
         </div>
     </div>
     <div class="questionnaire">
@@ -47,7 +51,7 @@
         </div>
         <div class="question">
             <label>Living situation</label>
-            <p>{{ $application->living_arrangement ?? '' }}</p>
+            <p>{{ $application->living_environment ?? '' }}</p>
         </div>
         <div class="question">
             <label>Household Members</label>
