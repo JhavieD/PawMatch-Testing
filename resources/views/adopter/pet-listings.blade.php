@@ -56,16 +56,21 @@
         </div>
 
         <div class="pet-grid">
-            @forelse($pets as $pet)
+        @forelse($pets as $pet)
             @if($pet->status === 'available' || $pet->adoption_status === 'available')
-            <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
-                <img src="{{ $pet->image_url }}" alt="{{ $pet->name }}" class="pet-image">
-                <div class="pet-info">
-                    <h3 class="pet-name">{{ $pet->name }}</h3>
-                    <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city }}</p>
-                    <span class="pet-status">{{ $pet->status }}</span>
-                </div>
-            </div>
+                    <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
+                        @if($pet->images->isNotEmpty())
+                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }}" class="pet-image">
+                        @else
+                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available" class="pet-image">
+                        @endif
+                        <div class="pet-info">
+                            <h3 class="pet-name">{{ $pet->name }}</h3>
+                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city }}</p>
+                            <span class="pet-status">{{ $pet->status }}</span>
+                        </div>
+                    </div>
+                </a>
             @endif
             @empty
             <div class="no-pets-message">
@@ -87,7 +92,7 @@
         </div>
         <div class="modal-body">
             <div class="pet-gallery">
-                <img src="" alt="Main pet photo" class="main-image" id="mainImage">
+                <img src="" alt="Main pet photo" class="main-pet-image" id="mainImage">
                 <div class="thumbnail-grid" id="thumbnailGrid">
                     <!-- Thumbnails will be populated dynamically -->
                 </div>
@@ -219,25 +224,38 @@
             const petId = card.dataset.petId;
             console.log('Pet card clicked, petId:', petId);
             try {
-                const response = await fetch(`/api/pets/${petId}`);
-                const pet = await response.json();
+                // Fetch pet details
+                const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+                const petDetails = await petDetailsResponse.json();
+
+                // Fetch pet images
+                const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
+                const petImagesData = await petImagesResponse.json();
+
                 // Update modal content
-                document.getElementById('petName').textContent = pet.name;
-                document.getElementById('petNameDesc').textContent = pet.name;
-                document.getElementById('petBreed').textContent = pet.breed;
-                document.getElementById('petAge').textContent = `${pet.age} years`;
-                document.getElementById('petGender').textContent = pet.gender;
-                document.getElementById('petSize').textContent = pet.size;
-                document.getElementById('petStatus').textContent = pet.status;
-                document.getElementById('petDescription').textContent = pet.description;
-                document.getElementById('shelterName').textContent = pet.shelter.name;
-                document.getElementById('shelterAddress').textContent = pet.shelter.address;
-                document.getElementById('shelterPhone').textContent = pet.shelter.phone;
+                document.getElementById('petName').textContent = petDetails.name;
+                document.getElementById('petNameDesc').textContent = petDetails.name;
+                document.getElementById('petBreed').textContent = petDetails.breed;
+                document.getElementById('petAge').textContent = `${petDetails.age} years`;
+                document.getElementById('petGender').textContent = petDetails.gender;
+                document.getElementById('petSize').textContent = petDetails.size;
+                document.getElementById('petStatus').textContent = petDetails.status;
+                document.getElementById('petDescription').textContent = petDetails.description;
+                document.getElementById('shelterName').textContent = petDetails.shelter.name;
+                document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
+                document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
+
                 // Update images
-                mainImage.src = pet.images[0];
-                thumbnailGrid.innerHTML = pet.images.map(img => 
-                    `<img src="${img}" alt="Pet photo" class="thumbnail">`
-                ).join('');
+                if (petImagesData.images.length > 0) {
+                    mainImage.src = petImagesData.images[0].image_url;
+                    thumbnailGrid.innerHTML = petImagesData.images.map(img => 
+                        `<img src="${img.image_url}" alt="Pet photo" class="thumbnail">`
+                    ).join('');
+                } else {
+                    mainImage.src = '';
+                    thumbnailGrid.innerHTML = '<p>No images available.</p>';
+                }
+
                 // Update buttons
                 applyButton.dataset.petId = petId;
                 applyButton.onclick = function() {
@@ -245,14 +263,15 @@
                     document.body.style.overflow = 'hidden';
                     adoptionPetId.value = petId;
                 };
-                favoriteButton.textContent = pet.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+                favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
                 favoriteButton.dataset.petId = petId;
 
                 // Set the message button handler for this pet
                 const messageShelterBtn = document.getElementById('message-shelter');
                 messageShelterBtn.onclick = async function () {
-                    console.log('Message Shelter button clicked, shelter user id:', pet.shelter.user_id);
-                    if (pet.shelter.user_id) {
+                    const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
+                    console.log('Message Shelter button clicked, shelter user id:', shelterUserId);
+                    if (shelterUserId) {
                         try {
                             const res = await fetch('/messages', {
                                 method: 'POST',
@@ -261,8 +280,8 @@
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                 },
                                 body: JSON.stringify({
-                                    receiver_id: pet.shelter.user_id,
-                                    message: `Hi! I'm interested in adopting ${pet.name} from your shelter.`
+                                    receiver_id: shelterUserId,
+                                    message: `Hi! I'm interested in adopting ${petDetails.name} from your shelter.`
                                 })
                             });
                             const data = await res.json();
@@ -270,10 +289,12 @@
                                 alert('Failed to send message: ' + (data.message || res.status));
                                 return;
                             }
-                            window.location.href = '/adopter/messages?receiver_id=' + pet.shelter.user_id;
+                            window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
                         } catch (e) {
                             alert('Error sending message: ' + e);
                         }
+                    } else {
+                        alert('Shelter user ID not found. Please try again later.');
                     }
                 };
 

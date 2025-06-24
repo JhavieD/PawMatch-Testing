@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/shelter.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shelter/shelter.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 @endsection
 
@@ -21,7 +21,7 @@
                     </h2>
                     
                     @php
-                        $verification = App\Models\ShelterVerification::where('shelter_id', Auth::user()->shelter->shelter_id)
+                        $verification = App\Models\Shelter\ShelterVerification::where('shelter_id', Auth::user()->shelter->shelter_id)
                             ->latest()
                             ->first();
                     @endphp

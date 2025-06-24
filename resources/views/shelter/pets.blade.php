@@ -47,6 +47,7 @@
                         data-daily_activity="{{ $pet->daily_activity }}"
                         data-special_needs="{{ $pet->special_needs }}"
                         data-compatibility="{{ $pet->compatibility }}"
+                        data-images='@json($pet->images)'
                         data-eating_habits="{{ $pet->eating_habits}}">
                         Edit
                     </button>
@@ -72,7 +73,7 @@
                 <button class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="editPetForm" method="POST" action="/shelter/pets/__PET_ID__">
+                <form id="editPetForm" method="POST" enctype="multipart/form-data" action="/shelter/pets/__PET_ID__">
                     @csrf
                     @method('PUT')
                     <div class="form-grid">
@@ -160,7 +161,6 @@
                             <option value="No">No</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="edit-eating_habits">Eating Habits</label>
                         <select name="eating_habits" id="edit-eating_habits" required>
@@ -169,6 +169,16 @@
                             <option value="Portion Control">Portion Control</option>
                             <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
                         </select>
+                    </div>
+                    <div class="image-upload">
+                        <h3>Pet Images</h3>
+                        <div class="image-grid" id="edit-image-grid">
+                            <!-- Existing images will be injected here by JS -->
+                            <label class="upload-box">
+                                <input type="file" name="images[]" id="edit-images" multiple accept="image/*">
+                                <span>+ Add Photos</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="modal-actions">
                         <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -268,7 +278,6 @@
                             <option value="No">No</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="eating_habits">Eating Habits</label>
                         <select name="eating_habits" id="eating_habits" required>
@@ -278,7 +287,6 @@
                             <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
                         </select>
                     </div>
-
                     <div class="image-upload">
                         <h3>Pet Images</h3>
                         <div class="image-grid">
@@ -329,6 +337,36 @@
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
+    
+    
+    document.addEventListener('submit', async (e) => {
+            if (e.target.matches('.delete-image-form')) {
+                e.preventDefault();
+
+                if (!confirm('Delete this photo?')) return;
+
+                const form = e.target;
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        form.closest('.thumbnail-wrapper').remove();
+                    } else {
+                        alert('Image delete failed.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Something went wrong.');
+                }
+            }
+        });
+        // Auto reload of Pet Details
 
     editBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -346,6 +384,46 @@
             const specialNeeds = btn.getAttribute('data-special_needs');
             const compatibility = btn.getAttribute('data-compatibility');
             const eatingHabits = btn.getAttribute('data-eating_habits');
+
+            // Display existing images and Delete
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-species').value = species;
+            document.getElementById('edit-breed').value = breed;
+            document.getElementById('edit-age').value = age;
+            document.getElementById('edit-gender').value = gender;
+            document.getElementById('edit-size').value = size;
+            document.getElementById('edit-description').value = description;
+            document.getElementById('edit-adoption_status').value = adoptionStatus;
+            document.getElementById('edit-behavior').value = behavior;
+            document.getElementById('edit-daily_activity').value = dailyActivity;
+            document.getElementById('edit-special_needs').value = specialNeeds;
+            document.getElementById('edit-compatibility').value = compatibility;
+            document.getElementById('edit-eating_habits').value = eatingHabits;
+            document.getElementById('editPetForm').action = `/shelter/pets/${petId}`;
+
+            const thumbnailGrid = document.querySelector('.thumbnail-grid');
+            if (thumbnailGrid) {
+                thumbnailGrid.innerHTML = ''; // clear old thumbnails
+
+                const images = JSON.parse(btn.getAttribute('data-images') || '[]');
+
+                images.forEach(image => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'thumbnail-wrapper';
+
+                    wrapper.innerHTML = `
+                        <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
+                        <form action="/shelter/pet-images/${image.id}" method="POST" class="delete-image-form" onsubmit="return confirm('Delete this photo?')">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="delete-image-btn">Delete Image</button>
+                        </form>
+                    `;
+
+                    thumbnailGrid.appendChild(wrapper);
+                });
+            }
+            // ^Display existing images and Delete
 
             // Debug log
             console.log({size, behavior, dailyActivity, specialNeeds, compatibility, eatingHabits});
@@ -397,6 +475,7 @@
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
+        formData.append('_method', 'PUT');
 
         fetch(form.action, {
             method: 'POST',
