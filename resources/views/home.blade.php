@@ -40,5 +40,8 @@
             <a href="{{ route('adopter.report-stray') }}" id="report-now-btn">Report Now</a>
         </div>
     </section>
-    <link rel="stylesheet" href="{{ asset('css/marketing.css') }}">
+    @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/shared/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/marketing.css') }}">
+    @endsection
 @endsection 
