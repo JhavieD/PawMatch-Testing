@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/strayreports.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/strayreports.css') }}">
 @endpush
 
 @section('content')

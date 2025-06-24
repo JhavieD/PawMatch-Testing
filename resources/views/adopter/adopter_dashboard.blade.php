@@ -28,7 +28,7 @@
             <div class="content-card">
                 <div class="card-header">
                     <h2>Favorite Pets</h2>
-                    <a href="pet-listings-LoggedIn.html" class="btn btn-outline">Find More</a>
+                    <a href="pet-listings" class="btn btn-outline">Find More</a>
                 </div>
                 <div class="pet-grid">
                     <div class="pet-card">
@@ -38,7 +38,7 @@
                             class="pet-image" />
                         <div class="pet-info">
                             <div class="pet-name">Ester</div>
-                            <div class="pet-details">Tabby Cat • 2 years</div>
+                            <div class="pet-details">Tabby Cat • 2 years<image.png/div>
                         </div>
                     </div>
                     <div class="pet-card">
@@ -58,7 +58,7 @@
             <div class="content-card">
                 <div class="card-header">
                     <h2>Recent Applications</h2>
-                    <a href="application-status.html" class="btn btn-outline">View All</a>
+                    <a href="application-status" class="btn btn-outline">View All</a>
                 </div>
                 <ul class="application-list">
                     <li class="application-item">

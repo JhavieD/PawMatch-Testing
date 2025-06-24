@@ -73,7 +73,8 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/marketing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/marketing.css') }}">
 </div>
 @push('scripts')
 <script>

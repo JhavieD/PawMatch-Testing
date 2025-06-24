@@ -3,7 +3,7 @@
 @section('title', 'Report a Stray Animal - PawMatch')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/report-stray.css') }}">
+<link rel="stylesheet" href="{{ asset('css/adopter/report-stray.css') }}">
 @endpush
 
 @section('adopter-content')
