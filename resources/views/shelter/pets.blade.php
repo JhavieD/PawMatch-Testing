@@ -163,35 +163,6 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <!-- <label for="edit-images">Add More Photos</label> -->
-                        <label>Upload New Images</label><br>
-                        <label class="custom-upload">
-                            Upload New Image
-                        <input type="file" name="images[]" id="edit-images" multiple accept="image/*" hidden>
-                        </label>
-                    </div>
-                    <div class="thumbnail-grid"></div>
-                    <!-- ^Add More Images -->
-                    <!-- @if(isset($pet) && $pet->images->count())
-                        <div class="thumbnail-grid">
-                            @foreach ($pet->images as $image)
-                                <div class="thumbnail-wrapper">
-                                    <img src="{{ $image->image_url }}" class="thumbnail" alt="Pet Image">
-
-                                    @if(auth()->user() && auth()->user()->role === 'shelter')
-                                        <form action="{{ route('shelter.pet-images.destroy', $image->id) }}" method="POST" class="delete-image-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="delete-image-btn">&times;</button>
-                                        </form>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif -->
-                    <!-- ^Display Existing Images -->
-
-                    <div class="form-group">
                         <label for="edit-eating_habits">Eating Habits</label>
                         <select name="eating_habits" id="edit-eating_habits" required>
                             <option value="">Select Eating Habits</option>
@@ -199,6 +170,16 @@
                             <option value="Portion Control">Portion Control</option>
                             <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
                         </select>
+                    </div>
+                    <div class="image-upload">
+                        <h3>Pet Images</h3>
+                        <div class="image-grid" id="edit-image-grid">
+                            <!-- Existing images will be injected here by JS -->
+                            <label class="upload-box">
+                                <input type="file" name="images[]" id="edit-images" multiple accept="image/*">
+                                <span>+ Add Photos</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="modal-actions">
                         <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -298,7 +279,6 @@
                             <option value="No">No</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="edit-eating_habits">Eating Habits</label>
                         <select name="eating_habits" id="edit-eating_habits" required>
@@ -308,7 +288,6 @@
                             <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
                         </select>
                     </div>
-
                     <div class="image-upload">
                         <h3>Pet Images</h3>
                         <div class="image-grid">
@@ -420,6 +399,7 @@
             document.getElementById('edit-daily_activity').value = dailyActivity;
             document.getElementById('edit-special_needs').value = specialNeeds;
             document.getElementById('edit-compatibility').value = compatibility;
+            document.getElementById('edit-eating_habits').value = eatingHabits;
             document.getElementById('editPetForm').action = `/shelter/pets/${petId}`;
 
             const thumbnailGrid = document.querySelector('.thumbnail-grid');

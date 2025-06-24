@@ -156,7 +156,7 @@ class ShelterDashboardController extends Controller
         $pet->update($request->only([
             'name', 'species', 'breed', 'age', 'gender', 'size',
             'description', 'adoption_status', 'behavior',
-            'daily_activity', 'special_needs', 'compatibility',
+            'daily_activity', 'special_needs', 'compatibility', 'eating_habits',
         ]));
 
         if ($request->hasFile('images')) {
@@ -215,7 +215,8 @@ class ShelterDashboardController extends Controller
     {
         $user = auth()->user();
         $shelter = $user->shelter;
-        return view('shelter.profile', compact('user', 'shelter'));
+        $verification = $shelter->verifications()->latest()->first(); // Get the latest verification record
+        return view('shelter.profile', compact('user', 'shelter', 'verification'));
     }
     //Upload New Photo Feature
     public function updateProfile(Request $request)
