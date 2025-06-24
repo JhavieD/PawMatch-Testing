@@ -8,7 +8,7 @@ use App\Models\AdoptionApplication;
 use App\Models\Shelter;
 use App\Models\Adopter;
 use App\Models\Rescuer;
-use App\Models\StrayReport;
+use App\Models\StrayReports;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -379,11 +379,6 @@ class AdminDashboardController extends Controller
         ]);
     }
 
-    public function strayReports()
-    {
-        // This will be replaced with actual stray reports functionality
-        return view('admin.stray-reports');
-    }
 
     public function settings()
     {
@@ -413,13 +408,96 @@ class AdminDashboardController extends Controller
         ]);
     }
 
-    public function updateReportStatus(Request $request, $reportId)
+    public function strayReports(Request $request)
+        {
+            // Start query with adopter relationship
+            $query = \App\Models\StrayReports::with('adopter');
+
+            // Search filter (searches description and location)
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function($q) use ($search) {
+                    $q->where('description', 'like', "%$search%")
+                    ->orWhere('location', 'like', "%$search%");
+                });
+            }
+
+            // Status filter
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+
+            // Paginate reports
+            $reports = $query->orderByDesc('reported_at')->paginate(20);
+
+            // Attach timeline to each report
+            foreach ($reports as $report) {
+                $timeline = \DB::table('admin_actions')
+                    ->where('action_type', 'status_update')
+                    ->where('target_report_id', $report->report_id)
+                    ->orderBy('created_at', 'asc')
+                    ->get()
+                    ->map(function($action) {
+                        return [
+                            'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
+                            'content' => $action->reason,
+                        ];
+                    });
+                $report->timeline = $timeline;
+            }
+
+            return view('admin.stray-reports', compact('reports'));
+        }
+
+        public function updateStatus(Request $request, $id)
     {
-        // This will be replaced with actual status update functionality
-        return response()->json([
-            'message' => 'Report status updated successfully'
-        ]);
+        try {
+            $report = \App\Models\StrayReports::find($id);
+            if (!$report) {
+                return response()->json(['success' => false, 'message' => 'Report not found.'], 404);
+            }
+
+            $request->validate([
+                'status' => 'required|in:pending,investigating,resolved,cancelled'
+            ]);
+
+            $report->status = $request->status;
+            $report->save();
+
+            DB::table('admin_actions')->insert([
+                'action_type' => 'status_update',
+                'target_report_id' => $report->id,
+                'reason' => 'Status updated to ' . $request->status,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'admin_id' => auth()->id(),
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
+        
+    public function strayReportTimeline($id)
+            {
+                $timeline = \DB::table('admin_actions')
+                    ->where('action_type', 'status_update')
+                    ->where('target_report_id', $id)
+                    ->orderBy('created_at', 'asc')
+                    ->get()
+                    ->map(function($action) {
+                        return [
+                            'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
+                            'content' => $action->reason,
+                        ];
+                    });
+                return response()->json(['timeline' => $timeline]);
+            }
+            
+             
+    
+
 
     public function verifications()
     {
