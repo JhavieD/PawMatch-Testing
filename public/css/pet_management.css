@@ -436,3 +436,19 @@ body {
         width: 100%;
     }
 }
+
+/* Delete Pet Image Styles */
+.thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin: 4px;
+}
+
+.thumbnail-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
