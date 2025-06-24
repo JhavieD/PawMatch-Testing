@@ -1,85 +1,74 @@
 <?php
 
+// =====================
+// USE STATEMENTS
+// =====================
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+// Auth Controllers
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\AdopterDashboardController;
-use App\Http\Controllers\ShelterDashboardController;
-use App\Http\Controllers\RescuerDashboardController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\PetPersonalityQuizController;
-use App\Http\Controllers\PetSwipeController;
-use App\Http\Controllers\Auth\AdoptionApplicationController;
-use App\Models\AdoptionApplication;
-use App\Http\Controllers\AdopterPetListingsController;
-use App\Http\Controllers\ShelterApplicationController;
-use App\Http\Controllers\AdopterApplicationController as AdopterApplicationControllerAlias;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\ShelterVerificationController;
-use App\Http\Controllers\ReportStrayController;
-use App\Http\Controllers\ShelterController;
-use App\Http\Controllers\PetSwipeController as PetSwipeControllerAlias;
+// Adopter Controllers
+use App\Http\Controllers\Adopter\AdopterDashboardController;
+use App\Http\Controllers\Adopter\AdopterPetListingsController;
+use App\Http\Controllers\Adopter\AdopterApplicationController;
+// Shelter Controllers
+use App\Http\Controllers\Shelter\ShelterDashboardController;
+use App\Http\Controllers\Shelter\ShelterVerificationController;
+use App\Http\Controllers\Shelter\ShelterApplicationController;
+use App\Http\Controllers\Shelter\AdoptionApplicationController as ShelterAdoptionApplicationController;
+// Rescuer Controllers
+use App\Http\Controllers\Rescuer\RescuerDashboardController;
+use App\Http\Controllers\Rescuer\RescuerController;
+// Admin Controllers
+use App\Http\Controllers\Admin\AdminDashboardController;
+// Shared Controllers
+use App\Http\Controllers\Shared\MessageController;
+use App\Http\Controllers\Shared\PetPersonalityQuizController;
+use App\Http\Controllers\Shared\PetSwipeController;
+use App\Http\Controllers\Shared\ReportStrayController;
+// Models
+use App\Models\Shared\AdoptionApplication;
 
-// Public routes
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+// =====================
+// PUBLIC ROUTES
+// =====================
+Route::get('/', fn() => view('home'))->name('home');
+Route::get('/faq', fn() => view('faq'))->name('faq');
+Route::get('/terms', fn() => view('terms'))->name('terms');
+Route::get('/about', fn() => view('about'))->name('about');
+Route::get('/pet-listings', fn() => view('adopter.pet-listings'))->name('pet-listings');
+Route::get('/report-stray', fn() => view('report-stray'))->name('report-stray');
 
-Route::get('/faq', function () {
-    return view('faq');
-})->name('faq');
-
-Route::get('/terms', function () {
-    return view('terms');
-})->name('terms');
-
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
-
-Route::get('/pet-listings', function () {
-    return view('adopter.pet-listings');
-})->name('pet-listings');
-
-Route::get('/report-stray', function () {
-    return view('report-stray');
-})->name('report-stray');
-
-// Pet Personality Quiz Routes (public routes)
+// Pet Personality Quiz
 Route::get('/quiz', [PetPersonalityQuizController::class, 'showQuiz'])->name('quiz.show');
 Route::post('/quiz', [PetPersonalityQuizController::class, 'submitQuiz'])->name('quiz.submit');
 
-// Authentication Routes
+// =====================
+// AUTHENTICATION ROUTES
+// =====================
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
-
-    // Password Reset Routes
-    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
-        ->name('password.request');
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
-        ->name('password.email');
-    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
-        ->name('password.reset');
-    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
-        ->name('password.update');
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
-
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Protected Routes with Authentication and Role-Based Middleware
+// =====================
+// AUTHENTICATED USER ROUTES
+// =====================
 Route::middleware(['auth'])->group(function () {
-
-    // Admin Routes
+    // -------- ADMIN --------
     Route::middleware(['admin'])->group(function () {
-        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-            ->name('admin.dashboard');
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/admin/users', [AdminDashboardController::class, 'users'])->name('admin.users');
         Route::get('/admin/verifications', [AdminDashboardController::class, 'verifications'])->name('admin.verifications');
         Route::get('/admin/verifications/{id}', [AdminDashboardController::class, 'showVerification'])->name('admin.verifications.show');
@@ -89,7 +78,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/stray-reports/{id}/timeline', [AdminDashboardController::class, 'strayReportTimeline']);
         Route::post('/admin/stray-reports/{report}/status', [AdminDashboardController::class, 'updateStatus'])->name('admin.stray-reports.update-status');
         Route::get('/admin/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
-
         // User Management
         Route::post('/admin/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
         Route::put('/admin/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('admin.users.update');
@@ -97,149 +85,101 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/users/{user}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])->name('admin.users.toggle-status');
         Route::post('/admin/users/bulk-action', [AdminDashboardController::class, 'bulkAction'])->name('admin.users.bulk-action');
         Route::get('/admin/users/export', [AdminDashboardController::class, 'exportUsers'])->name('admin.users.export');
-
         // Stray Reports Management
         Route::post('/admin/stray-reports/{report}/assign', [AdminDashboardController::class, 'assignReport'])->name('admin.stray-reports.assign');
-        
         // Settings Management
         Route::post('/admin/settings', [AdminDashboardController::class, 'updateSettings'])->name('admin.settings.update');
     });
 
-    // Shelter Routes
+    // -------- SHELTER --------
     Route::middleware(['shelter'])->group(function () {
-        // Shelter Verification Routes
-        Route::get('/shelter/verification', [ShelterVerificationController::class, 'showVerificationForm'])
-            ->name('shelter.verification.form');
-        Route::post('/shelter/verification', [ShelterVerificationController::class, 'submitVerification'])
-            ->name('shelter.verification.submit');
-
-        Route::get('/shelter/dashboard', [ShelterDashboardController::class, 'index'])
-            ->name('shelter.dashboard');
-
-        Route::post('/shelter/pets', [ShelterDashboardController::class, 'store'])
-            ->name('shelter.pets.store');
-
-        Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])
-            ->name('shelter.pets');
-
-        // Messages
+        Route::get('/shelter/verification', [ShelterVerificationController::class, 'showVerificationForm'])->name('shelter.verification.form');
+        Route::post('/shelter/verification', [ShelterVerificationController::class, 'submitVerification'])->name('shelter.verification.submit');
+        Route::get('/shelter/dashboard', [ShelterDashboardController::class, 'index'])->name('shelter.dashboard');
+        Route::post('/shelter/pets', [ShelterDashboardController::class, 'store'])->name('shelter.pets.store');
+        Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])->name('shelter.pets');
         Route::get('/shelter/messages', [MessageController::class, 'shelterMessages'])->name('shelter.messages');
-
-        // Profile
         Route::get('/shelter/profile', [ShelterDashboardController::class, 'profile'])->name('shelter.profile');
         Route::post('/shelter/profile/update', [ShelterDashboardController::class, 'updateProfile'])->name('shelter.profile.update');
         Route::post('/shelter/profile/password', [ShelterDashboardController::class, 'updatePassword'])->name('shelter.profile.password');
         Route::post('/shelter/profile/delete', [ShelterDashboardController::class, 'deleteAccount'])->name('shelter.profile.delete');
-
         // Custom Application Controller
         Route::get('/shelter/applications', [ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
         Route::get('/shelter/applications/{id}', [ShelterApplicationController::class, 'show'])->name('shelter.applications.show');
         Route::post('/shelter/applications/{id}/approve', [ShelterApplicationController::class, 'approve'])->name('shelter.applications.approve');
         Route::post('/shelter/applications/{id}/reject', [ShelterApplicationController::class, 'reject'])->name('shelter.applications.reject');
         Route::post('/shelter/applications/{id}/request-info', [ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
-
         // Pet management routes
         Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterDashboardController::class, 'update'])->name('shelter.pets.update');
-        Route::get('/shelter/pets/{pet}/applications', [AdoptionApplicationController::class, 'forPet'])->name('applications.forPet');
+        Route::get('/shelter/pets/{pet}/applications', [AdopterApplicationController::class, 'forPet'])->name('applications.forPet');
         Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
         Route::delete('/shelter/pet-images/{id}', [ShelterDashboardController::class, 'deleteImage'])->name('shelter.pet-images.destroy');
-        Route::get('/shelter/pet_applications', [App\Http\Controllers\Auth\AdoptionApplicationController::class, 'index'])->name('shelter.pet_applications');
+        Route::get('/shelter/pet_applications', [ShelterAdoptionApplicationController::class, 'index'])->name('shelter.pet_applications');
     });
 
-    // Messages Routes (global auth middleware)
+    // -------- MESSAGES (FOR ALL POT) --------
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
     Route::post('/messages', [MessageController::class, 'send'])->name('messages.send');
 
-    // Rescuer Routes
+    // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {
-        Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])
-            ->name('rescuer.dashboard');
+        Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])->name('rescuer.dashboard');
         Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
         Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
     });
 
-    // Adopter Routes
+    // -------- ADOPTER --------
     Route::middleware(['adopter'])->group(function () {
-        Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
-            ->name('adopter.dashboard');
-        
+        Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])->name('adopter.dashboard');
         // Profile routes
-        Route::get('/adopter/profile', [\App\Http\Controllers\AdopterDashboardController::class, 'profile'])->name('adopter.profile');
-        Route::post('/adopter/profile/update', [\App\Http\Controllers\AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
-        Route::post('/adopter/profile/password', [\App\Http\Controllers\AdopterDashboardController::class, 'updatePassword'])->name('adopter.profile.password');
-        Route::post('/adopter/profile/notifications', [\App\Http\Controllers\AdopterDashboardController::class, 'updateNotifications'])->name('adopter.profile.notifications');
-        Route::post('/adopter/profile/delete', [\App\Http\Controllers\AdopterDashboardController::class, 'deleteAccount'])->name('adopter.profile.delete');
-        
+        Route::get('/adopter/profile', [AdopterDashboardController::class, 'profile'])->name('adopter.profile');
+        Route::post('/adopter/profile/update', [AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
+        Route::post('/adopter/profile/password', [AdopterDashboardController::class, 'updatePassword'])->name('adopter.profile.password');
+        Route::post('/adopter/profile/notifications', [AdopterDashboardController::class, 'updateNotifications'])->name('adopter.profile.notifications');
+        Route::post('/adopter/profile/delete', [AdopterDashboardController::class, 'deleteAccount'])->name('adopter.profile.delete');
         // Pet-related routes
         Route::get('/adopter/pets/{pet}', [AdopterPetListingsController::class, 'show'])->name('adopter.pets.show');
-        Route::get('/adopter/pet-swipe', [App\Http\Controllers\PetSwipeController::class, 'index'])->name('adopter.pet-swipe');
-        Route::get('/adopter/pet-listings', [\App\Http\Controllers\AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
-        Route::get('/adopter/pet-details', function () {
-            return view('adopter.pet-details');
-        })->name('adopter.pet-details');
-        Route::get('/adopter/pet-personality-quiz', function () {
-            return view('adopter.pet-personality-quiz');
-        })->name('adopter.pet-personality-quiz');
-        
+        Route::get('/adopter/pet-swipe', [PetSwipeController::class, 'index'])->name('adopter.pet-swipe');
+        Route::get('/adopter/pet-listings', [AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
+        Route::get('/adopter/pet-details', fn() => view('adopter.pet-details'))->name('adopter.pet-details');
+        Route::get('/adopter/pet-personality-quiz', fn() => view('adopter.pet-personality-quiz'))->name('adopter.pet-personality-quiz');
         // Application routes
-        Route::get('/adopter/adoption-form', function () {
-            return view('adopter.adoption-form');
-        })->name('adopter.adoption-form');
-        Route::get('/adopter/application-status', [\App\Http\Controllers\AdopterApplicationController::class, 'index'])->name('adopter.application-status');
-        Route::post('/adopter/applications', [\App\Http\Controllers\AdopterApplicationController::class, 'store'])->name('adopter.applications.store');
-        
+        Route::get('/adopter/adoption-form', fn() => view('adopter.adoption-form'))->name('adopter.adoption-form');
+        Route::get('/adopter/application-status', [AdopterApplicationController::class, 'index'])->name('adopter.application-status');
+        Route::post('/adopter/applications', [AdopterApplicationController::class, 'store'])->name('adopter.applications.store');
         // Messages route
         Route::get('/adopter/messages', [AdopterDashboardController::class, 'messages'])->name('adopter.messages');
-        
         // Stray reporting routes
         Route::get('/adopter/report-stray', [ReportStrayController::class, 'showForm'])->name('adopter.report-stray');
         Route::post('/adopter/report-stray', [ReportStrayController::class, 'submit'])->name('stray.report.submit');
     });
 
-    // Profile route
+    // -------- PROFILE & DASHBOARD REDIRECTS --------
     Route::view('profile', 'profile')->name('profile');
-
-    // Dashboard redirect
     Route::get('/dashboard-redirect', function () {
         $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
+        if (!$user) return redirect()->route('login');
         switch ($user->role) {
-            case 'admin':
-                return redirect()->route('admin.dashboard');
-            case 'adopter':
-                return redirect()->route('adopter.dashboard');
-            case 'shelter':
-                return redirect()->route('shelter.dashboard');
-            case 'rescuer':
-                return redirect()->route('rescuer.dashboard');
-            default:
-                return redirect()->route('home');
+            case 'admin': return redirect()->route('admin.dashboard');
+            case 'adopter': return redirect()->route('adopter.dashboard');
+            case 'shelter': return redirect()->route('shelter.dashboard');
+            case 'rescuer': return redirect()->route('rescuer.dashboard');
+            default: return redirect()->route('home');
         }
     })->name('dashboard.redirect');
-
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
+        if (!$user) return redirect()->route('login');
         switch ($user->role) {
-            case 'admin':
-                return redirect()->route('admin.dashboard');
-            case 'adopter':
-                return redirect()->route('adopter.dashboard');
-            case 'shelter':
-                return redirect()->route('shelter.dashboard');
-            case 'rescuer':
-                return redirect()->route('rescuer.dashboard');
-            default:
-                return redirect()->route('home');
+            case 'admin': return redirect()->route('admin.dashboard');
+            case 'adopter': return redirect()->route('adopter.dashboard');
+            case 'shelter': return redirect()->route('shelter.dashboard');
+            case 'rescuer': return redirect()->route('rescuer.dashboard');
+            default: return redirect()->route('home');
         }
     })->name('dashboard');
-
     // S3 Upload
     Route::post('/upload', function (Request $request) {
         if ($request->hasFile('photo')) {
@@ -252,14 +192,12 @@ Route::middleware(['auth'])->group(function () {
         }
         return 'No file uploaded.';
     });
-
     // API route for fetching pet details by ID
     Route::get('/api/pets/{id}', function ($id) {
-        $pet = \App\Models\Pet::with('shelter')->find($id);
+        $pet = \App\Models\Shared\Pet::with('shelter')->find($id);
         if (!$pet) {
             return response()->json(['error' => 'Pet not found'], 404);
         }
-        // Compose the response to match frontend expectations
         return response()->json([
             'pet_id' => $pet->pet_id,
             'name' => $pet->name,
@@ -270,8 +208,8 @@ Route::middleware(['auth'])->group(function () {
             'weight' => $pet->weight ?? 0,
             'status' => $pet->adoption_status ?? $pet->status ?? 'available',
             'description' => $pet->description,
-            'images' => [$pet->image_url ?? 'https://placehold.co/400x300'], // Placeholder for now
-            'is_favorite' => false, // Placeholder, implement favorite logic if needed
+            'images' => [$pet->image_url ?? 'https://placehold.co/400x300'],
+            'is_favorite' => false,
             'shelter' => [
                 'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
                 'address' => $pet->shelter->location ?? 'Unknown Address',
@@ -279,24 +217,13 @@ Route::middleware(['auth'])->group(function () {
             ],
         ]);
     });
-
-    Route::get('/api/pets/{pet}/images', [\App\Http\Controllers\ShelterDashboardController::class, 'getPetImages']);
+    Route::get('/api/pets/{pet}/images', [ShelterDashboardController::class, 'getPetImages']);
 });
 
-// Public API routes (outside auth middleware)
-Route::get('/application-status', function () {
-    return view('adopter.application-status');
-})->name('application-status');
-
-// Placeholder routes (public)
-Route::get('/pets', function () {
-    return 'Pet listings coming soon!';
-})->name('pets.index');
-
-Route::get('/applications', function () {
-    return 'Applications page coming soon!';
-})->name('applications.index');
-
-Route::get('/profile/edit', function () {
-    return 'Profile edit page coming soon!';
-})->name('profile.edit');
+// =====================
+// PUBLIC API & PLACEHOLDER ROUTES
+// =====================
+Route::get('/application-status', fn() => view('adopter.application-status'))->name('application-status');
+Route::get('/pets', fn() => 'Pet listings coming soon!')->name('pets.index');
+Route::get('/applications', fn() => 'Applications page coming soon!')->name('applications.index');
+Route::get('/profile/edit', fn() => 'Profile edit page coming soon!')->name('profile.edit');

@@ -2,6 +2,11 @@
 
 @section('title', 'About PawMatch - Connecting Pets with Loving Homes')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/shared/app.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/marketing.css') }}">
+@endsection
+
 @section('content')
 
     <section id="about-hero">
@@ -121,5 +126,4 @@
             </div>
         </section>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/marketing.css') }}">
 @endsection 
