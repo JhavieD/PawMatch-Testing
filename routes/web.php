@@ -20,6 +20,7 @@ use App\Http\Controllers\ShelterApplicationController;
 use App\Http\Controllers\AdopterApplicationController as AdopterApplicationControllerAlias;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ShelterVerificationController;
+use App\Http\Controllers\ReportStrayController;
 use App\Http\Controllers\ShelterController;
 use App\Http\Controllers\PetSwipeController as PetSwipeControllerAlias;
 
@@ -73,11 +74,13 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // Protected Routes with Authentication and Role-Based Middleware
 Route::middleware(['auth'])->group(function () {});
 
-// Admin Routes
-Route::middleware(['admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
-});
+    // Admin Routes
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('admin.dashboard');
+        Route::get('/stray-reports', [\App\Http\Controllers\AdminDashboardController::class, 'strayReports'])->name('admin.stray-reports');
+
+    });
 
 // Shelter Routes
 Route::middleware(['auth', 'shelter'])->group(function () {
@@ -175,14 +178,14 @@ Route::middleware(['auth', 'shelter'])->group(function () {
         Route::get('/adopter/dashboard', [AdopterDashboardController::class, 'index'])
             ->name('adopter.dashboard');
         
-        // Profile routes (from main branch)
+        // Profile routes
         Route::get('/adopter/profile', [\App\Http\Controllers\AdopterDashboardController::class, 'profile'])->name('adopter.profile');
         Route::post('/adopter/profile/update', [\App\Http\Controllers\AdopterDashboardController::class, 'updateProfile'])->name('adopter.profile.update');
         Route::post('/adopter/profile/password', [\App\Http\Controllers\AdopterDashboardController::class, 'updatePassword'])->name('adopter.profile.password');
         Route::post('/adopter/profile/notifications', [\App\Http\Controllers\AdopterDashboardController::class, 'updateNotifications'])->name('adopter.profile.notifications');
         Route::post('/adopter/profile/delete', [\App\Http\Controllers\AdopterDashboardController::class, 'deleteAccount'])->name('adopter.profile.delete');
         
-        // Pet-related routes (keeping the structure from HEAD)
+        // Pet-related routes
         Route::get('/adopter/pet-swipe', function () {
             return view('adopter.pet-swipe');
         })->name('adopter.pet-swipe');
@@ -194,15 +197,19 @@ Route::middleware(['auth', 'shelter'])->group(function () {
             return view('adopter.pet-personality-quiz');
         })->name('adopter.pet-personality-quiz');
         
-        // Application routes (using controller from main branch)
+        // Application routes
         Route::get('/adopter/adoption-form', function () {
             return view('adopter.adoption-form');
         })->name('adopter.adoption-form');
         Route::get('/adopter/application-status', [\App\Http\Controllers\AdopterApplicationController::class, 'index'])->name('adopter.application-status');
         Route::post('/adopter/applications', [\App\Http\Controllers\AdopterApplicationController::class, 'store'])->name('adopter.applications.store');
         
-        // Messages route (using controller from main branch)
+        // Messages route
         Route::get('/adopter/messages', [AdopterDashboardController::class, 'messages'])->name('adopter.messages');
+        
+        // Stray reporting routes (from main branch)
+        Route::get('/adopter/report-stray', [ReportStrayController::class, 'showForm'])->name('adopter.report-stray');
+        Route::post('/adopter/report-stray', [ReportStrayController::class, 'submit'])->name('stray.report.submit');
     });
 
 // Pet Personality Quiz Routes
@@ -246,6 +253,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/verifications/{id}/approve', [AdminDashboardController::class, 'approveVerification'])->name('admin.verifications.approve');
     Route::post('/verifications/{id}/reject', [AdminDashboardController::class, 'rejectVerification'])->name('admin.verifications.reject');
     Route::get('/stray-reports', [AdminDashboardController::class, 'strayReports'])->name('admin.stray-reports');
+    Route::get('/stray-reports/{id}/timeline', [AdminDashboardController::class, 'strayReportTimeline']);
+    Route::post('/stray-reports/{report}/status', [AdminDashboardController::class, 'updateStatus'])->name('admin.stray-reports.update-status');
     Route::get('/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
 
     // User Management
@@ -258,8 +267,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Stray Reports Management
     Route::post('/stray-reports/{report}/assign', [AdminDashboardController::class, 'assignReport'])->name('admin.stray-reports.assign');
-    Route::post('/stray-reports/{report}/status', [AdminDashboardController::class, 'updateReportStatus'])->name('admin.stray-reports.status');
-
+    
     // Settings Management
     Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('admin.settings.update');
 });
