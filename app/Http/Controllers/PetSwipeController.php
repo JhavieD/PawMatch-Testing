@@ -12,7 +12,6 @@ class PetSwipeController extends Controller
         $query = Pet::query();
 
         // Mapping quiz short values to actual DB values
-
         $speciesMap = [
             'dog' => 'Dog',
             'cat' => 'Cat',
@@ -27,9 +26,9 @@ class PetSwipeController extends Controller
         ];
 
         $activityMap = [
-            'low' => 'Relaxed Lifestyle',
-            'moderate' => 'Balanced Activity',
-            'high' => 'Active and Energetic',
+            'low' => 'Low',
+            'moderate' => 'Moderate',
+            'high' => 'High',
         ];
 
         $eatingMap = [
@@ -40,11 +39,11 @@ class PetSwipeController extends Controller
 
         // Filter by species (dog/cat)
         if (
-            isset($answers['question1']) &&
-            isset($speciesMap[$answers['question1']]) &&
-            $speciesMap[$answers['question1']] !== null
+            $request->filled('question1') &&
+            isset($speciesMap[$request->input('question1')]) &&
+            $speciesMap[$request->input('question1')] !== null
         ) {
-            $query->where('species', $speciesMap[$answers['question1']]);
+            $query->where('species', $speciesMap[$request->input('question1')]);
         }
 
         // Filter by behavior/personality
@@ -58,13 +57,16 @@ class PetSwipeController extends Controller
         }
 
         // Filter by special needs
-        if ($request->filled('question4') && $request->input('question4') === 'no') {
-            $query->where(function($q) {
-                $q->whereNull('special_needs')
-                  ->orWhere('special_needs', 'Without Special Needs')
-                  ->orWhere('special_needs', 'no')
-                  ->orWhere('special_needs', '0');
-            });
+        if ($request->filled('question4')) {
+            if ($request->input('question4') === 'no') {
+                $query->where(function($q) {
+                    $q->whereNull('special_needs')
+                      ->orWhere('special_needs', 'No')
+                      ->orWhere('special_needs', '0');
+                });
+            } elseif ($request->input('question4') === 'yes') {
+                $query->where('special_needs', 'Yes');
+            }
         }
 
         // Filter by eating habits
