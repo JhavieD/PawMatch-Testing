@@ -150,7 +150,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/adopter/application-status', [AdopterApplicationController::class, 'index'])->name('adopter.application-status');
         Route::post('/adopter/applications', [AdopterApplicationController::class, 'store'])->name('adopter.applications.store');
         // Messages route
-        Route::get('/adopter/messages', [AdopterDashboardController::class, 'messages'])->name('adopter.messages');
+        Route::get('/adopter/messages', [MessageController::class, 'adopterMessages'])->name('adopter.messages');
         // Stray reporting routes
         Route::get('/adopter/report-stray', [ReportStrayController::class, 'showForm'])->name('adopter.report-stray');
         Route::post('/adopter/report-stray', [ReportStrayController::class, 'submit'])->name('stray.report.submit');
