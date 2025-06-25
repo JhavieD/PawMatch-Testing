@@ -14,7 +14,7 @@
     <!-- Conversations List -->
     <div class="conversations">
         @foreach ($partners as $partner)
-            <div class="conversation {{ $receiver && $partner->user_id == $receiver->user_id ? 'active' : '' }}"
+            <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                 onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $partner->user_id]) }}'">
                 <div class="conversation-header">
                     <span class="conversation-name"> {{ $partner->name }} </span>
@@ -23,7 +23,7 @@
                     </span>
                 </div>
                 <div class="conversation-preview">
-                    {{ Str::limit($partner->last_message ?? 'No messages yet.', 50) }}
+                    {{ Str::limit($partner->decrypted_last_message ?? 'No messages yet.', 50) }}
                 </div>
             </div>
         @endforeach
@@ -101,7 +101,7 @@
                         })
                     })
                     .then(res => res.json())
-                    .then(message => {
+                    .then((message) => {
                         if (message && message.message_content && message.sender_id) {
                             renderMessage(message);
                             input.value = '';

@@ -136,6 +136,10 @@ class User extends Authenticatable
 
     public function getLastMessageAttribute()
     {
+        // Return the decrypted message_content if set as a dynamic attribute, otherwise fallback to DB (encrypted)
+        if (array_key_exists('last_message', $this->attributes)) {
+            return $this->attributes['last_message'];
+        }
         $message = \App\Models\Shared\Message::where(function ($q) {
             $q->where('sender_id', auth()->id())
                 ->where('receiver_id', $this->user_id);
@@ -143,12 +147,14 @@ class User extends Authenticatable
             $q->where('sender_id', $this->user_id)
                 ->where('receiver_id', auth()->id());
         })->orderByDesc('sent_at')->first();
-
         return $message?->message_content;
     }
 
     public function getLastMessageTimeAttribute()
     {
+        if (array_key_exists('last_message_time', $this->attributes)) {
+            return $this->attributes['last_message_time'];
+        }
         $message = \App\Models\Shared\Message::where(function ($q) {
             $q->where('sender_id', auth()->id())
                 ->where('receiver_id', $this->user_id);
@@ -156,7 +162,6 @@ class User extends Authenticatable
             $q->where('sender_id', $this->user_id)
                 ->where('receiver_id', auth()->id());
         })->orderByDesc('sent_at')->first();
-
         return $message?->sent_at
             ? \Carbon\Carbon::parse($message->sent_at)->timezone('Asia/Manila')
             : null;
