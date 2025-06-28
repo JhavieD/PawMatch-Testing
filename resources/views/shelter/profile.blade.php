@@ -21,7 +21,7 @@
                     <div class="profile-upload">
                         <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
                         <div class="upload-buttons">
-                            <input type="file" name="profile_image" id="profile_image" class="profile-image-input">
+                            {{-- <input type="file" name="profile_image" id="profile_image" class="btn btn-outline"> --}}
                             <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
                             <button type="submit" name="remove_photo" value="1" class="btn btn-outline">Remove</button>
                         </div>

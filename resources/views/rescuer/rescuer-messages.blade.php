@@ -1,8 +1,8 @@
-@extends ('layouts.messages')
+@extends ('layouts.rescuer-messages')
 
 @section('title', 'Messages')
 
-@section('shelter-content')
+@section('rescuer-content')
 
 @php 
     use Illuminate\Support\Str;
@@ -13,9 +13,9 @@
 
     <!-- Conversations List -->
     <div class="conversations">
-        @foreach ($partners as $partner)
+        @forelse ($partners as $partner)
             <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
-                onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $partner->user_id]) }}'">
+                onclick="window.location.href='{{ route('rescuer.messages', ['receiver_id' => $partner->user_id]) }}'">
                 <div class="conversation-header">
                     <span class="conversation-name"> {{ $partner->name }} </span>
                     <span class="conversation-time">
@@ -26,7 +26,9 @@
                     {{ Str::limit($partner->decrypted_last_message ?? 'No messages yet.', 50) }}
                 </div>
             </div>
-        @endforeach
+        @empty
+            <div class="no-conversations">No conversations found.</div>
+        @endforelse
     </div>
 
     <!-- Chat Area -->
@@ -51,9 +53,7 @@
     </div>
 </div>
 
-
 <input type="hidden" id="receiver-id" value="{{ optional($receiver)->user_id }}">
-
 <input type="hidden" id="current-user-id" value="{{ auth()->id() }}">
 
 <script>
@@ -132,8 +132,6 @@
             // Real-time updates
             window.Echo.private(`chat.${currentUserId}`)
             .listen('MessageSent', (e) => {
-                console.log('Echo event payload:', e);
-
                 if (String(e.sender_id) === String(receiverId)) {
                     if (typeof renderMessage === "function") {
                         renderMessage(e);

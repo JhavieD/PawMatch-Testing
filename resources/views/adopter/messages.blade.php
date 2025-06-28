@@ -16,7 +16,13 @@
             <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                 onclick="window.location.href='{{ route('adopter.messages', ['receiver_id' => $partner->user_id]) }}'">
                 <div class="conversation-header">
-                    <span class="conversation-name">{{ $partner->shelterProfile->shelter_name ?? 'Unknown Shelter' }}</span>
+                    <span class="conversation-name">
+                        @if($partner->role === 'shelter')
+                            {{ $partner->shelterProfile->shelter_name ?? 'Unknown Shelter' }}
+                        @else
+                            {{ $partner->name ?? 'Unknown User' }}
+                        @endif
+                    </span>
                     <span class="conversation-time">
                         {{ $partner->last_message_time ? Carbon::parse($partner->last_message_time)->diffForHumans() : 'Now' }}
                     </span>
@@ -33,7 +39,13 @@
         <div class="chat-header">
             @if($receiver)
                 <img src="{{ $receiver->profile_picture_url ?? 'https://via.placeholder.com/40' }}" alt="Profile Image" class="profile-image" />
-                <div class="chat-name">{{ $receiver->shelterProfile->shelter_name ?? 'Unknown Shelter' }}</div>
+                <div class="chat-name">
+                    @if($receiver->role === 'shelter')
+                        {{ $receiver->shelterProfile->shelter_name ?? 'Unknown Shelter' }}
+                    @else
+                        {{ $receiver->name ?? 'Unknown User' }}
+                    @endif
+                </div>
             @else
                 <div class="chat-name">No Active Chats</div>
             @endif
@@ -60,9 +72,15 @@
 
         if (receiverId && currentUserId) {
             // Load old messages
-            fetch(`/messages?receiver_id=${receiverId}`)
+            chatMessages.innerHTML = '';
+            fetch(`/messages?receiver_id=${receiverId}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
                 .then(res => res.json())
                 .then(messages => {
+                    console.log('Fetched messages:', messages, 'receiverId:', receiverId, 'currentUserId:', currentUserId);
                     messages.forEach(renderMessage);
                     if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
                 });
@@ -182,4 +200,6 @@
         chatMessages.appendChild(bubble);
     }
 </script>
+
+<pre>{{ var_export($receiver, true) }}</pre>
 @endsection
