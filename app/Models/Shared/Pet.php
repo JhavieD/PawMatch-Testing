@@ -27,4 +27,8 @@ class Pet extends Model
     {
     return $this->hasMany(PetImage::class, 'pet_id', 'pet_id');
     }
+    public function getImageUrlAttribute()
+    {
+        return $this->images->first()->image_url ?? null;
+    }
 }   
