@@ -495,10 +495,6 @@ class AdminDashboardController extends Controller
                     });
                 return response()->json(['timeline' => $timeline]);
             }
-            
-             
-    
-
 
     public function verifications()
     {
