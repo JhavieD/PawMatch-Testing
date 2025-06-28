@@ -41,6 +41,7 @@ class ShelterDashboardController extends Controller
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
 
         return view('shelter.shelter_dashboard', compact(
+            'shelter',
             'availablePets',
             'pendingApplications',
             'successfulAdoptions',
@@ -155,22 +156,32 @@ class ShelterDashboardController extends Controller
             'eating_habits' => 'nullable|string',
         ]);
         $pet->update($request->only([
-            'name', 'species', 'breed', 'age', 'gender', 'size',
-            'description', 'adoption_status', 'behavior',
-            'daily_activity', 'special_needs', 'compatibility', 'eating_habits',
+            'name',
+            'species',
+            'breed',
+            'age',
+            'gender',
+            'size',
+            'description',
+            'adoption_status',
+            'behavior',
+            'daily_activity',
+            'special_needs',
+            'compatibility',
+            'eating_habits',
         ]));
 
         if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $image) {
-            $path = $image->store('petimages', 's3');
-            \Storage::disk('s3')->setVisibility($path, 'public');
-            $imageUrl = \Storage::disk('s3')->url($path);
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('petimages', 's3');
+                \Storage::disk('s3')->setVisibility($path, 'public');
+                $imageUrl = \Storage::disk('s3')->url($path);
 
-            \App\Models\Shared\PetImage::create([
-                'pet_id' => $pet->pet_id,
-                'image_url' => $imageUrl,
-            ]);
-        }
+                \App\Models\Shared\PetImage::create([
+                    'pet_id' => $pet->pet_id,
+                    'image_url' => $imageUrl,
+                ]);
+            }
         }
         if ($request->expectsJson()) {
             return response()->json(['success' => true]);
@@ -204,14 +215,14 @@ class ShelterDashboardController extends Controller
             ->filter()
             ->unique()
             ->values();
-        
+
         $partners = User::whereIn('user_id', $partnerIds)->get();
 
         $receiver = $partners->first(); // default chat open to first partner
 
         return view('shelter.messages', compact('partners', 'receiver'));
     }
-    
+
     public function profile()
     {
         $user = auth()->user();
@@ -231,7 +242,7 @@ class ShelterDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255', 
+            'address' => 'required|string|max:255',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -244,14 +255,14 @@ class ShelterDashboardController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
         ]);
-        
+
         $shelter->update([
             'address' => $request->address,
         ]);
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
-            $profileImagePath = $file->store('profileimage', 's3'); 
+            $profileImagePath = $file->store('profileimage', 's3');
             $fileType = $file->getClientMimeType();
 
             \DB::table('user_profile_pic')->updateOrInsert(
@@ -264,16 +275,16 @@ class ShelterDashboardController extends Controller
                 ]
             );
         }
-        
+
         if ($request->has('remove_photo')) {
             \DB::table('user_profile_pic')
-            ->where('user_id', $user->user_id)
-            ->update(['is_displayed' => false]); // hide image
+                ->where('user_id', $user->user_id)
+                ->update(['is_displayed' => false]); // hide image
         }
 
         return back()->with('success', 'Profile updated!');
     }
-    
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -316,4 +327,3 @@ class ShelterDashboardController extends Controller
         return back()->with('success', 'Image deleted successfully!');
     }
 }
-

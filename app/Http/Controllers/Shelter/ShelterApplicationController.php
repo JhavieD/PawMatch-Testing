@@ -72,4 +72,27 @@ class ShelterApplicationController extends Controller
 
         return response()->json(['message' => 'Information request sent successfully.']);
     }
+
+    // Return applications for a specific pet as JSON (for modal)
+    public function forPet($petId)
+    {
+        $applications = AdoptionApplication::where('pet_id', $petId)
+            ->with(['adopter.user', 'pet', 'answers'])
+            ->orderByDesc('submitted_at')
+            ->get();
+
+        $formatted = $applications->map(function ($app) {
+            $adopter = $app->adopter;
+            $user = $adopter ? $adopter->user : null;
+            return [
+                'application_id' => $app->id,
+                'applicant_name' => $user ? ($user->name ?? 'Unknown') : 'Unknown',
+                'phone' => $user ? ($user->phone ?? '') : '',
+                'submitted_at' => $app->submitted_at,
+                'status' => ucfirst($app->status),
+            ];
+        });
+
+        return response()->json(['applications' => $formatted]);
+    }
 }
