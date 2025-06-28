@@ -66,7 +66,7 @@
                         @endif
                         <div class="pet-info">
                             <h3 class="pet-name">{{ $pet->name }}</h3>
-                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city }}</p>
+                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p>
                             <span class="pet-status">{{ $pet->status }}</span>
                         </div>
                     </div>
@@ -270,7 +270,6 @@
                 const messageShelterBtn = document.getElementById('message-shelter');
                 messageShelterBtn.onclick = async function () {
                     const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
-                    console.log('Message Shelter button clicked, shelter user id:', shelterUserId);
                     if (shelterUserId) {
                         try {
                             const res = await fetch('/messages', {
@@ -289,7 +288,10 @@
                                 alert('Failed to send message: ' + (data.message || res.status));
                                 return;
                             }
-                            window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                            // Wait a short moment to ensure the message is saved before redirecting
+                            setTimeout(() => {
+                                window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                            }, 400);
                         } catch (e) {
                             alert('Error sending message: ' + e);
                         }

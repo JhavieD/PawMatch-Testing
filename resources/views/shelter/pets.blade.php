@@ -3,7 +3,7 @@
 @section('title', 'Pet Management')
 
 @section('shelter-content')
-<div class="container" style="margin-left: 250px;">
+<div class="container">
     <div class="header">
         <h1>Pet Management</h1>
         <button class="btn add-pet-btn">+ Add New Pet</button>
@@ -590,36 +590,33 @@
                 .then(response => response.json())
                 .then(data => {
                     const applicationsList = document.querySelector('.applications-list');
-                    applicationsList.innerHTML = ''; // Clear existing content
-
-                    if (data.applications.length > 0) {
-                        data.applications.forEach(application => {
-                            const applicationItem = document.createElement('div');
-                            applicationItem.classList.add('application-item', 'modal-application-item');
-                            
-                            let statusClass = application.status.toLowerCase();
-                            if (statusClass.includes('pending')) statusClass = 'pending';
-                            else if (statusClass.includes('approved')) statusClass = 'approved';
-                            else if (statusClass.includes('rejected')) statusClass = 'rejected';
-                            else if (statusClass.includes('available')) statusClass = 'available';
-
-
-                            applicationItem.innerHTML = `
-                                <div class="applicant-info">
-                                    <h3>${application.applicant_name}</h3>
-                                    <p>Submitted: ${new Date(application.submitted_at).toLocaleString()}</p>
-                                    <span class="status-badge status-${statusClass}">${application.status}</span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary" onclick="viewApplicationDetails(${application.id})">View Details</button>
-                                    <button class="btn btn-outline" onclick="messageApplicant('${application.applicant_name}')">Message</button>
+                    applicationsList.innerHTML = '';
+                    // Defensive: check for data.applications as array
+                    if (Array.isArray(data.applications) && data.applications.length > 0) {
+                        data.applications.forEach(app => {
+                            const applicantName = app.adopter && app.adopter.user ? app.adopter.user.name : 'Unknown';
+                            const phone = app.adopter && app.adopter.user ? app.adopter.user.phone || '' : '';
+                            const submittedAt = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : '';
+                            const status = app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : '';
+                            const statusClass = app.status ? `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` : '';
+                            applicationsList.innerHTML += `
+                                <div class=\"application-item\" style=\"display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;\">
+                                    <div class=\"application-info\">
+                                        <h3 style=\"font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;\">Application for ${petName}</h3>
+                                        <p style=\"color: #6b7280; margin-bottom: 0.5rem;\">From: <span style=\"font-weight: 500; color: #1a1a1a;\">${applicantName}</span>${phone ? ' • Phone: <span style=\\\"color:#1a1a1a;\\\">' + phone + '</span>' : ''}</p>
+                                        <div class=\"application-meta\" style=\"font-size: 0.875rem; color: #6b7280;\">
+                                            Submitted: ${submittedAt} <span class=\"status-badge ${statusClass}\" style=\"margin-left: 0.5rem;\">${status}</span>
+                                        </div>
+                                    </div>
+                                    <div class=\"action-buttons\" style=\"display: flex; gap: 0.5rem;\">
+                                        <button class=\"btn btn-primary\" onclick=\"viewApplicationDetails(${app.application_id})\">Review</button>
+                                        <button class=\"btn btn-outline\" onclick=\"messageApplicant('${applicantName}')\">Message</button>
+                                    </div>
                                 </div>
                             `;
-
-                            applicationsList.appendChild(applicationItem);
                         });
                     } else {
-                        applicationsList.innerHTML = '<div>No applications found.</div>';
+                        applicationsList.innerHTML = '<div>No applications found for this pet.</div>';
                     }
                 })
                 .catch(error => {
