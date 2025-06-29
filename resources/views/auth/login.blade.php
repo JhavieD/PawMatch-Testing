@@ -7,7 +7,39 @@
 @endsection
 
 @section('content')
-<!-- Main Content -->
+<!-- Account Created Modal -->
+@if (session('account_created'))
+<div id="accountCreatedModal" class="modal-overlay">
+    <div class="modal-box">
+        <button onclick="closeAccountCreatedModal()" class="modal-close">&times;</button>
+        <div class="modal-checkmark">
+            <svg viewBox="0 0 48 48" width="56" height="56">
+                <circle cx="24" cy="24" r="24" fill="#4a90e2"/>
+                <polyline points="14,26 22,34 34,18" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="modal-content">
+            <h2>Your account has been created</h2>
+            <p>You can now log in to your PawMatch account and start your journey!</p>
+            <button onclick="closeAccountCreatedModal()" class="modal-btn">Okay</button>
+        </div>
+    </div>
+</div>
+@endif
+<style>
+</style>
+<script>
+function closeAccountCreatedModal() {
+    document.getElementById('accountCreatedModal').style.display = 'none';
+}
+window.addEventListener('click', function(e) {
+    var modal = document.getElementById('accountCreatedModal');
+    if (modal && e.target === modal) {
+        closeAccountCreatedModal();
+    }
+});
+</script>
+
 <main class="auth-main main-content">
     <div class="auth-container">
         <!-- Login Card -->
