@@ -1,4 +1,6 @@
-/* Reset and Base Styles */
+/* =====================
+   Reset and Base Styles
+   ===================== */
 * {
     margin: 0;
     padding: 0;
@@ -11,7 +13,9 @@ body {
     min-height: 100vh;
 }
 
-/* Navigation Styles */
+/* =====================
+   Navigation Styles
+   ===================== */
 .navbar {
     background: white;
     padding: 1rem 2rem;
@@ -37,6 +41,11 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .nav-links {
@@ -45,28 +54,223 @@ body {
     align-items: center;
 }
 
-.nav-links a {
+.nav-link {
     color: #4b5563;
     text-decoration: none;
-    transition: color 0.2s ease;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    position: relative;
+}
+
+.nav-link.active,
+.nav-link:active {
+    color: #4a90e2;
+    font-weight: 700;
+    background: #e3f2fd;
+    box-shadow: 0 2px 8px rgba(74,144,226,0.06);
+}
+
+.nav-link.active::after {
+    content: '';
+    display: block;
+    height: 3px;
+    width: 60%;
+    background: #4a90e2;
+    border-radius: 2px;
+    margin: 0.25rem auto 0 auto;
 }
 
 .nav-links a:hover {
     color: #4a90e2;
+    background: #f3f4f6;
 }
 
 .nav-links .btn {
-    padding: 0.5rem 1rem;
     background: #4a90e2;
     color: white;
+    padding: 0.5rem 1.5rem;
     border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
 .nav-links .btn:hover {
     background: #357abd;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
-/* Button Styles */
+/* =====================
+   Hamburger Menu Button
+   ===================== */
+.navbar-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #4a90e2;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.navbar-hamburger:hover {
+    background: #e3f2fd;
+    transform: scale(1.05);
+}
+
+/* =====================
+   Mobile Navigation Overlay
+   ===================== */
+.navbar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+}
+
+/* =====================
+   Mobile Navigation Menu
+   ===================== */
+.mobile-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 270px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.13);
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2rem;
+    padding-top: 0.5rem;
+    padding-left: 0;
+}
+
+.mobile-nav-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 1.2rem 1.2rem 1rem 1.2rem;
+    border-bottom: 1.5px solid #e5e7eb;
+    background: #fff;
+    border-radius: 0;
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.mobile-logo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: auto;
+    padding: 0.2rem 0;
+}
+
+.mobile-logo img {
+    height: 42px;
+    display: block;
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(74,144,226,0.08);
+    background: #fff;
+    padding: 0.2rem;
+}
+
+.mobile-nav-close {
+    position: absolute;
+    top: 1.2rem;
+    right: 0.7rem;
+    background: none;
+    border: none;
+    font-size: 1.7rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem 0.7rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+    margin: 0;
+    z-index: 2;
+}
+
+.mobile-nav-close:hover {
+    background: #f3f4f6;
+    color: #4a90e2;
+}
+
+.mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1.2rem 0.5rem 0 0.5rem;
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1.1rem;
+    color: #4b5563;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    font-size: 1.08rem;
+    margin: 0 0.2rem;
+    box-shadow: none;
+}
+
+.mobile-nav-link:hover {
+    background: #f3f4f6;
+    color: #4a90e2;
+}
+
+.mobile-nav-link.active {
+    background: #4a90e2;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(74,144,226,0.08);
+}
+
+.mobile-nav-link i {
+    width: 22px;
+    text-align: center;
+    font-size: 1.15rem;
+}
+
+.mobile-nav-link span {
+    font-size: 1.08rem;
+}
+
+.mobile-nav-header:after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 95%;
+    background: #f3f4f6;
+    margin: 0.7rem auto 0 0.5rem;
+    border-radius: 2px;
+}
+
+/* =====================
+   Button Styles
+   ===================== */
 .btn {
     display: inline-block;
     padding: 1rem 2rem;
@@ -87,6 +291,8 @@ body {
 
 .btn-primary:hover {
     background: #357abd;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
 .btn-secondary {
@@ -99,9 +305,51 @@ body {
     background: #e3f2fd;
 }
 
-/* Responsive Design */
+/* =====================
+   Responsive Design
+   ===================== */
 @media (max-width: 768px) {
-    .nav-links {
-        display: none;
+    .navbar {
+        display: none !important;
     }
+    .logo {
+        display: none !important;
+    }
+    .nav-links {
+        display: none !important;
+        border: none !important;
+    }
+    .navbar-hamburger {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1100;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 0.5rem 0.7rem;
+        border-radius: 8px;
+        margin: 1.2rem 0 0 1.2rem;
+        float: none;
+    }
+}
+
+/* =====================
+   Smooth Transitions
+   ===================== */
+* {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* =====================
+   Main Content Wrapper
+   ===================== */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+body.mobile-nav-open .navbar-hamburger {
+    display: none !important;
 }

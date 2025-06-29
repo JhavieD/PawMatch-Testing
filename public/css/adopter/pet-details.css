@@ -1,0 +1,108 @@
+.pet-details-page {
+    background: #f2f6fc;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+.pet-details-page .content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+.pet-details-page .pet-details-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+.pet-details-page .pet-details-grid {
+    display: flex;
+    gap: 2rem;
+}
+.pet-details-page .pet-images-section {
+    flex: 1 1 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.pet-details-page .main-image-container {
+    width: 100%;
+    background: #f8fafc;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.pet-details-page .pet-detail-image {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+.pet-details-page .thumbnail-grid {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.pet-details-page .thumbnail-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #e0e7ef;
+}
+.pet-details-page .pet-info-section {
+    flex: 1 1 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.pet-details-page .pet-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.pet-details-page .pet-description {
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+.pet-details-page .pet-details-grid .detail-item {
+    margin-bottom: 0.5rem;
+}
+.pet-details-page .pet-section {
+    margin-top: 1.5rem;
+}
+.pet-details-page .pet-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.pet-details-page .health-list {
+    list-style: disc inside;
+    color: #64748b;
+    margin-left: 1rem;
+}
+.pet-details-page .shelter-info {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+.pet-details-page .pet-actions {
+    margin-top: 2rem;
+}
+.pet-details-page .btn-primary {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.pet-details-page .btn-primary:hover {
+    background: #2563eb;
+} 

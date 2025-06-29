@@ -1,6 +1,5 @@
 @extends('layouts.adopter-messages')
 
-
 @section('title', 'Messages - PawMatch')
 
 @section('adopter-content')

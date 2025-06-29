@@ -2,7 +2,7 @@
 
 @section('styles')
     <link rel="stylesheet" href="{{ asset('css/adopter/adopter.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/adopter/adopter-messages.css') }}">
+    @stack('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 @endsection
 
@@ -17,4 +17,4 @@
             @yield('adopter-content')
         </main>
     </div>
-@endsection
+@endsection 
