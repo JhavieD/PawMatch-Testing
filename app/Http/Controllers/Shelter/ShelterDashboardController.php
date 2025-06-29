@@ -39,6 +39,7 @@ class ShelterDashboardController extends Controller
                 return Message::with('sender')->find($id);
             });
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
+        $verification = $shelter->verifications()->latest()->first();
 
         return view('shelter.shelter_dashboard', compact(
             'shelter',
@@ -51,7 +52,8 @@ class ShelterDashboardController extends Controller
             'recentPets',
             'recentApplications',
             'recentMessages',
-            'recentReviews'
+            'recentReviews',
+            'verification'
             // 'profilePictureUrl' // No longer needed
         ));
     }
