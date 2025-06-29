@@ -17,6 +17,17 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+        // If shelter, combine Step 2 address fields into 'address' for validation (must be before validation)
+        if ($request->role === 'shelter') {
+            $usePersonal = $request->input('usePersonalAddress', 'off') === 'on';
+            if ($usePersonal) {
+                $address = trim($request->street_address) . ', ' . trim($request->city) . ', ' . trim($request->zip_code);
+                $request->merge(['address' => $address]);
+            } else {
+                $address = trim($request->shelter_street_address) . ', ' . trim($request->shelter_city) . ', ' . trim($request->shelter_zip_code);
+                $request->merge(['address' => $address]);
+            }
+        }
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -31,9 +42,16 @@ class RegisterController extends Controller
         if ($request->role === 'shelter') {
             $request->validate([
                 'shelter_name' => ['required', 'string', 'max:255'],
-                'shelter_location' => ['required', 'string', 'max:255'],
                 'shelter_valid_id' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
             ]);
+            $usePersonal = $request->input('usePersonalAddress', 'off') === 'on';
+            if (!$usePersonal) {
+                $request->validate([
+                    'shelter_street_address' => ['required', 'string', 'max:255'],
+                    'shelter_city' => ['required', 'string', 'max:255'],
+                    'shelter_zip_code' => ['required', 'string', 'max:20'],
+                ]);
+            }
         }
 
         // Additional validation for rescuer role
@@ -56,7 +74,6 @@ class RegisterController extends Controller
 
         // Handle shelter-specific data
         if ($request->role === 'shelter') {
-            if ($request->role === 'shelter') {
             $request->validate([
                 'shelter_valid_id' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             ]);
@@ -70,7 +87,7 @@ class RegisterController extends Controller
             }
             $user->shelter()->create([
                 'shelter_name' => $request->shelter_name,
-                'location' => $request->shelter_location,
+                'location' => $address,
                 'contact_info' => $validated['phone_number'],
                 'verified' => false,
                 'user_id' => $user->user_id,
@@ -86,7 +103,6 @@ class RegisterController extends Controller
                 ]);
             }
         }
-    }
 
         // Handle rescuer-specific data
         if ($request->role === 'rescuer') {
