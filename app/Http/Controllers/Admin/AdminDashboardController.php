@@ -24,24 +24,10 @@ class AdminDashboardController extends Controller
     {
         $totalUsers = User::count();
         $activeAdoptions = AdoptionApplication::where('status', 'approved')->count();
-        $pendingReports = StrayReports::where('status', 'pending')->count();
-        $investigatingReports = StrayReports::where('status', 'investigating')->count();
+        $pendingReports = 2; // This will be replaced with actual stray reports count
         $newUsersToday = User::whereDate('created_at', today())->count();
 
-        // Recent activity
-        $recentReports = StrayReports::with('adopter.user')
-            ->orderByDesc('reported_at')
-            ->limit(5)
-            ->get();
-
-        return view('admin.admin_dashboard', compact(
-            'totalUsers', 
-            'activeAdoptions', 
-            'pendingReports', 
-            'investigatingReports',
-            'newUsersToday',
-            'recentReports'
-        ));
+        return view('admin.admin_dashboard', compact('totalUsers', 'activeAdoptions', 'pendingReports', 'newUsersToday'));
     }
 
     public function applications(Request $request)
@@ -391,8 +377,9 @@ class AdminDashboardController extends Controller
     {
         return view('admin.profile', [
             'user' => auth()->user()
-        ]);    
+        ]);
     }
+
 
     public function settings()
     {
@@ -423,56 +410,50 @@ class AdminDashboardController extends Controller
     }
 
     public function strayReports(Request $request)
-    {
-        // Start query with adopter relationship
-        $query = StrayReports::with('adopter.user');
+        {
+            // Start query with adopter relationship
+            $query = \App\Models\StrayReports::with('adopter');
 
-        // Filter by search term
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->where('report_id', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%")
-                  ->orWhere('animal_type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by status if provided
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-
-        $reports = $query->orderByDesc('reported_at')->paginate(12);
-
-        // Attach timeline for each report
-        foreach ($reports as $report) {
-            $timeline = DB::table('admin_actions')
-                ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-                ->where('target_report_id', $report->report_id)
-                ->where('action_type', 'status_update')
-                ->orderBy('created_at', 'asc')
-                ->select('admin_actions.*', 'users.first_name', 'users.last_name')
-                ->get()
-                ->map(function($action) {
-                    return [
-                        'date' => \Carbon\Carbon::parse($action->created_at)->format('M d, Y g:i A'),
-                        'content' => $action->reason,
-                        'author' => ($action->first_name && $action->last_name) 
-                            ? $action->first_name . ' ' . $action->last_name 
-                            : 'Admin',
-                    ];
+            // Search filter (searches description and location)
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function($q) use ($search) {
+                    $q->where('description', 'like', "%$search%")
+                    ->orWhere('location', 'like', "%$search%");
                 });
-            $report->timeline = $timeline;
+            }
+
+            // Status filter
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+
+            // Paginate reports
+            $reports = $query->orderByDesc('reported_at')->paginate(20);
+
+            // Attach timeline to each report
+            foreach ($reports as $report) {
+                $timeline = \DB::table('admin_actions')
+                    ->where('action_type', 'status_update')
+                    ->where('target_report_id', $report->report_id)
+                    ->orderBy('created_at', 'asc')
+                    ->get()
+                    ->map(function($action) {
+                        return [
+                            'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
+                            'content' => $action->reason,
+                        ];
+                    });
+                $report->timeline = $timeline;
+            }
+
+            return view('admin.stray-reports', compact('reports'));
         }
 
-        return view('admin.stray-reports', compact('reports'));
-    }
-
-    public function updateStatus(Request $request, $id)
+        public function updateStatus(Request $request, $id)
     {
         try {
-            $report = StrayReports::find($id);
+            $report = \App\Models\StrayReports::find($id);
             if (!$report) {
                 return response()->json(['success' => false, 'message' => 'Report not found.'], 404);
             }
@@ -486,7 +467,7 @@ class AdminDashboardController extends Controller
 
             DB::table('admin_actions')->insert([
                 'action_type' => 'status_update',
-                'target_report_id' => $report->report_id,
+                'target_report_id' => $report->id,
                 'reason' => 'Status updated to ' . $request->status,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -500,48 +481,6 @@ class AdminDashboardController extends Controller
     }
         
     public function strayReportTimeline($id)
-    {
-        $timeline = \DB::table('admin_actions')
-            ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-            ->where('target_report_id', $id)
-            ->where('action_type', 'status_update') // Only status updates in timeline
-            ->orderBy('created_at', 'desc') // Latest first
-            ->select('admin_actions.*', 'users.first_name', 'users.last_name')
-            ->get()
-            ->map(function($action) {
-                return [
-                    'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
-                    'content' => $action->reason,
-                    'type' => $action->action_type,
-                    'author' => ($action->first_name && $action->last_name) 
-                        ? $action->first_name . ' ' . $action->last_name 
-                        : 'Admin',
-                ];
-            });
-        return response()->json(['timeline' => $timeline]);
-    }
-    
-    //for comments ito
-    public function strayReportComments($id)
-    {
-        $comments = \DB::table('admin_actions') //table nito for comments
-            ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-            ->where('action_type', 'comment')
-            ->where('target_report_id', $id)
-            ->orderBy('created_at', 'desc') // descending order ng comments una ung latest
-            ->select('admin_actions.*', 'users.first_name', 'users.last_name')
-            ->get()
-            ->map(function($action) {
-                return [
-                    'author' => ($action->first_name && $action->last_name) 
-                        ? $action->first_name . ' ' . $action->last_name 
-                        : 'Admin',
-                    'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
-                    'content' => $action->reason,
-                ];
-            });
-        return response()->json(['comments' => $comments]);
-    }
             {
                 $timeline = \DB::table('admin_actions')
                     ->where('action_type', 'status_update')
@@ -717,209 +656,9 @@ class AdminDashboardController extends Controller
 
         $user = User::find($verification->submitted_by);
         
+        // You can implement notification logic here
+        // Notification::send($user, new VerificationStatusUpdated($status));
+
         return response()->json(['message' => 'Verification status updated successfully']);
     }
-
-    public function addComment(Request $request, $id)
-    {
-        try {
-            $report = StrayReports::find($id);
-            if (!$report) {
-                return response()->json(['success' => false, 'message' => 'Report not found.'], 404);
-            }
-
-            $request->validate([
-                'comment' => 'required|string|max:1000'
-            ]);
-
-            DB::table('admin_actions')->insert([
-                'action_type' => 'comment',
-                'target_report_id' => $report->report_id,
-                'reason' => $request->comment,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'admin_id' => auth()->id(),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'comment' => [
-                    'author' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
-                    'date' => now()->format('F d, Y h:i A'),
-                    'content' => $request->comment
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    public function findNearbyShelters($reportId)
-    {
-        try {
-            $report = StrayReports::findOrFail($reportId);
-            $reportLocation = strtolower($report->location);
-            $locationKeywords = [];
-            
-            $parts = preg_split('/[,|]/', $reportLocation);
-            foreach ($parts as $part) {
-                $cleaned = trim($part);
-                
-                if (preg_match('/\b(\w+(?:\s+\w+)?)\s+(city|town|municipality)\b/i', $cleaned, $matches)) {
-                    $cityName = strtolower(trim($matches[1]));
-                    if (strlen($cityName) > 2) { 
-                        $locationKeywords[] = $cityName;
-                    }
-                }
-                
-                $words = preg_split('/\s+/', $cleaned);
-                foreach ($words as $word) {
-                    $word = strtolower(trim($word));
-                    
-                    if (strlen($word) > 4 && 
-                        !in_array($word, ['road', 'street', 'avenue', 'metro', 'private', 'barangay', 'subdivision']) &&
-                        !preg_match('/^\d+$/', $word)) { 
-                        $locationKeywords[] = $word;
-                    }
-                }
-            }
-            
-            
-            $locationKeywords = array_unique(array_filter($locationKeywords));
-            
-            // Find shelters - INCLUDE ALL SHELTERS (verified and unverified)
-            $shelters = \DB::table('shelters')
-                ->join('users', 'shelters.user_id', '=', 'users.user_id')
-                // REMOVED: ->where('shelters.verified', 1) 
-                ->select(
-                    'shelters.shelter_id',
-                    'shelters.shelter_name',
-                    'shelters.location',
-                    'shelters.contact_info',
-                    'shelters.verified', 
-                    'users.email',
-                    'users.first_name',
-                    'users.last_name'
-                )
-                ->get();
-
-            // Sort shelters by location relevance with verification status
-            $sortedShelters = $shelters->map(function($shelter) use ($locationKeywords) {
-                $shelterLocation = strtolower($shelter->location);
-                $matchScore = 0;
-                
-                
-                foreach ($locationKeywords as $keyword) {
-             
-                    if (strpos($shelterLocation, $keyword) !== false) {
-                        $matchScore += 2; 
-                    }
-                    
-                    
-                    if (strpos($keyword, $shelterLocation) !== false && strlen($shelterLocation) > 3) {
-                        $matchScore += 1;
-                    }
-                    
-                    
-                    if (preg_match('/\b(\w+(?:\s+\w+)?)\s+(city|town|municipality)\b/i', $shelterLocation, $shelterMatches)) {
-                        $shelterCityName = strtolower(trim($shelterMatches[1]));
-                        if ($keyword === $shelterCityName) {
-                            $matchScore += 3; 
-                        }
-                    }
-                }
-                
-             
-                $shelter->match_score = $matchScore;
-                $shelter->distance_text = $matchScore >= 2 ? 'Same Area' : 'Different Area';
-                
-                // ADD VERIFICATION STATUS TO SHELTER NAME
-                $shelter->display_name = $shelter->shelter_name . ($shelter->verified ? '' : ' (Unverified)');
-                $shelter->verification_status = $shelter->verified ? 'verified' : 'unverified';
-                
-                return $shelter;
-            })->sortByDesc(function($shelter) {
-                // PRIORITIZE VERIFIED SHELTERS, THEN BY MATCH SCORE
-                return ($shelter->verified ? 1000 : 0) + $shelter->match_score;
-            });
-
-            return response()->json([
-                'success' => true,
-                'shelters' => $sortedShelters->values()->all()
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function markAsInvestigating(Request $request, $reportId)
-    {
-        try {
-            $request->validate([
-                'selected_shelters' => 'required|array',
-                'selected_shelters.*' => 'exists:shelters,shelter_id',
-                'notification_message' => 'nullable|string|max:500'
-            ]);
-
-            $report = StrayReports::findOrFail($reportId);
-            
-            // Check if already investigating
-            if ($report->status === 'investigating') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Report is already being investigated'
-                ], 400);
-            }
-
-            // Update report status
-            $report->status = 'investigating';
-            $report->save();
-
-            // Get shelter names for the timeline message
-            $shelterNames = \DB::table('shelters')
-                ->whereIn('shelter_id', $request->selected_shelters)
-                ->pluck('shelter_name')
-                ->toArray();
-
-            $shelterList = implode(', ', $shelterNames);
-
-            // CREATE NOTIFICATION RECORDS FOR EACH SELECTED SHELTER
-            foreach ($request->selected_shelters as $shelterId) {
-                \DB::table('stray_report_notifications')->insert([
-                    'report_id' => $report->report_id,
-                    'shelter_id' => $shelterId,
-                    'sent_at' => now(),
-                    'is_read' => false,
-                    'admin_message' => $request->notification_message, 
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-            }
-
-            // Create admin action for timeline
-            \DB::table('admin_actions')->insert([
-                'action_type' => 'status_update',
-                'target_report_id' => $report->report_id,
-                'reason' => "Status changed to investigating. Notified shelters: {$shelterList}",
-                'admin_id' => auth()->id(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Report marked as investigating and shelters notified successfully!'
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-}
+} 
