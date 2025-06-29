@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('styles')
@@ -21,9 +22,13 @@
                     </h2>
                     
                     @php
-                        $verification = App\Models\Shelter\ShelterVerification::where('shelter_id', Auth::user()->shelter->shelter_id)
-                            ->latest()
-                            ->first();
+                        $shelter = Auth::user()->shelter;
+                        $verification = null;
+                        if ($shelter) {
+                            $verification = App\Models\Shelter\ShelterVerification::where('shelter_id', $shelter->shelter_id)
+                                ->latest()
+                                ->first();
+                        }
                     @endphp
                     
                     <div class="flex items-center space-x-4">
@@ -31,7 +36,7 @@
                             <div class="px-4 py-2 rounded-full text-sm font-medium
                                 {{ $verification->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                                    ($verification->status === 'approved' ? 'bg-green-100 text-green-800' : 
-                                   'bg-red-100 text-red-800') }}">
+                                    'bg-red-100 text-red-800') }}">
                                 Verification Status: {{ ucfirst($verification->status) }}
                             </div>
                         @else
