@@ -54,7 +54,7 @@
         <div class="form-group">
             <label>Photos</label>
             <div class="image-upload" onclick="document.getElementById('fileInput').click()">
-                <input type="file" id="fileInput" name="photos[]" multiple accept="image/*" style="display:none;">
+                <input type="file" id="fileInput" name="photos[]" multiple accept="image/*" style="display:none;font-family: 'Inter', sans-serif;">
                 <p>Click to upload photos</p>
                 <p class="help-text">You can upload multiple photos</p>
             </div>
@@ -66,12 +66,12 @@
         <div class="form-group">
             <label>Location</label>
             <div class="location-group">
-                <input type="text" name="street" placeholder="Street Address" required>
-                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="street" placeholder="Street Address" required aria-required="true" style="font-family: 'Inter', sans-serif;">
+                <input type="text" name="city" placeholder="City" required aria-required="true" style="font-family: 'Inter', sans-serif;">
             </div>
             <div class="location-group" style="margin-top: 1rem;">
-                <input type="text" name="state" placeholder="State" required>
-                <input type="text" name="zip" placeholder="ZIP Code" required>
+                <input type="text" name="state" placeholder="State" required aria-required="true" style="font-family: 'Inter', sans-serif;">
+                <input type="text" name="zip" placeholder="ZIP Code" required aria-required="true" style="font-family: 'Inter', sans-serif;">
             </div>
         </div>
 
@@ -82,18 +82,18 @@
 
         <div class="form-group">
             <label for="contactName">Your Contact Information</label>
-            <input type="text" id="contactName" name="contactName" placeholder="Your Name" required>
+            <input type="text" id="contactName" name="contactName" placeholder="Your Name" required aria-required="true" style="font-family: 'Inter', sans-serif;">
         </div>
 
         <div class="form-group">
-            <input type="tel" id="contactPhone" name="contactPhone" placeholder="Phone Number" required>
+            <input type="tel" id="contactPhone" name="contactPhone" placeholder="Phone Number" required aria-required="true" style="font-family: 'Inter', sans-serif;">
         </div>
 
         <div class="form-group">
-            <input type="email" id="contactEmail" name="contactEmail" placeholder="Email Address" required>
+            <input type="email" id="contactEmail" name="contactEmail" placeholder="Email Address" required aria-required="true" style="font-family: 'Inter', sans-serif;">
         </div>
 
-        <button type="submit" class="btn">Submit Report</button>
+        <button type="submit" class="btn" aria-label="Submit Report" style="font-family: 'Inter', sans-serif;">Submit Report</button>
     </form>
 </div>
 

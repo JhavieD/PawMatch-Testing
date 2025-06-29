@@ -109,4 +109,24 @@ class AdopterPetListingsController extends Controller
     $pet->load(['images', 'shelter']);
     return view('adopter.pet-details', compact('pet'));
     }
+
+    /**
+     * Toggle favorite (save/remove) for a pet for the logged-in adopter.
+     */
+    public function toggleFavorite(Request $request, $petId)
+    {
+        $user = auth()->user();
+        if (!$user || !$user->adopter) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $adopter = $user->adopter;
+        $pet = Pet::findOrFail($petId);
+        $isFavorite = $adopter->savedPets()->where('saved_pets.pet_id', $petId)->exists();
+        if ($isFavorite) {
+            $adopter->savedPets()->detach($petId);
+        } else {
+            $adopter->savedPets()->attach($petId);
+        }
+        return response()->json(['is_favorite' => !$isFavorite]);
+    }
 } 

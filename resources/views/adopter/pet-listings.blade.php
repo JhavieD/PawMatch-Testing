@@ -2,6 +2,10 @@
 
 @section('title', 'Pet-Listings - PawMatch')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/adopter/pet-listing.css') }}">
+@endpush
+
 @section('adopter-content')
 <div class="main-container">
     <!-- Filters Panel -->
@@ -49,20 +53,14 @@
 
     <!-- Main Content -->
     <main>
-        <div class="search-bar">
-            <form action="{{ route('adopter.pet-listings') }}" method="GET">
-                <input type="text" name="search" class="search-input" placeholder="Search pets by name, breed, or location..." value="{{ request('search') }}">
-            </form>
-        </div>
-
         <div class="pet-grid">
         @forelse($pets as $pet)
             @if($pet->status === 'available' || $pet->adoption_status === 'available')
                     <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
                         @if($pet->images->isNotEmpty())
-                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }}" class="pet-image">
+                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
                         @else
-                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available" class="pet-image">
+                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available for {{ $pet->name }}" class="pet-image" style="font-family: 'Inter', sans-serif;">
                         @endif
                         <div class="pet-info">
                             <h3 class="pet-name">{{ $pet->name }}</h3>
@@ -92,7 +90,7 @@
         </div>
         <div class="modal-body">
             <div class="pet-gallery">
-                <img src="" alt="Main pet photo" class="main-pet-image" id="mainImage">
+                <img src="" alt="Main pet photo" class="main-pet-image" id="mainImage" style="font-family: 'Inter', sans-serif;">
                 <div class="thumbnail-grid" id="thumbnailGrid">
                     <!-- Thumbnails will be populated dynamically -->
                 </div>
@@ -246,7 +244,7 @@
             if (petImagesData.images.length > 0) {
                 mainImage.src = petImagesData.images[0].image_url;
                 thumbnailGrid.innerHTML = petImagesData.images.map(img => 
-                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail">`
+                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail" style="font-family: 'Inter', sans-serif;">`
                 ).join('');
             } else {
                 mainImage.src = '';
@@ -298,8 +296,23 @@
             });
             const data = await response.json();
             favoriteButton.textContent = data.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+            if (typeof refreshFavoritePetsSection === 'function') {
+                refreshFavoritePetsSection();
+            }
         } catch (error) {
             console.error('Error toggling favorite:', error);
+        }
+    });
+
+    // Auto-open modal if redirected with #pet-{id}
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#pet-')) {
+            const petId = hash.replace('#pet-', '');
+            const card = document.querySelector(`.pet-card[data-pet-id="${petId}"]`);
+            if (card) {
+                card.click();
+            }
         }
     });
 
