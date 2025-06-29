@@ -1,7 +1,6 @@
-
 @extends('layouts.pet-personality-quiz')
 
-@section('title', 'Pet Personality Quiz')
+@section('title', 'Pet Personality Quiz - PawMatch')
 
 @section('adopter-content')
 <div class="quiz-container">
