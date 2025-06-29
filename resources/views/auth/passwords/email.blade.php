@@ -1,130 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - PawMatch</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+@extends('layouts.app')
 
-        body {
-            background: linear-gradient(rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.2));
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+@section('title', 'Reset Password - PawMatch')
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin: 2rem auto;
-        }
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/shared/auth.css') }}">
+@endsection
 
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #333;
-        }
+@section('content')
+<div class="flex-1 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md mx-auto">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <div class="auth-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Reset Password</h1>
+                    <p class="text-gray-600 mt-2">Enter your email to receive a password reset link</p>
+                </div>
+                
+                @if (session('status'))
+                    <div class="success-message">
+                        <div class="error-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="error-content">
+                            <p>{{ session('status') }}</p>
+                        </div>
+                    </div>
+                @endif
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+                <form method="POST" action="{{ route('password.email') }}" class="auth-form">
+                    @csrf
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Email Address
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                required 
+                                value="{{ old('email') }}" 
+                                placeholder="Enter your email address"
+                                class="form-input @error('email') is-invalid @enderror"
+                            >
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                        @error('email')
+                            <span class="invalid-feedback" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </span>
+                        @enderror
+                    </div>
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #666;
-        }
+                    <button type="submit" class="auth-btn">
+                        <span>Send Password Reset Link</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
 
-        input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .btn:hover {
-            background: #357abd;
-        }
-
-        .form-footer {
-            margin-top: 1.5rem;
-            text-align: center;
-        }
-
-        .form-footer a {
-            color: #4a90e2;
-            text-decoration: none;
-        }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #dc2626;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-
-        .success-message {
-            color: #059669;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Reset Password</h1>
-        
-        @if (session('status'))
-            <div class="success-message">
-                {{ session('status') }}
+                <div class="auth-footer">
+                    <p>
+                        <a href="{{ route('login') }}" class="auth-link">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Login
+                        </a>
+                    </p>
+                </div>
             </div>
-        @endif
-
-        <form method="POST" action="{{ route('password.email') }}">
-            @csrf
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required value="{{ old('email') }}" placeholder="Enter your email">
-                @error('email')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <button type="submit" class="btn">Send Password Reset Link</button>
-
-            <div class="form-footer">
-                <p><a href="{{ route('login') }}">Back to Login</a></p>
-            </div>
-        </form>
+        </div>
     </div>
-</body>
-</html> 
+</div>
+@endsection 

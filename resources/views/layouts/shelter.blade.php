@@ -30,8 +30,9 @@
                                 ->first();
                         }
                     @endphp
-                    
-                    <div class="flex items-center space-x-4">
+
+                    <!-- Work in Progress -->
+                    <!-- <div class="flex items-center space-x-4">
                         @if($verification)
                             <div class="px-4 py-2 rounded-full text-sm font-medium
                                 {{ $verification->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
@@ -45,7 +46,9 @@
                                 Get Verified
                             </a>
                         @endif
-                    </div>
+                    </div> -->
+                    <!-- Work in Progress -->
+                    
                 </div>
             </header>
             @yield('shelter-content')

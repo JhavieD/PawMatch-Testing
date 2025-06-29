@@ -391,7 +391,7 @@ class AdminDashboardController extends Controller
     {
         return view('admin.profile', [
             'user' => auth()->user()
-        ]);
+        ]);    
     }
 
     public function settings()
@@ -542,6 +542,20 @@ class AdminDashboardController extends Controller
             });
         return response()->json(['comments' => $comments]);
     }
+            {
+                $timeline = \DB::table('admin_actions')
+                    ->where('action_type', 'status_update')
+                    ->where('target_report_id', $id)
+                    ->orderBy('created_at', 'asc')
+                    ->get()
+                    ->map(function($action) {
+                        return [
+                            'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
+                            'content' => $action->reason,
+                        ];
+                    });
+                return response()->json(['timeline' => $timeline]);
+            }
 
     public function verifications()
     {
@@ -703,9 +717,6 @@ class AdminDashboardController extends Controller
 
         $user = User::find($verification->submitted_by);
         
-        // You can implement notification logic here
-        // Notification::send($user, new VerificationStatusUpdated($status));
-
         return response()->json(['message' => 'Verification status updated successfully']);
     }
 
@@ -747,40 +758,33 @@ class AdminDashboardController extends Controller
     {
         try {
             $report = StrayReports::findOrFail($reportId);
-            
-            // Extract location keywords from the report - MORE PRECISE VERSION
             $reportLocation = strtolower($report->location);
-            
-            // Extract only the main city/area names (be more selective)
             $locationKeywords = [];
             
-            // Split by common delimiters and clean up
             $parts = preg_split('/[,|]/', $reportLocation);
             foreach ($parts as $part) {
                 $cleaned = trim($part);
                 
-                // Look specifically for city patterns and extract the city name
                 if (preg_match('/\b(\w+(?:\s+\w+)?)\s+(city|town|municipality)\b/i', $cleaned, $matches)) {
                     $cityName = strtolower(trim($matches[1]));
-                    if (strlen($cityName) > 2) { // Only significant city names
+                    if (strlen($cityName) > 2) { 
                         $locationKeywords[] = $cityName;
                     }
                 }
                 
-                // Also look for standalone significant location words (but be more selective)
                 $words = preg_split('/\s+/', $cleaned);
                 foreach ($words as $word) {
                     $word = strtolower(trim($word));
-                    // Only add if it's a significant location word and not common words
+                    
                     if (strlen($word) > 4 && 
                         !in_array($word, ['road', 'street', 'avenue', 'metro', 'private', 'barangay', 'subdivision']) &&
-                        !preg_match('/^\d+$/', $word)) { // Not just numbers
+                        !preg_match('/^\d+$/', $word)) { 
                         $locationKeywords[] = $word;
                     }
                 }
             }
             
-            // Remove duplicates and empty values
+            
             $locationKeywords = array_unique(array_filter($locationKeywords));
             
             // Find shelters - INCLUDE ALL SHELTERS (verified and unverified)
@@ -792,7 +796,7 @@ class AdminDashboardController extends Controller
                     'shelters.shelter_name',
                     'shelters.location',
                     'shelters.contact_info',
-                    'shelters.verified', // ✅ ADD THIS FIELD
+                    'shelters.verified', 
                     'users.email',
                     'users.first_name',
                     'users.last_name'
@@ -804,38 +808,38 @@ class AdminDashboardController extends Controller
                 $shelterLocation = strtolower($shelter->location);
                 $matchScore = 0;
                 
-                // More precise matching - require substantial overlap
+                
                 foreach ($locationKeywords as $keyword) {
-                    // Direct substring match
+             
                     if (strpos($shelterLocation, $keyword) !== false) {
-                        $matchScore += 2; // Higher weight for direct matches
+                        $matchScore += 2; 
                     }
                     
-                    // Check if shelter location contains the keyword (but be more strict)
+                    
                     if (strpos($keyword, $shelterLocation) !== false && strlen($shelterLocation) > 3) {
                         $matchScore += 1;
                     }
                     
-                    // For city names, be very specific
+                    
                     if (preg_match('/\b(\w+(?:\s+\w+)?)\s+(city|town|municipality)\b/i', $shelterLocation, $shelterMatches)) {
                         $shelterCityName = strtolower(trim($shelterMatches[1]));
                         if ($keyword === $shelterCityName) {
-                            $matchScore += 3; // Very high score for exact city name match
+                            $matchScore += 3; 
                         }
                     }
                 }
                 
-                // Only consider it "Same Area" if there's a strong match
+             
                 $shelter->match_score = $matchScore;
                 $shelter->distance_text = $matchScore >= 2 ? 'Same Area' : 'Different Area';
                 
-                // ✅ ADD VERIFICATION STATUS TO SHELTER NAME
+                // ADD VERIFICATION STATUS TO SHELTER NAME
                 $shelter->display_name = $shelter->shelter_name . ($shelter->verified ? '' : ' (Unverified)');
                 $shelter->verification_status = $shelter->verified ? 'verified' : 'unverified';
                 
                 return $shelter;
             })->sortByDesc(function($shelter) {
-                // ✅ PRIORITIZE VERIFIED SHELTERS, THEN BY MATCH SCORE
+                // PRIORITIZE VERIFIED SHELTERS, THEN BY MATCH SCORE
                 return ($shelter->verified ? 1000 : 0) + $shelter->match_score;
             });
 
@@ -883,14 +887,14 @@ class AdminDashboardController extends Controller
 
             $shelterList = implode(', ', $shelterNames);
 
-            // 🚨 CREATE NOTIFICATION RECORDS FOR EACH SELECTED SHELTER
+            // CREATE NOTIFICATION RECORDS FOR EACH SELECTED SHELTER
             foreach ($request->selected_shelters as $shelterId) {
                 \DB::table('stray_report_notifications')->insert([
                     'report_id' => $report->report_id,
                     'shelter_id' => $shelterId,
                     'sent_at' => now(),
                     'is_read' => false,
-                    'admin_message' => $request->notification_message, // ✅ Use 'admin_message' instead of 'message'
+                    'admin_message' => $request->notification_message, 
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);

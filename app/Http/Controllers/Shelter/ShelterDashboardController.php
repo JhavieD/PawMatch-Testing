@@ -46,8 +46,10 @@ class ShelterDashboardController extends Controller
                 return Message::with('sender')->find($id);
             });
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
+        $verification = $shelter->verifications()->latest()->first();
 
         return view('shelter.shelter_dashboard', compact(
+            'shelter',
             'availablePets',
             'pendingApplications',
             'successfulAdoptions',
@@ -58,6 +60,9 @@ class ShelterDashboardController extends Controller
             'recentApplications',
             'recentMessages',
             'recentReviews'
+            'recentReviews',
+            'verification'
+            
         ));
     }
 
@@ -171,9 +176,19 @@ class ShelterDashboardController extends Controller
         ]);
         
         $pet->update($request->only([
-            'name', 'species', 'breed', 'age', 'gender', 'size',
-            'description', 'adoption_status', 'behavior',
-            'daily_activity', 'special_needs', 'compatibility', 'eating_habits',
+            'name',
+            'species',
+            'breed',
+            'age',
+            'gender',
+            'size',
+            'description',
+            'adoption_status',
+            'behavior',
+            'daily_activity',
+            'special_needs',
+            'compatibility',
+            'eating_habits',
         ]));
 
         if ($request->hasFile('images')) {
@@ -219,14 +234,14 @@ class ShelterDashboardController extends Controller
             ->filter()
             ->unique()
             ->values();
-        
+
         $partners = User::whereIn('user_id', $partnerIds)->get();
         $receiver = $partners->first();
 
         return view('shelter.messages', compact('partners', 'receiver'));
-    } // <- ADDED THIS MISSING CLOSING BRACE
+    } 
 
-   public function profile()
+    public function profile()
     {
         $user = auth()->user();
         $shelter = $user->shelter;
@@ -255,7 +270,7 @@ class ShelterDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255', 
+            'address' => 'required|string|max:255',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -267,14 +282,14 @@ class ShelterDashboardController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
         ]);
-        
+
         $shelter->update([
             'address' => $request->address,
         ]);
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
-            $profileImagePath = $file->store('profileimage', 's3'); 
+            $profileImagePath = $file->store('profileimage', 's3');
             $fileType = $file->getClientMimeType();
 
             \DB::table('user_profile_pic')->updateOrInsert(
@@ -287,16 +302,19 @@ class ShelterDashboardController extends Controller
                 ]
             );
         }
-        
+
         if ($request->has('remove_photo')) {
             \DB::table('user_profile_pic')
             ->where('user_id', $user->user_id)
             ->update(['is_displayed' => false]);
+            ->where('user_id', $user->user_id)
+             ->update(['is_displayed' => false]); // hide image
+
         }
 
         return back()->with('success', 'Profile updated!');
     }
-    
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -341,7 +359,6 @@ class ShelterDashboardController extends Controller
     }
 
     // STRAY REPORTS METHODS added by andrea
-
     public function strayReports(Request $request)
     {
         $shelter = auth()->user()->shelter;
@@ -441,3 +458,5 @@ class ShelterDashboardController extends Controller
         }
     }
 } 
+
+
