@@ -1,20 +1,22 @@
 @extends('layouts.pet-swipe')
 
+@section('title', 'Pet Swipe - PawMatch')
+
 @section('adopter-content')
 <div class="swipe-container"></div>
 
 <div class="action-buttons">
-    <button class="action-btn dislike" onclick="swipeLeft()">❌</button>
-    <button class="action-btn like" onclick="swipeRight()">❤️</button>
+    <button class="action-btn dislike" aria-label="Dislike" title="Dislike" type="button" style="font-family: 'Inter', sans-serif;">❌</button>
+    <button class="action-btn like" aria-label="Like" title="Like" type="button" style="font-family: 'Inter', sans-serif;">❤️</button>
 </div>
 
-<div class="match-modal" id="matchModal" style="display:none;">
+<div class="match-modal" id="matchModal" style="display:none; font-family: 'Inter', sans-serif;">
     <div class="match-content">
-        <div class="match-icon">🎉</div>
+        <div class="match-icon" aria-hidden="true">🎉</div>
         <h2 class="match-title">It's a Match!</h2>
         <p class="match-text">You've found a potential furry friend! Would you like to learn more about this pet?</p>
-        <button class="action-btn like" onclick="viewPetDetails()">View Details</button>
-        <button class="action-btn dislike" onclick="closeMatchModal()">Keep Swiping</button>
+        <button class="action-btn like" aria-label="View Details" title="View Details" type="button" style="font-family: 'Inter', sans-serif;">View Details</button>
+        <button class="action-btn dislike" aria-label="Keep Swiping" title="Keep Swiping" type="button" style="font-family: 'Inter', sans-serif;">Keep Swiping</button>
     </div>
 </div>
 

@@ -1,8 +1,5 @@
 @extends('layouts.adopter-sidebar')
 @section('title', 'My Applications')
-@section('styles')
-<link rel="stylesheet" href="{{ asset('css/adopter/application-status.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 @section('adopter-content')
 <div class="main-content">
     <div class="container">
