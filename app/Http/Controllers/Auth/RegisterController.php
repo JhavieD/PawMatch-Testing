@@ -153,15 +153,10 @@ class RegisterController extends Controller
         }
         }
 
-        Auth::login($user);
-
-        // Redirect based on role
-        if ($request->role === 'shelter') {
-            return redirect()->intended('/shelter/dashboard');
-        } elseif ($request->role === 'rescuer') {
-            return redirect()->intended('/rescuer/dashboard');
-        } else {
-            return redirect()->intended('/adopter/dashboard');
-        }
+        // Redirect to login with success modal
+        return redirect()->route('login')->with([
+            'account_created' => true,
+            'account_message' => 'Your account was created successfully! Please log in to continue.'
+        ]);
     }
 } 
