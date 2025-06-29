@@ -87,4 +87,4 @@
     <button class="btn btn-primary" id="approveBtn">Approve Application</button>
     <button class="btn btn-outline" id="rejectBtn">Reject Application</button>
     <button class="btn btn-outline" id="requestInfoBtn">Request More Info</button>
-</div> 
+</div>

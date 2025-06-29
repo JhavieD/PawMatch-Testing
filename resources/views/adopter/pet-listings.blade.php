@@ -64,7 +64,7 @@
                         @endif
                         <div class="pet-info">
                             <h3 class="pet-name">{{ $pet->name }}</h3>
-                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city }}</p>
+                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p>
                             <span class="pet-status">{{ $pet->status }}</span>
                         </div>
                     </div>
@@ -133,6 +133,7 @@
             </div>
 
             <div class="modal-actions">
+                <button id="message-shelter" class="btn-messages"> Message Shelter </button>
                 <button id="applyButton" class="btn">Apply for Adoption</button>
                 <button id="favoriteButton" class="btn" style="background: #f3f4f6; color: #4b5563;">Save to Favorites</button>
             </div>
@@ -208,6 +209,8 @@
     const thumbnailGrid = document.getElementById('thumbnailGrid');
     const applyButton = document.getElementById('applyButton');
     const favoriteButton = document.getElementById('favoriteButton');
+    const messageShelterButton = document.getElementById('message-shelter');
+    let currentShelterUserId = null;
 
     function closeModal() {
         modal.style.display = 'none';
@@ -251,22 +254,58 @@
                 thumbnailGrid.innerHTML = '<p>No images available.</p>';
             }
 
-            // Update buttons
-            applyButton.dataset.petId = petId;
-            applyButton.onclick = function() {
-                adoptionModal.style.display = 'block';
+                // Update buttons
+                applyButton.dataset.petId = petId;
+                applyButton.onclick = function() {
+                    adoptionModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    adoptionPetId.value = petId;
+                };
+                favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+                favoriteButton.dataset.petId = petId;
+
+                // Set the message button handler for this pet
+                const messageShelterBtn = document.getElementById('message-shelter');
+                messageShelterBtn.onclick = async function () {
+                    const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
+                    if (shelterUserId) {
+                        try {
+                            const res = await fetch('/messages', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({
+                                    receiver_id: shelterUserId,
+                                    message: `Hi! I'm interested in adopting ${petDetails.name} from your shelter.`
+                                })
+                            });
+                            const data = await res.json();
+                            if (!res.ok) {
+                                alert('Failed to send message: ' + (data.message || res.status));
+                                return;
+                            }
+                            // Wait a short moment to ensure the message is saved before redirecting
+                            setTimeout(() => {
+                                window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                            }, 400);
+                        } catch (e) {
+                            alert('Error sending message: ' + e);
+                        }
+                    } else {
+                        alert('Shelter user ID not found. Please try again later.');
+                    }
+                };
+
+                modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
-                adoptionPetId.value = petId;
-            };
-            favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
-            favoriteButton.dataset.petId = petId;
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            console.error('Error fetching pet details:', error);
-        }
+            } catch (error) {
+                console.error('Error fetching pet details:', error);
+            }
+        });
     });
-});
+
     closeBtn.addEventListener('click', closeModal);
 
     window.addEventListener('click', (e) => {

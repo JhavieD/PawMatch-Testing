@@ -1,3 +1,7 @@
+/* =========================
+   GENERAL RESET & BASE
+   ========================= */
+
 * {
   margin: 0;
   padding: 0;
@@ -11,11 +15,11 @@ body {
 }
 
 /* =========================
-   SIDEBAR STYLES
+   SIDEBAR & NAVIGATION
    ========================= */
 
 @media (max-width: 900px) {
-  .shelter-sidebar {
+  .rescuer-sidebar {
     display: block !important;
     left: 0 !important;
     width: 70px !important;
@@ -26,11 +30,11 @@ body {
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
     transition: width 0.2s;
   }
-  .shelter-sidebar .sidebar-title,
-  .shelter-sidebar .nav-label {
+  .rescuer-sidebar .sidebar-title,
+  .rescuer-sidebar .nav-label {
     display: none !important;
   }
-  .shelter-sidebar .shelter-sidebar-header {
+  .rescuer-sidebar .rescuer-sidebar-header {
     justify-content: center;
   }
   .main-content {
@@ -54,7 +58,7 @@ body {
 }
 
 /* Sidebar base styles */
-.shelter-sidebar {
+.rescuer-sidebar {
   background: white;
   border-right: 1px solid #e5e7eb;
   padding: 1.5rem;
@@ -65,30 +69,25 @@ body {
   transition: width 0.2s;
 }
 
-.shelter-sidebar.collapsed {
+.rescuer-sidebar.collapsed {
   width: 70px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
 
-.shelter-sidebar.collapsed .sidebar-title,
-.shelter-sidebar.collapsed .nav-label {
+.rescuer-sidebar.collapsed .sidebar-title,
+.rescuer-sidebar.collapsed .nav-label {
   display: none;
 }
 
-.shelter-sidebar.collapsed .shelter-nav-item {
-  justify-content: center !important;
-  padding: 0.75rem 0.5rem;
-}
-
-.shelter-sidebar.collapsed .shelter-sidebar-header {
+.rescuer-sidebar.collapsed .rescuer-sidebar-header {
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 1.5rem;
   justify-content: center;
 }
 
-.shelter-sidebar-header {
+.rescuer-sidebar-header {
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 1.5rem;
@@ -97,19 +96,19 @@ body {
   gap: 0.5rem;
 }
 
-.shelter-sidebar-header h2 {
+.rescuer-sidebar-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1a1a1a;
 }
 
-.shelter-sidebar-nav {
+.rescuer-sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.shelter-nav-item {
+.rescuer-nav-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -121,35 +120,45 @@ body {
   min-width: 0;
 }
 
-.shelter-sidebar.collapsed .shelter-nav-item {
+.rescuer-sidebar.collapsed .rescuer-nav-item {
   justify-content: center;
   padding: 0.75rem 0.5rem;
 }
 
-.shelter-nav-item:hover {
+.rescuer-nav-item:hover {
   background: #f3f4f6;
   color: #4a90e2;
 }
 
-.shelter-nav-item.active {
+.rescuer-nav-item.active {
   background: #4a90e2;
   color: white;
 }
 
-.shelter-nav-item i {
+.rescuer-nav-item i {
   width: 20px;
   text-align: center;
   font-size: 1rem;
 }
 
 /* =========================
-    MAIN CONTENT STYLES
+   MAIN PROFILE LAYOUT
    ========================= */
+
+.rescuer-dashboard-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.main-content-wrapper {
+  flex: 1;
+  padding: 2rem 0;
+}
+
 .container {
-  max-width: 800px;
-  /* margin: 2rem auto; */
-  padding: 1.5rem 2rem;
   margin-left: 250px;
+  max-width: 880px;
+  padding: 0 2rem;
 }
 
 .header {
@@ -236,11 +245,6 @@ body {
   height: 100px;
   border-radius: 50%;
   background: #e5e7eb;
-  object-fit: cover;
-}
-
-.profile-image-input {
-  display: none;
 }
 
 .upload-buttons {
