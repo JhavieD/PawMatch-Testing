@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Adopter\AdopterDashboardController;
 use App\Http\Controllers\Adopter\AdopterPetListingsController;
 use App\Http\Controllers\Adopter\AdopterApplicationController;
+use App\Http\Controllers\Adopter\AdopterReportController;
 // Shelter Controllers
 use App\Http\Controllers\Shelter\ShelterDashboardController;
 use App\Http\Controllers\Shelter\ShelterVerificationController;
@@ -75,9 +76,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/verifications/{id}/approve', [AdminDashboardController::class, 'approveVerification'])->name('admin.verifications.approve');
         Route::post('/admin/verifications/{id}/reject', [AdminDashboardController::class, 'rejectVerification'])->name('admin.verifications.reject');
         Route::get('/admin/stray-reports', [AdminDashboardController::class, 'strayReports'])->name('admin.stray-reports');
+        Route::get('/admin/stray-reports/debug', [AdminDashboardController::class, 'debugStrayReports']); // Temporary debug route
         Route::get('/admin/stray-reports/{id}/timeline', [AdminDashboardController::class, 'strayReportTimeline']);
+        Route::get('/admin/stray-reports/{id}/comments', [AdminDashboardController::class, 'strayReportComments']);
         Route::post('/admin/stray-reports/{report}/status', [AdminDashboardController::class, 'updateStatus'])->name('admin.stray-reports.update-status');
+        Route::post('/admin/stray-reports/{report}/comment', [AdminDashboardController::class, 'addComment'])->name('admin.stray-reports.add-comment');
         Route::get('/admin/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
+        //added for stray reports to shelters
+        Route::get('/admin/stray-reports/{report}/nearby-shelters', [AdminDashboardController::class, 'findNearbyShelters'])->name('admin.stray-reports.nearby-shelters');
+        Route::post('/admin/stray-reports/{report}/mark-investigating', [AdminDashboardController::class, 'markAsInvestigating'])->name('admin.stray-reports.mark-investigating');
+
         // User Management
         Route::post('/admin/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
         Route::put('/admin/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('admin.users.update');
@@ -115,9 +123,13 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
         Route::delete('/shelter/pet-images/{id}', [ShelterDashboardController::class, 'deleteImage'])->name('shelter.pet-images.destroy');
         Route::get('/shelter/pet_applications', [ShelterAdoptionApplicationController::class, 'index'])->name('shelter.pet_applications');
+        //STRAY REPORTS ROUTES ADDED BY ANDRE
+        Route::get('/shelter/stray-reports', [ShelterDashboardController::class, 'strayReports'])->name('shelter.stray-reports');
+        Route::post('/shelter/stray-reports/{reportId}/mark-read', [ShelterDashboardController::class, 'markStrayReportRead'])->name('shelter.stray-reports.mark-read');
+        Route::post('/shelter/stray-reports/{reportId}/accept', [ShelterDashboardController::class, 'acceptStrayReport'])->name('shelter.stray-reports.accept');
     });
 
-    // -------- MESSAGES (FOR ALL POT) --------
+    // -------- MESSAGES (FOR ALL PETS) --------
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
     Route::post('/messages', [MessageController::class, 'send'])->name('messages.send');
 
@@ -152,8 +164,11 @@ Route::middleware(['auth'])->group(function () {
         // Messages route
         Route::get('/adopter/messages', [AdopterDashboardController::class, 'messages'])->name('adopter.messages');
         // Stray reporting routes
-        Route::get('/adopter/report-stray', [ReportStrayController::class, 'showForm'])->name('adopter.report-stray');
-        Route::post('/adopter/report-stray', [ReportStrayController::class, 'submit'])->name('stray.report.submit');
+        Route::get('/adopter/report-stray', [ReportStrayController::class, 'show'])->name('adopter.report-stray');
+        Route::post('/stray-report/submit', [ReportStrayController::class, 'submit'])->name('stray.report.submit');
+        // Report status routes
+        Route::get('/my-reports', [App\Http\Controllers\Adopter\AdopterReportController::class, 'myReports'])->name('adopter.reports.index');
+        Route::get('/reports/{reportId}', [App\Http\Controllers\Adopter\AdopterReportController::class, 'show'])->name('adopter.reports.show');
     });
 
     // -------- PROFILE & DASHBOARD REDIRECTS --------
@@ -229,3 +244,4 @@ Route::get('/application-status', fn() => view('adopter.application-status'))->n
 Route::get('/pets', fn() => 'Pet listings coming soon!')->name('pets.index');
 Route::get('/applications', fn() => 'Applications page coming soon!')->name('applications.index');
 Route::get('/profile/edit', fn() => 'Profile edit page coming soon!')->name('profile.edit');
+

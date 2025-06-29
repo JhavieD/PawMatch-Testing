@@ -1,3 +1,4 @@
+
 @extends('layouts.adopter')
 
 @section('title', 'Report a Stray Animal - PawMatch')
@@ -67,13 +68,13 @@
             <label>Location</label>
             <div class="location-group">
                 <input type="text" name="street" placeholder="Street Address" required>
-                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="zip" placeholder="ZIP Code" required>
+                
             </div>
             <div class="location-group" style="margin-top: 1rem;">
-                <input type="text" name="state" placeholder="State" required>
-                <input type="text" name="zip" placeholder="ZIP Code" required>
+                <input type="text" name="city" placeholder="City" required>
             </div>
-        </div>
+        </div>  
 
         <div class="form-group">
             <label for="landmarks">Nearby Landmarks</label>

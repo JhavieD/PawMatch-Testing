@@ -16,8 +16,6 @@ class StrayReports extends Model
         'description',
         'status',
         'reported_at',
-        'image_url',      
-        'animal_type',    
     ];
 
     public function adopter()

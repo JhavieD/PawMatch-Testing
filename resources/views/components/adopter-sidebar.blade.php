@@ -1,3 +1,4 @@
+
 <aside class="adopter-sidebar">
     <div class="sidebar-header">
         <h2>Adopter Dashboard</h2>
@@ -28,10 +29,16 @@
             <span>Messages</span>
         </a>
         <a href="{{ route('adopter.report-stray') }}" class="nav-item {{ request()->routeIs('adopter.report-stray') ? 'active' : '' }}">
-    <i class="fas fa-exclamation-triangle"></i>
-    <span>Report a Stray</span>
-</a>
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Report a Stray</span>
+        </a>
+        
+        <a href="{{ route('adopter.reports.index') }}" class="nav-item {{ request()->routeIs('adopter.reports.*') ? 'active' : '' }}">
+            <i class="fas fa-clipboard-list"></i>
+            <span>My Reports</span>
+        </a>
     </nav>
+    
     <form method="POST" action="{{ route('logout') }}" style="margin-top:2rem;">
         @csrf
         <button type="submit" class="nav-item" style="width:100%;justify-content:left;">
@@ -39,4 +46,4 @@
             <span>Logout</span>
         </button>
     </form>
-</aside> 
+</aside>
