@@ -1,4 +1,3 @@
-<aside class="shelter-sidebar">
 <aside class="shelter-sidebar" id="shelterSidebar">
     <div class="shelter-sidebar-header">
         <h2 class="sidebar-title">Shelter Dashboard</h2>
@@ -16,24 +15,6 @@
             <i class="fas fa-clipboard-list"></i>
             <span class="nav-label">Applications</span>
         </a>
-        <!-- NEWLY ADDED BY ANDREA -->
-         <a href="{{ route('shelter.stray-reports') }}" class="shelter-nav-item {{ request()->routeIs('shelter.stray-reports') ? 'active' : '' }}">
-            <i class="fas fa-search"></i>
-            <span>Stray Reports</span>
-            @php
-                $shelter = auth()->user()->shelter;
-                $unreadCount = 0;
-                if ($shelter) {
-                    $unreadCount = \DB::table('stray_report_notifications')
-                        ->where('shelter_id', $shelter->shelter_id)
-                        ->where('is_read', false)
-                        ->count();
-                }
-            @endphp
-            @if($unreadCount > 0)
-                <span class="notification-badge">{{ $unreadCount }}</span>
-            @endif
-        </a>
         <a href="{{ route('shelter.messages') }}" class="shelter-nav-item {{ request()->routeIs('shelter.messages') ? 'active' : '' }}">
             <i class="fas fa-envelope"></i>
             <span class="nav-label">Messages</span>
@@ -50,7 +31,6 @@
             <span class="nav-label">Logout</span>
         </button>
     </form>
-</aside>
 </aside>
 <div id="sidebarBackdrop" class="sidebar-backdrop hide"></div>
 <script>

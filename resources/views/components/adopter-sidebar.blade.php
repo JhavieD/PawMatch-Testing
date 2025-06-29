@@ -1,11 +1,8 @@
-
-
-<aside class="adopter-sidebar">
 <button id="sidebarToggle" class="sidebar-hamburger" aria-label="Open navigation menu" style="display:none;position:fixed;top:1rem;left:1rem;z-index:1001;background:none;border:none;font-size:2rem;">
     <i class="fas fa-bars"></i>
 </button>
 <div id="sidebarOverlay" class="sidebar-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;"></div>
-<aside class="adopter-sidebar" id="adopterSidebar"> 
+<aside class="adopter-sidebar" id="adopterSidebar">
     <div class="sidebar-header">
         <a href="{{ route('adopter.dashboard') }}">
             <img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" style="height: 40px; display: block; margin: 0 auto;" />
@@ -40,12 +37,7 @@
             <i class="fas fa-exclamation-triangle"></i>
             <span>Report a Stray</span>
         </a>
-        <a href="{{ route('adopter.reports.index') }}" class="nav-item {{ request()->routeIs('adopter.reports.*') ? 'active' : '' }}">
-            <i class="fas fa-clipboard-list"></i>
-            <span>My Reports</span>
-        </a>
     </nav>
-    
     <form method="POST" action="{{ route('logout') }}" style="margin-top:2rem;">
         @csrf
         <button type="submit" class="nav-item" style="width:100%;justify-content:left;">
@@ -53,9 +45,6 @@
             <span>Logout</span>
         </button>
     </form>
-
-</aside>
-
 </aside>
 @push('scripts')
 <script>
