@@ -1,133 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - PawMatch</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+@extends('layouts.app')
 
-        body {
-            background: linear-gradient(rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.2));
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+@section('title', 'Reset Password - PawMatch')
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin: 2rem auto;
-        }
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/shared/auth.css') }}">
+@endsection
 
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #333;
-        }
+@section('content')
+<div class="flex-1 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md mx-auto">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <div class="auth-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Reset Password</h1>
+                    <p class="text-gray-600 mt-2">Enter your new password below</p>
+                </div>
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+                <form method="POST" action="{{ route('password.update') }}" class="auth-form">
+                    @csrf
+                    <input type="hidden" name="token" value="{{ $token }}">
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #666;
-        }
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Email Address
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                required 
+                                value="{{ old('email') }}" 
+                                placeholder="Enter your email address"
+                                class="form-input @error('email') is-invalid @enderror"
+                            >
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                        @error('email')
+                            <span class="invalid-feedback" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </span>
+                        @enderror
+                    </div>
 
-        input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            New Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required 
+                                placeholder="Enter new password"
+                                class="form-input @error('password') is-invalid @enderror"
+                            >
+                            <i class="fas fa-lock input-icon"></i>
+                            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                            <span class="invalid-feedback" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </span>
+                        @enderror
+                    </div>
 
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
+                    <div class="form-group">
+                        <label for="password_confirmation" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            Confirm New Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password_confirmation" 
+                                name="password_confirmation" 
+                                required 
+                                placeholder="Confirm new password"
+                                class="form-input"
+                            >
+                            <i class="fas fa-lock input-icon"></i>
+                            <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
+                                <i class="fas fa-eye" id="passwordConfirmationToggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
 
-        .btn:hover {
-            background: #357abd;
-        }
+                    <button type="submit" class="auth-btn">
+                        <span>Reset Password</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                </form>
 
-        .form-footer {
-            margin-top: 1.5rem;
-            text-align: center;
-        }
-
-        .form-footer a {
-            color: #4a90e2;
-            text-decoration: none;
-        }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #dc2626;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Reset Password</h1>
-
-        <form method="POST" action="{{ route('password.update') }}">
-            @csrf
-            <input type="hidden" name="token" value="{{ $token }}">
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required value="{{ old('email') }}" placeholder="Enter your email">
-                @error('email')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
+                <div class="auth-footer">
+                    <p>
+                        <a href="{{ route('login') }}" class="auth-link">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Login
+                        </a>
+                    </p>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="password">New Password</label>
-                <input type="password" id="password" name="password" required placeholder="Enter new password">
-                @error('password')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="password_confirmation">Confirm New Password</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="Confirm new password">
-            </div>
-
-            <button type="submit" class="btn">Reset Password</button>
-
-            <div class="form-footer">
-                <p><a href="{{ route('login') }}">Back to Login</a></p>
-            </div>
-        </form>
+        </div>
     </div>
-</body>
-</html> 
+</div>
+
+@push('scripts')
+<script>
+    function togglePassword(inputId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(inputId === 'password' ? 'passwordToggleIcon' : 'passwordConfirmationToggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+</script>
+@endpush
+@endsection 

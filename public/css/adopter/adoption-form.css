@@ -1,0 +1,136 @@
+.adoption-form-page {
+    background: #f2f6fc;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+.adoption-form-page .content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+.adoption-form-page .application-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+.adoption-form-page .progress-steps {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.adoption-form-page .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+.adoption-form-page .step-number {
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.adoption-form-page .step.active .step-number {
+    background: #2563eb;
+}
+.adoption-form-page .step-label {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+.adoption-form-page .application-form {
+    margin-top: 1.5rem;
+}
+.adoption-form-page .form-section {
+    margin-bottom: 2rem;
+}
+.adoption-form-page .form-section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.adoption-form-page .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+}
+.adoption-form-page .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.adoption-form-page .form-group.full-width {
+    grid-column: span 2;
+}
+.adoption-form-page label {
+    font-weight: 500;
+    color: #334155;
+}
+.adoption-form-page input[type="text"],
+.adoption-form-page input[type="email"],
+.adoption-form-page input[type="tel"] {
+    border: 1px solid #e0e7ef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: border 0.2s;
+}
+.adoption-form-page input:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+.adoption-form-page .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.adoption-form-page .btn-primary {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.adoption-form-page .btn-primary:hover {
+    background: #2563eb;
+}
+.adoption-form-page .btn-outline {
+    background: #fff;
+    color: #3b82f6;
+    border: 1.5px solid #3b82f6;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+}
+.adoption-form-page .btn-outline:hover {
+    background: #e0e7ef;
+}
+.adoption-form-page .form-tips {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+.adoption-form-page .form-tips h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.adoption-form-page .form-tips ul {
+    color: #64748b;
+    margin-left: 1rem;
+} 

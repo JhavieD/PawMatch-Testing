@@ -15,7 +15,7 @@
             </div>
             <div class="profile-section">
             <div class="profile-img">
-                <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}" style="width: 100%; height: 100%; border-radius: 50%;" />
+                <img src="{{ $user->profile_image }}" alt="{{ $user->first_name }} {{ $user->last_name }}'s profile photo" style="width: 100%; height: 100%; border-radius: 50%; font-family: 'Inter', sans-serif;" />
             </div>
             <div class="profile-info">
                     <strong>{{ $user->first_name }} {{ $user->last_name }}</strong>
@@ -25,83 +25,88 @@
 
         <div class="content-grid">
             <!-- Favorite Pets -->
-            <div class="content-card">
+            <div class="content-card" id="favoritePetsSection">
                 <div class="card-header">
-                    <h2>Favorite Pets</h2>
-                    <a href="pet-listings" class="btn btn-outline">Find More</a>
+                    <div class="card-header-row">
+                        <h2>Favorite Pets</h2>
+                        <a href="{{ route('adopter.pet-listings') }}" class="btn btn-outline card-header-btn" aria-label="Find more pets">Find More</a>
+                    </div>
                 </div>
                 <div class="pet-grid">
-                    <div class="pet-card">
-                        <img
-                            src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.15752-9/482958427_546890997878558_7939868464340469320_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEg26tmyKvJjnwIVGA4p7VpyQUyRIOYwdHJBTJEg5jB0Wx4wKGdnDZxTVL1IbZ-XSjbaTHznmX8rfBWnCPmJmMd&_nc_ohc=Z4p-MgCZnLUQ7kNvgEaxlgm&_nc_oc=Adj34yEQkoq4BVC1rbv3hqxuOEPtGTzHnNq_bsWvPqyo8vgZ9z2tbbWgJ7HSzT1tE3w&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&oh=03_Q7cD1wGK65XEYIiIyewAECv3ua60cvr7cDuW6l98OwR5gTpdRw&oe=67F7AA9D"
-                            alt="Dog"
-                            class="pet-image" />
-                        <div class="pet-info">
-                            <div class="pet-name">Ester</div>
-                            <div class="pet-details">Tabby Cat • 2 years<image.png/div>
+                    @forelse($favoritePets as $pet)
+                        <div class="pet-card favorite-pet-card" data-pet-id="{{ $pet->pet_id ?? $pet->id }}" style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0; border: none; box-shadow: none; cursor: pointer;">
+                            <img src="{{ $pet->images->first()->image_url ?? asset('images/default-pet.png') }}" alt="{{ $pet->name }}" class="pet-image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; font-family: 'Inter', sans-serif; margin: 0;" />
+                            <div class="pet-info" style="flex: 1;">
+                                <div class="pet-name" style="color:#1a1a1a; font-size: 1rem; font-weight: 500;">{{ $pet->name }}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="pet-card">
-                        <img
-                            src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.15752-9/482487994_519954501125001_2078025813899306849_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeEeZjpdAK_M-yf5h5IvWdXQUR3Ko2en25tRHcqjZ6fbm_KRvQPSzX18tPL-2ParloJBk9AHSq4CfWq5m8dMHjOZ&_nc_ohc=bZ16vY0c35YQ7kNvgGtgcCE&_nc_oc=AdhzMhPeljm5uTxIQuorDQdXH2IQFxYfI27IX1SynAkecUVIN-tpoisUk_G_BIkQA-U&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&oh=03_Q7cD1wEaT8XJlz7gNg-5YTKvcnQf3ePKvmU6Pe0I0jDrb0IO1w&oe=67F7B9B4"
-                            alt="Cat"
-                            class="pet-image" />
-                        <div class="pet-info">
-                            <div class="pet-name">Fort</div>
-                            <div class="pet-details">Belgian • 1 year</div>
+                    @empty
+                        <div class="no-pets-message">
+                            <p>No favorite pets yet.</p>
                         </div>
-                    </div>
+                    @endforelse
                 </div>
             </div>
 
             <!-- Recent Applications -->
             <div class="content-card">
                 <div class="card-header">
-                    <h2>Recent Applications</h2>
-                    <a href="application-status" class="btn btn-outline">View All</a>
+                    <div class="card-header-row">
+                        <h2>Recent Applications</h2>
+                        <a href="{{ route('adopter.application-status') }}" class="btn btn-outline card-header-btn" aria-label="View all applications">View All</a>
+                    </div>
                 </div>
                 <ul class="application-list">
-                    <li class="application-item">
-                        <div class="pet-name">Ester - Tabby Cat</div>
-                        <div class="pet-details">Strays Worth Saving</div>
-                        <span class="status status-pending">Application Pending</span>
-                    </li>
-                    <li class="application-item">
-                        <div class="pet-name">Fort - Belgian </div>
-                        <div class="pet-details">Paws & Whiskers Rescue</div>
-                        <span class="status status-approved">Approved - Schedule Visit</span>
-                    </li>
+                    @forelse($recentApplications as $application)
+                        <li class="application-item">
+                            <div class="pet-name">{{ $application->pet->name ?? 'Unknown Pet' }} - {{ $application->pet->breed ?? '' }}</div>
+                            <div class="pet-details">{{ $application->pet->shelter->shelter_name ?? 'Unknown Shelter' }}</div>
+                            <span class="status status-{{ $application->status }}">
+                                @if($application->status === 'pending')
+                                    Application Pending
+                                @elseif($application->status === 'approved')
+                                    Approved - Schedule Visit
+                                @elseif($application->status === 'completed')
+                                    Adoption Completed
+                                @else
+                                    {{ ucfirst($application->status) }}
+                                @endif
+                            </span>
+                        </li>
+                    @empty
+                        <li class="application-item">
+                            <div class="pet-name">No recent applications.</div>
+                        </li>
+                    @endforelse
                 </ul>
             </div>
 
             <!-- Recent Messages -->
             <div class="content-card">
                 <div class="card-header">
-                    <h2>Recent Messages</h2>
-                    <a href="messages-adopter.html" class="btn btn-outline">View All</a>
+                    <div class="card-header-row">
+                        <h2>Recent Messages</h2>
+                        <a href="{{ route('adopter.messages') }}" class="btn btn-outline card-header-btn" aria-label="View all messages">View All</a>
+                    </div>
                 </div>
                 <ul class="message-list">
-                    <li class="message-item">
-                        <div class="message-header">
-                            <span class="message-sender">Strays Worth Saving</span>
-                            <span class="message-time">2:30 PM</span>
-                        </div>
-                        <div class="message-preview">
-                            Thank you for your interest in Ester! We'd be happy to schedule a
-                            visit for you to meet him. Please let us know what time works best
-                            for you.
-                        </div>
-                    </li>
-                    <li class="message-item">
-                        <div class="message-header">
-                            <span class="message-sender">Paws & Whiskers Rescue</span>
-                            <span class="message-time">Yesterday</span>
-                        </div>
-                        <div class="message-preview">
-                            Your application for Fort has been approved! Let's schedule a meet
-                            and greet at your earliest convenience.
-                        </div>
-                    </li>
+                    @forelse($recentMessages as $message)
+                        <li class="message-item">
+                            <div class="message-header">
+                                <span class="message-sender">{{ $message->sender->name ?? 'Unknown Sender' }}</span>
+                                <span class="message-time">{{ $message->created_at->format('g:i A') }}</span>
+                            </div>
+                            <div class="message-preview">
+                                {{ $message->content }}
+                            </div>
+                        </li>
+                    @empty
+                        <li class="message-item">
+                            <div class="message-header">
+                                <span class="message-sender">No recent messages.</span>
+                            </div>
+                        </li>
+                    @endforelse
                 </ul>
             </div>
         </div>

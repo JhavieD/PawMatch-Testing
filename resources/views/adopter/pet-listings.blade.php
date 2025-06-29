@@ -2,6 +2,10 @@
 
 @section('title', 'Pet-Listings - PawMatch')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/adopter/pet-listing.css') }}">
+@endpush
+
 @section('adopter-content')
 <div class="main-container">
     <!-- Filters Panel -->
@@ -49,24 +53,18 @@
 
     <!-- Main Content -->
     <main>
-        <div class="search-bar">
-            <form action="{{ route('adopter.pet-listings') }}" method="GET">
-                <input type="text" name="search" class="search-input" placeholder="Search pets by name, breed, or location..." value="{{ request('search') }}">
-            </form>
-        </div>
-
         <div class="pet-grid">
         @forelse($pets as $pet)
             @if($pet->status === 'available' || $pet->adoption_status === 'available')
                     <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
                         @if($pet->images->isNotEmpty())
-                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }}" class="pet-image">
+                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
                         @else
-                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available" class="pet-image">
+                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available for {{ $pet->name }}" class="pet-image" style="font-family: 'Inter', sans-serif;">
                         @endif
                         <div class="pet-info">
                             <h3 class="pet-name">{{ $pet->name }}</h3>
-                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city }}</p>
+                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p>
                             <span class="pet-status">{{ $pet->status }}</span>
                         </div>
                     </div>
@@ -92,7 +90,7 @@
         </div>
         <div class="modal-body">
             <div class="pet-gallery">
-                <img src="" alt="Main pet photo" class="main-pet-image" id="mainImage">
+                <img src="" alt="Main pet photo" class="main-pet-image" id="mainImage" style="font-family: 'Inter', sans-serif;">
                 <div class="thumbnail-grid" id="thumbnailGrid">
                     <!-- Thumbnails will be populated dynamically -->
                 </div>
@@ -220,41 +218,41 @@
     }
 
     petCards.forEach(card => {
-        card.addEventListener('click', async () => {
-            const petId = card.dataset.petId;
-            console.log('Pet card clicked, petId:', petId);
-            try {
-                // Fetch pet details
-                const petDetailsResponse = await fetch(`/api/pets/${petId}`);
-                const petDetails = await petDetailsResponse.json();
+    card.addEventListener('click', async () => {
+        const petId = card.dataset.petId;
+        console.log('Pet card clicked, petId:', petId);
+        try {
+            // Fetch pet details
+            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+            const petDetails = await petDetailsResponse.json();
 
-                // Fetch pet images
-                const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
-                const petImagesData = await petImagesResponse.json();
+            // Fetch pet images
+            const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
+            const petImagesData = await petImagesResponse.json();
 
-                // Update modal content
-                document.getElementById('petName').textContent = petDetails.name;
-                document.getElementById('petNameDesc').textContent = petDetails.name;
-                document.getElementById('petBreed').textContent = petDetails.breed;
-                document.getElementById('petAge').textContent = `${petDetails.age} years`;
-                document.getElementById('petGender').textContent = petDetails.gender;
-                document.getElementById('petSize').textContent = petDetails.size;
-                document.getElementById('petStatus').textContent = petDetails.status;
-                document.getElementById('petDescription').textContent = petDetails.description;
-                document.getElementById('shelterName').textContent = petDetails.shelter.name;
-                document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
-                document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
+            // Update modal content
+            document.getElementById('petName').textContent = petDetails.name;
+            document.getElementById('petNameDesc').textContent = petDetails.name;
+            document.getElementById('petBreed').textContent = petDetails.breed;
+            document.getElementById('petAge').textContent = `${petDetails.age} years`;
+            document.getElementById('petGender').textContent = petDetails.gender;
+            document.getElementById('petSize').textContent = petDetails.size;
+            document.getElementById('petStatus').textContent = petDetails.status;
+            document.getElementById('petDescription').textContent = petDetails.description;
+            document.getElementById('shelterName').textContent = petDetails.shelter.name;
+            document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
+            document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
 
-                // Update images
-                if (petImagesData.images.length > 0) {
-                    mainImage.src = petImagesData.images[0].image_url;
-                    thumbnailGrid.innerHTML = petImagesData.images.map(img => 
-                        `<img src="${img.image_url}" alt="Pet photo" class="thumbnail">`
-                    ).join('');
-                } else {
-                    mainImage.src = '';
-                    thumbnailGrid.innerHTML = '<p>No images available.</p>';
-                }
+            // Update images
+            if (petImagesData.images.length > 0) {
+                mainImage.src = petImagesData.images[0].image_url;
+                thumbnailGrid.innerHTML = petImagesData.images.map(img => 
+                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail" style="font-family: 'Inter', sans-serif;">`
+                ).join('');
+            } else {
+                mainImage.src = '';
+                thumbnailGrid.innerHTML = '<p>No images available.</p>';
+            }
 
                 // Update buttons
                 applyButton.dataset.petId = petId;
@@ -270,7 +268,6 @@
                 const messageShelterBtn = document.getElementById('message-shelter');
                 messageShelterBtn.onclick = async function () {
                     const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
-                    console.log('Message Shelter button clicked, shelter user id:', shelterUserId);
                     if (shelterUserId) {
                         try {
                             const res = await fetch('/messages', {
@@ -289,7 +286,10 @@
                                 alert('Failed to send message: ' + (data.message || res.status));
                                 return;
                             }
-                            window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                            // Wait a short moment to ensure the message is saved before redirecting
+                            setTimeout(() => {
+                                window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                            }, 400);
                         } catch (e) {
                             alert('Error sending message: ' + e);
                         }
@@ -335,8 +335,23 @@
             });
             const data = await response.json();
             favoriteButton.textContent = data.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+            if (typeof refreshFavoritePetsSection === 'function') {
+                refreshFavoritePetsSection();
+            }
         } catch (error) {
             console.error('Error toggling favorite:', error);
+        }
+    });
+
+    // Auto-open modal if redirected with #pet-{id}
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#pet-')) {
+            const petId = hash.replace('#pet-', '');
+            const card = document.querySelector(`.pet-card[data-pet-id="${petId}"]`);
+            if (card) {
+                card.click();
+            }
         }
     });
 
