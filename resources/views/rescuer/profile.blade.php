@@ -1,10 +1,10 @@
-@extends('layouts.rescuer')
+@extends('layouts.rescuer-profile')
 
 @section('title', "Rescuer's Profile - PawMatch")
 
 @section('rescuer-content')
 <main class="main-content">
-    <div class="container rescuer-profile-container">
+    <div class="container">
         <div class="header rescuer-profile-header">
             <h1>Settings</h1>
             <p>Manage your account preferences and profile information</p>
@@ -21,7 +21,6 @@
                         <div class="profile-upload">
                             <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
                             <div class="upload-buttons">
-                                <input type="file" name="profile_image" id="profile_image" class="profile-image-input">
                                 <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
                                 <button type="submit" name="remove_photo" value="1" class="btn btn-outline">Remove</button>
                             </div>

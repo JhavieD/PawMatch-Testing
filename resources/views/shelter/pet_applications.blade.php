@@ -9,8 +9,8 @@
     </div>
 
     <div class="search-bar">
-        <input type="text" class="search-input" placeholder="Search by applicant name or pet name...">
-        <select class="filter-dropdown">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by applicant name or pet name...">
+        <select class="filter-dropdown" id="statusFilter">
             <option value="all">All Status</option>
             <option value="pending">Pending Review</option>
             <option value="approved">Approved</option>
@@ -20,7 +20,10 @@
 
     <div class="applications-list">
         @foreach ($applications as $application)
-            <div class="application-item">
+            <div class="application-item"
+                data-applicant="{{ strtolower($application->adopter->user->name ?? '') }}"
+                data-pet="{{ strtolower($application->pet->name ?? '') }}"
+                data-status="{{ strtolower($application->status) }}">
                 <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image">
                 <div class="application-info">
                     <h3>Application for {{ $application->pet->name }}</h3>
@@ -193,5 +196,38 @@
             badge.className = `status-badge status-${newStatus}`;
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const applicationItems = document.querySelectorAll('.application-item');
+    function filterApplications() {
+        const search = searchInput.value.trim().toLowerCase();
+        const status = statusFilter.value;
+
+        applicationItems.forEach(item => {
+            const applicant = item.getAttribute('data-applicant');
+            const pet = item.getAttribute('data-pet');
+            const itemStatus = item.getAttribute('data-status');
+
+            const matchesSearch = !search ||
+                applicant.includes(search) ||
+                pet.includes(search);
+
+            const matchesStatus = status === 'all' ||
+                (status === 'pending' && itemStatus === 'pending') ||
+                (status === 'approved' && itemStatus === 'approved') ||
+                (status === 'rejected' && itemStatus === 'rejected');
+
+            if (matchesSearch && matchesStatus) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+        searchInput.addEventListener('input', filterApplications);
+        statusFilter.addEventListener('change', filterApplications);
+});
 </script>
 @endsection

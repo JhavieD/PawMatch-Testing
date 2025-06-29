@@ -3,14 +3,14 @@
 @section('title', 'Pet Management')
 
 @section('shelter-content')
-<div class="container" style="margin-left: 250px;">
+<div class="container">
     <div class="header">
         <h1>Pet Management</h1>
         <button class="btn add-pet-btn">+ Add New Pet</button>
     </div>
 
     <div class="search-bar">
-        <input type="text" class="search-input" placeholder="Search pets by name, breed, or ID...">
+        <input type="text" id="petSearchInput" class="search-input" placeholder="Search pets by name, breed, or ID...">
         <select class="filter-dropdown">
             <option value="all">All Status</option>
             <option value="available">Available</option>
@@ -22,12 +22,11 @@
     <!-- Pet Cards -->
     <div class="pets-grid">
         @forelse($pets as $pet)
-        <div class="pet-card">
-        @if($pet->images->isNotEmpty())
-            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }}" class="pet-image">
-        @else
-            <img src="https://placehold.co/400x300" alt="{{ $pet->name }}" class="pet-image">
-        @endif
+        <div class="pet-card"
+            data-name="{{ $pet->name }}"
+            data-breed="{{ $pet->breed }}"
+            data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}">
+            <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
             <div class="pet-info">
                 <h3 class="pet-name">{{ $pet->name }}</h3>
                 <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>
@@ -181,6 +180,7 @@
                             </label>
                         </div>
                     </div>
+                    <div class="thumbnail-grid" data-images='@json($pet->images)'></div>
                     <div class="modal-actions">
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                         <button type="button" class="btn btn-outline" onclick="closeModal(editModal)">Cancel</button>
@@ -272,7 +272,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="compatibility">Compatibility</label>
+                        <label for="compatibility">Compatibile with elders</label>
                         <select name="compatibility" id="compatibility">
                             <option value="">Select Option</option>
                             <option value="Yes">Yes</option>
@@ -280,8 +280,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="edit-eating_habits">Eating Habits</label>
-                        <select name="eating_habits" id="edit-eating_habits" required>
+                        <label for="eating_habits">Eating Habits</label>
+                        <select name="eating_habits" id="eating_habits" required>
                             <option value="">Select Eating Habits</option>
                             <option value="Balanced Diet">Balanced Diet</option>
                             <option value="Portion Control">Portion Control</option>
@@ -591,29 +591,33 @@
                 .then(response => response.json())
                 .then(data => {
                     const applicationsList = document.querySelector('.applications-list');
-                    applicationsList.innerHTML = ''; // Clear existing content
-
-                    if (data.applications.length > 0) {
-                        data.applications.forEach(application => {
-                            const applicationItem = document.createElement('div');
-                            applicationItem.classList.add('application-item');
-
-                            applicationItem.innerHTML = `
-                                <div class="applicant-info">
-                                    <h3>${application.applicant_name}</h3>
-                                    <p>Submitted: ${new Date(application.submitted_at).toLocaleString()}</p>
-                                    <span class="status-badge status-${application.status.toLowerCase()}">${application.status}</span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary" onclick="viewApplicationDetails(${application.id})">View Details</button>
-                                    <button class="btn btn-outline" onclick="messageApplicant('${application.applicant_name}')">Message</button>
+                    applicationsList.innerHTML = '';
+                    // Defensive: check for data.applications as array
+                    if (Array.isArray(data.applications) && data.applications.length > 0) {
+                        data.applications.forEach(app => {
+                            const applicantName = app.adopter && app.adopter.user ? app.adopter.user.name : 'Unknown';
+                            const phone = app.adopter && app.adopter.user ? app.adopter.user.phone || '' : '';
+                            const submittedAt = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : '';
+                            const status = app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : '';
+                            const statusClass = app.status ? `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` : '';
+                            applicationsList.innerHTML += `
+                                <div class=\"application-item\" style=\"display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;\">
+                                    <div class=\"application-info\">
+                                        <h3 style=\"font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;\">Application for ${petName}</h3>
+                                        <p style=\"color: #6b7280; margin-bottom: 0.5rem;\">From: <span style=\"font-weight: 500; color: #1a1a1a;\">${applicantName}</span>${phone ? ' • Phone: <span style=\\\"color:#1a1a1a;\\\">' + phone + '</span>' : ''}</p>
+                                        <div class=\"application-meta\" style=\"font-size: 0.875rem; color: #6b7280;\">
+                                            Submitted: ${submittedAt} <span class=\"status-badge ${statusClass}\" style=\"margin-left: 0.5rem;\">${status}</span>
+                                        </div>
+                                    </div>
+                                    <div class=\"action-buttons\" style=\"display: flex; gap: 0.5rem;\">
+                                        <button class=\"btn btn-primary\" onclick=\"viewApplicationDetails(${app.application_id})\">Review</button>
+                                        <button class=\"btn btn-outline\" onclick=\"messageApplicant('${applicantName}')\">Message</button>
+                                    </div>
                                 </div>
                             `;
-
-                            applicationsList.appendChild(applicationItem);
                         });
                     } else {
-                        applicationsList.innerHTML = '<div>No applications found.</div>';
+                        applicationsList.innerHTML = '<div>No applications found for this pet.</div>';
                     }
                 })
                 .catch(error => {
@@ -631,5 +635,35 @@
         // Redirect to messages with the applicant
         window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
     }
+// filtering
+    document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('petSearchInput');
+    const statusFilter = document.querySelector('.filter-dropdown');
+    const petCards = document.querySelectorAll('.pet-card');
+
+    function filterPets() {
+        const search = searchInput.value.trim().toLowerCase();
+        const status = statusFilter.value;
+
+        petCards.forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const breed = (card.getAttribute('data-breed') || '').toLowerCase();
+            const cardStatus = (card.getAttribute('data-status') || '').toLowerCase();
+
+            const matchesSearch = !search ||
+                name.includes(search) ||
+                breed.includes(search);
+
+            const matchesStatus = status === 'all' || cardStatus === status;
+
+            card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterPets);
+    statusFilter.addEventListener('change', filterPets);
+});
+
+
 </script>
 @endsection
