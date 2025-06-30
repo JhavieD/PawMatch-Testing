@@ -109,7 +109,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shelter/verification', [ShelterVerificationController::class, 'showVerificationForm'])->name('shelter.verification.form');
         Route::post('/shelter/verification', [ShelterVerificationController::class, 'submitVerification'])->name('shelter.verification.submit');
         Route::get('/shelter/dashboard', [ShelterDashboardController::class, 'index'])->name('shelter.dashboard');
-        Route::post('/shelter/pets', [ShelterDashboardController::class, 'store'])->name('shelter.pets.store');
+        Route::post('/shelter/pets', [ShelterDashboardController::class, 'createPetListing'])->name('shelter.pets.create');
         Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])->name('shelter.pets');
         Route::get('/shelter/messages', [MessageController::class, 'shelterMessages'])->name('shelter.messages');
         Route::get('/shelter/profile', [ShelterDashboardController::class, 'profile'])->name('shelter.profile');
@@ -118,7 +118,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/shelter/profile/delete', [ShelterDashboardController::class, 'deleteAccount'])->name('shelter.profile.delete');
         // PET APPLICATIONS CRUD ROUTES
         Route::get('/shelter/applications', [ShelterApplicationController::class, 'index'])->name('shelter.applications.index');
-        Route::get('/shelter/applications/{id}', [ShelterApplicationController::class, 'show'])->name('shelter.applications.show');
+        Route::get('/shelter/applications/{id}/review', [ShelterApplicationController::class, 'reviewApplication'])->name('shelter.applications.review');
         Route::post('/shelter/applications/{id}/approve', [ShelterApplicationController::class, 'approve'])->name('shelter.applications.approve');
         Route::post('/shelter/applications/{id}/reject', [ShelterApplicationController::class, 'reject'])->name('shelter.applications.reject');
         Route::post('/shelter/applications/{id}/request-info', [ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
@@ -136,7 +136,7 @@ Route::middleware(['auth'])->group(function () {
 
     // -------- MESSAGES (FOR ALL POT) --------
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
-    Route::post('/messages', [MessageController::class, 'send'])->name('messages.send');
+    Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {
@@ -146,9 +146,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rescuer/pet_applications', [RescuerDashboardController::class, 'petApplications'])->name('rescuer.pet_applications');
         Route::get('/rescuer/rescuer-messages', [RescuerDashboardController::class, 'rescuerMessages'])->name('rescuer.messages');
         Route::get('/rescuer/messages', [MessageController::class, 'rescuerMessages'])->name('rescuer.messages');
+        Route::post('/rescuer/pets', [RescuerDashboardController::class, 'AddPetListing'])->name('rescuer.pets.create');
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
-        Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
+        Route::post('/rescuer/prof  ile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
 
         // RESCUER PET APPLICATIONS CRUD ROUTES
         Route::get('/rescuer/pet_applications', [RescuerApplicationController::class, 'index'])->name('rescuer.pet_applications');
@@ -159,7 +160,7 @@ Route::middleware(['auth'])->group(function () {
 
         // RESCUER PET MANAGEMENT CRUD ROUTES
         Route::get('/rescuer/pets/{pet}/applications', [RescuerApplicationController::class, 'forPet'])->name('rescuer.pets.applications');
-        Route::post('/rescuer/pets', [RescuerDashboardController::class, 'store'])->name('rescuer.pets.store');
+        Route::post('/rescuer/pets', [RescuerDashboardController::class, 'AddPetListing'])->name('rescuer.pets.create');
         Route::match(['put', 'patch'], '/rescuer/pets/{pet}', [RescuerDashboardController::class, 'update'])->name('rescuer.pets.update');
         Route::delete('/rescuer/pets/{pet}', [RescuerDashboardController::class, 'destroy'])->name('rescuer.pets.destroy');
         Route::delete('/rescuer/pet-images/{id}', [RescuerDashboardController::class, 'deleteImage'])->name('rescuer.pet-images.destroy');

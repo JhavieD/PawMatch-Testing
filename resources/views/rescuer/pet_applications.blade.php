@@ -3,7 +3,7 @@
 @section('title', 'Pet Applications - PawMatch')
 
 @section('rescuer-content')
-    <div class="container" style="margin-left: 250px;">
+<div class="container">
         <div class="header">
             <h1>Adoption Applications</h1>
         </div>
@@ -42,7 +42,7 @@
                 </div>
             @endforeach
         </div>
-    </div>
+</div>
 
     <!-- Application Review Modal -->
     <div id="applicationModal" class="modal" style="display:none;">
@@ -90,7 +90,7 @@
 
         function showApplicationModal(id) {
             currentApplicationId = id;
-            fetch(`/rescuer/applications/${id}`)
+            fetch(`/rescuer/applications/${id}/review`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('applicationModalBody').innerHTML = html;
