@@ -660,8 +660,6 @@ class AdminDashboardController extends Controller
         
         // You can implement notification logic here
         // Notification::send($user, new VerificationStatusUpdated($status));
-
-        // return response()->json(['message' => 'Verification status updated successfully']);
         return redirect()->back()->with('success', 'Verification status updated.');
     }
 } 

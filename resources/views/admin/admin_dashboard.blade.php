@@ -46,7 +46,7 @@
                         </div>
 
                         <!-- Work in Progress -->
-                        <!-- <div class="flex gap-2">
+                        <div class="flex gap-2">
                             <form action="{{ route('admin.verifications.approve', $approval->verification_id) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-primary btn-sm">Approve</button>
@@ -62,7 +62,7 @@
             @else
                 <p class="text-gray-500 text-center py-4">No pending approvals.</p>
             @endif
-        </div> -->
+        </div>
 
         <!-- Recent Stray Reports -->
         <div class="bg-white rounded-xl shadow p-6">
