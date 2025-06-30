@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Adopter;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Shared\AdoptionApplication;
-use App\Http\Controllers\Shared\Controller;
+use App\Http\Controllers\Controller;
 
 class AdopterApplicationController extends Controller
 {

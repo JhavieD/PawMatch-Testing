@@ -3,34 +3,45 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Shared\User;
 
 class UsersSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
-            'user_id' => 4,
+        // Create admin user
+        User::create([
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('password'),
+            'phone_number' => '09123456789',
+            'role' => 'admin',
+            'usertype' => 'user',
+        ]);
+
+        // Create adopter user  
+        User::create([
             'first_name' => 'Jan Vincent',
             'last_name' => 'Dominguez',
             'email' => 'adopter@gmail.com',
             'password' => '$2y$12$6VLuIaKZk5uaAN9b0skrseKw3GdJaPQZQ5McBzRP8O8OlFfBwwlKW',
+            'password' => bcrypt('password'),
             'phone_number' => '09760792254',
             'role' => 'adopter',
-            'created_at' => '2025-06-16 10:21:33',
-            'updated_at' => '2025-06-16 10:21:33',
+            'usertype' => 'user',
         ]);
 
-        DB::table('users')->insert([
-            'user_id' => 5,
-            'first_name' => 'JAN VINCENT',
-            'last_name' => 'DOMINGUEZ',
+        // Create shelter user
+        User::create([
+            'first_name' => 'Shelter',
+            'last_name' => 'Manager',
             'email' => 'shelter@gmail.com',
             'password' => '$2y$12$sfdZ1NHAvifX2FYEnzFn8er5cqIyQgpFrj7r29iCFJfGaQ45fwy92',
+            'password' => bcrypt('password'),
             'phone_number' => '09760792254',
             'role' => 'shelter',
-            'created_at' => '2025-06-16 10:28:34',
-            'updated_at' => '2025-06-16 10:28:34',
+            'usertype' => 'user',
         ]);
 
         DB::table('users')->insert([
@@ -43,7 +54,15 @@ class UsersSeeder extends Seeder
             'role' => 'admin',
             'created_at' => '2025-06-19 09:40:37',
             'updated_at' => '2025-06-19 09:40:37',
+        // Create rescuer user
+        User::create([
+            'first_name' => 'Rescuer',
+            'last_name' => 'Hero',
+            'email' => 'rescuer@gmail.com',
+            'password' => bcrypt('password'),
+            'phone_number' => '09987654321',
+            'role' => 'rescuer',
+            'usertype' => 'user',
         ]);
-
     }
 }
