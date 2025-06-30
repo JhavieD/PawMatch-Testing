@@ -524,7 +524,7 @@ class AdminDashboardController extends Controller
             ->select(
                 'rescuer_verifications.verification_id',
                 'rescuer_verifications.submitted_by',
-                'rescuer_verifications.document_url',
+                'rescuer_verifications.document_url as rescuer_document_url',
                 'rescuer_verifications.facebook_link',
                 'rescuer_verifications.status',
                 'rescuer_verifications.submitted_at',
@@ -538,9 +538,11 @@ class AdminDashboardController extends Controller
             );
 
         // Combine and sort by submission date
-        $verifications = $shelterVerifications->union($rescuerVerifications)
+        $verifications = DB::table(DB::raw("({$shelterVerifications->toSql()} UNION {$rescuerVerifications->toSql()}) as combined"))
+            ->mergeBindings($shelterVerifications->union($rescuerVerifications))
             ->orderBy('submitted_at', 'desc')
             ->get();
+        // Work in Progres
 
         // Get counts for stats
         $stats = [
@@ -588,7 +590,7 @@ class AdminDashboardController extends Controller
                 ->select(
                     'rescuer_verifications.verification_id',
                     'rescuer_verifications.submitted_by',
-                    'rescuer_verifications.document_url',
+                    'rescuer_verifications.document_url as document_url',
                     'rescuer_verifications.facebook_link',
                     'rescuer_verifications.status',
                     'rescuer_verifications.submitted_at',
@@ -659,6 +661,7 @@ class AdminDashboardController extends Controller
         // You can implement notification logic here
         // Notification::send($user, new VerificationStatusUpdated($status));
 
-        return response()->json(['message' => 'Verification status updated successfully']);
+        // return response()->json(['message' => 'Verification status updated successfully']);
+        return redirect()->back()->with('success', 'Verification status updated.');
     }
 } 

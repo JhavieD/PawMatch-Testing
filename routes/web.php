@@ -23,6 +23,7 @@ use App\Http\Controllers\Shelter\AdoptionApplicationController as ShelterAdoptio
 // Rescuer Controllers
 use App\Http\Controllers\Rescuer\RescuerDashboardController;
 use App\Http\Controllers\Rescuer\RescuerController;
+use App\Http\Controllers\Rescuer\RescuerVerificationController;
 // Admin Controllers
 use App\Http\Controllers\Admin\AdminDashboardController;
 // Shared Controllers
@@ -125,6 +126,8 @@ Route::middleware(['auth'])->group(function () {
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {
+        Route::get('/verification', [RescuerVerificationController::class, 'showVerificationForm'])->name('rescuer.verification.form');
+        Route::post('/verification', [RescuerVerificationController::class, 'submitVerification'])->name('rescuer.verification.submit');
         Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])->name('rescuer.dashboard');
         Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
         Route::get('/rescuer/pets', [RescuerDashboardController::class, 'petManagement'])->name('rescuer.pet-management');

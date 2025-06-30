@@ -74,22 +74,19 @@
                         </span>
                     </td>
                     <td>
-
-                        <!-- Work in progress -->
                         <div class="document-previews">
-                            @if($verification->type === 'shelter')
-                                <button class="action-icon" 
-                                        onclick="viewRegistrationDocument('{{ Storage::disk('s3')->url($verification->document_url) }}')" 
-                                        title="View Registration Document">
+                            @if(strtolower($verification->type) === 'shelter' && $verification->document_url)
+                                <button class="action-icon"
+                                    onclick="viewRegistrationDocument('{{ Storage::disk('s3')->url($verification->document_url) }}')"
+                                    title="View Registration Document">
                                     <i class="fas fa-file-alt"></i> Registration Doc
                                 </button>
-                        <!-- Work in progress -->
-
-                                </a>
-                            @elseif($verification->type === 'rescuer')
-                                <a href="{{ Storage::disk('s3')->url($verification->document_url) }}" target="_blank" class="document-link">
-                                    <i class="fas fa-file-alt"></i> Credentials
-                                </a>
+                            @elseif(strtolower($verification->type) === 'rescuer' && $verification->document_url)
+                                <button class="action-icon"
+                                    onclick="viewRescuerDocument('{{ Storage::disk('s3')->url($verification->document_url) }}')"
+                                    title="View Rescuer Credentials">
+                                    <i class="fas fa-id-card"></i> Credentials
+                                </button>
                             @endif
                         </div>
                     </td>
@@ -110,12 +107,19 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                             @if($verification->status === 'pending')
-                                <button class="action-icon approve" title="Approve" onclick="approveVerification({{ $verification->verification_id }})">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="action-icon reject" title="Reject" onclick="rejectVerification({{ $verification->verification_id }})">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                                <form method="POST" action="{{ route('admin.verifications.approve', $verification->verification_id) }}" style="display:inline">
+                                    @csrf
+                                    <button type="submit" class="action-icon approve" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="{{ route('admin.verifications.reject', $verification->verification_id) }}" style="display:inline">
+                                    @csrf
+                                    <button type="submit" class="action-icon reject" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
                             @endif
                         </div>
                     </td>
@@ -187,7 +191,7 @@
         </div>
     </div>
 </div>
-<!-- Document Modal - To view registration document -->
+<!-- Document Modal - To view registration document for Shelter Dashboard -->
 <div id="documentModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -197,6 +201,25 @@
         <div class="modal-body">
             <div class="document-frame-wrapper" style="max-height: 80vh; overflow-y: auto;">
                 <iframe id="registrationDocViewer"
+                        width="100%"
+                        height="500"
+                        frameborder="0"
+                        style="border-radius: 6px; border: 1px solid #ccc;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Modal - To view rescuer credentials -->
+<div id="rescuerDocumentModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Rescuer Credentials</h2>
+            <button class="close-rescuer-modal" title="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="document-frame-wrapper" style="max-height: 80vh; overflow-y: auto;">
+                <iframe id="rescuerDocViewer"
                         width="100%"
                         height="500"
                         frameborder="0"
@@ -233,7 +256,6 @@
                         month: 'long',
                         day: 'numeric'
                     });
-                
                 // Show modal
                 document.getElementById('verificationModal').style.display = 'flex';
             });
@@ -287,7 +309,7 @@
         }
     });
 
-    // Registration Doc Modal
+    // Registration Doc Modal for Shelter
         window.viewRegistrationDocument = function(url) {
             const viewer = document.getElementById('registrationDocViewer');
             const modal = document.getElementById('documentModal');
@@ -316,5 +338,33 @@
                 });
             }
         });
+
+    // Registration Doc Modal for Rescuer
+    window.viewRescuerDocument = function(url) {
+        const viewer = document.getElementById('rescuerDocViewer');
+        const modal = document.getElementById('rescuerDocumentModal');
+        viewer.src = url;
+        modal.style.display = 'flex';
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeBtn = document.querySelector('.close-rescuer-modal');
+        const modal = document.getElementById('rescuerDocumentModal');
+        const viewer = document.getElementById('rescuerDocViewer');
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                viewer.src = '';
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                viewer.src = '';
+            }
+        });
+    });
 </script>
 @endsection 
