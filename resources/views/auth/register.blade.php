@@ -140,31 +140,6 @@
                     <div class="field-success" id="phone_numberSuccess"></div>
                 </div>
                 <div class="register-grid-span-2">
-                    <label for="street_address" class="register-label">
-                        Street Address <span class="required">*</span>
-                    </label>
-                    <input type="text" name="street_address" id="street_address" required class="register-input register-placeholder-small" placeholder="Enter your street address" value="{{ old('street_address') }}">
-                    <div class="field-error" id="street_addressError"></div>
-                    <div class="field-success" id="street_addressSuccess"></div>
-                </div>
-                <div>
-                    <label for="city" class="register-label">
-                        City <span class="required">*</span>
-                    </label>
-                    <input type="text" name="city" id="city" required class="register-input register-placeholder-small" placeholder="Enter your city" value="{{ old('city') }}">
-                    <div class="field-error" id="cityError"></div>
-                    <div class="field-success" id="citySuccess"></div>
-                </div>
-                <div>
-                    <label for="zip_code" class="register-label">
-                        ZIP Code <span class="required">*</span>
-                    </label>
-                    <input type="text" name="zip_code" id="zip_code" required class="register-input register-placeholder-small" placeholder="Enter your ZIP code" value="{{ old('zip_code') }}">
-                    <div class="field-error" id="zip_codeError"></div>
-                    <div class="field-success" id="zip_codeSuccess"></div>
-                </div>
-                {{--
-                <div class="register-grid-span-2">
                     <label for="address" class="register-label">
                         Address <span class="required">*</span>
                     </label>
@@ -172,7 +147,6 @@
                     <div class="field-error" id="addressError"></div>
                     <div class="field-success" id="addressSuccess"></div>
                 </div>
-                --}}
             </div>
         </div>
         
@@ -250,19 +224,14 @@
                     <input type="text" name="shelter_name" id="shelter_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's name" value="{{ old('shelter_name') }}">
                     <div class="field-error" id="shelter_nameError"></div>
                 </div>
-                <div class="mb-2">
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" id="usePersonalAddress" name="usePersonalAddress" value="on" {{ old('usePersonalAddress', 'on') == 'on' ? 'checked' : '' }} class="form-checkbox mr-2">
-                        <span class="text-sm">Use the address from Step 2</span>
-                    </label>
-                </div>
-                <div id="shelterLocationGroup">
+                <div>
                     <label for="shelter_location" class="block text-sm font-medium text-gray-700">
                         Location <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="shelter_location" id="shelter_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's address" value="{{ old('shelter_location') }}" readonly>
+                    <input type="text" name="shelter_location" id="shelter_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's address" value="{{ old('shelter_location') }}">
                     <div class="field-error" id="shelter_locationError"></div>
                 </div>
+
                 <div id="customShelterAddress" style="display:none;">
                     <div class="mb-2">
                         <label for="shelter_street_address" class="block text-sm font-medium text-gray-700">Street Address <span class="text-red-500">*</span></label>
@@ -519,7 +488,7 @@ function validateCurrentStep() {
             }
             break;
         case 2:
-            const requiredFields = ['first_name', 'last_name', 'email', 'phone_number', 'street_address', 'city', 'zip_code'];
+            const requiredFields = ['first_name', 'last_name', 'email', 'phone_number', 'address'];
             requiredFields.forEach(field => {
                 const value = document.getElementById(field).value.trim();
                 if (!value) {
@@ -563,46 +532,6 @@ function validateCurrentStep() {
             break;
         case 4:
             const roleValue = document.getElementById('role').value;
-            if (roleValue === 'shelter') {
-                const usePersonal = document.getElementById('usePersonalAddress');
-                if (usePersonal && !usePersonal.checked) {
-                    const customFields = ['shelter_street_address', 'shelter_city', 'shelter_zip_code'];
-                    customFields.forEach(field => {
-                        const value = document.getElementById(field).value.trim();
-                        if (!value) {
-                            showError(field + 'Error', 'This field is required');
-                            isValid = false;
-                        } else {
-                            hideError(field + 'Error');
-                        }
-                    });
-                } else {
-                    const shelterLocation = document.getElementById('shelter_location').value.trim();
-                    if (!shelterLocation) {
-                        showError('shelter_locationError', 'This field is required');
-                        isValid = false;
-                    } else {
-                        hideError('shelter_locationError');
-                    }
-                }
-                // Validate shelter_name as usual
-                const shelterName = document.getElementById('shelter_name').value.trim();
-                if (!shelterName) {
-                    showError('shelter_nameError', 'This field is required');
-                    isValid = false;
-                } else {
-                    hideError('shelter_nameError');
-                }
-                // Validate shelter_valid_id as usual
-                const shelterValidId = document.getElementById('shelter_valid_id');
-                if (!shelterValidId.value) {
-                    showError('shelter_valid_idError', 'This field is required');
-                    isValid = false;
-                } else {
-                    hideError('shelter_valid_idError');
-                }
-                break;
-            }
             const roleFields = getRoleFields(roleValue);
             roleFields.forEach(field => {
                 const value = document.getElementById(field).value.trim();
@@ -740,10 +669,7 @@ function showRoleFieldsForStep4() {
     rescuerFields.style.display = 'none';
     if (currentStep === 4) {
         if (role === 'adopter') adopterFields.style.display = 'block';
-        if (role === 'shelter') {
-            shelterFields.style.display = 'block';
-            autofillShelterLocation();
-        }
+        if (role === 'shelter') shelterFields.style.display = 'block';
         if (role === 'rescuer') rescuerFields.style.display = 'block';
     }
 }
@@ -757,42 +683,6 @@ function showCorrectNav() {
     } else {
         if (step1Nav) step1Nav.style.display = 'none';
         if (generalNav) generalNav.style.display = '';
-    }
-}
-
-function autofillShelterLocation() {
-    const usePersonal = document.getElementById('usePersonalAddress');
-    const shelterLocation = document.getElementById('shelter_location');
-    const group = document.getElementById('shelterLocationGroup');
-    const custom = document.getElementById('customShelterAddress');
-    if (!usePersonal || !shelterLocation || !group || !custom) return;
-    function setPersonal() {
-        const street = document.getElementById('street_address').value.trim();
-        const city = document.getElementById('city').value.trim();
-        const zip = document.getElementById('zip_code').value.trim();
-        shelterLocation.value = street && city && zip ? `${street}, ${city}, ${zip}` : '';
-        shelterLocation.readOnly = true;
-        group.style.display = '';
-        custom.style.display = 'none';
-    }
-    function setCustom() {
-        shelterLocation.value = '';
-        shelterLocation.readOnly = true;
-        group.style.display = 'none';
-        custom.style.display = '';
-    }
-    usePersonal.addEventListener('change', function() {
-        if (this.checked) {
-            setPersonal();
-        } else {
-            setCustom();
-        }
-    });
-    // On load
-    if (usePersonal.checked) {
-        setPersonal();
-    } else {
-        setCustom();
     }
 }
 
