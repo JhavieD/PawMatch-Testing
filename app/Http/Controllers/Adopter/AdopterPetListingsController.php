@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Adopter;
 
 use Illuminate\Http\Request;
 use App\Models\Shared\Pet;
-use App\Http\Controllers\Shared\Controller;
+use App\Http\Controllers\Controller;
 
 class AdopterPetListingsController extends Controller
 {
