@@ -81,7 +81,7 @@ class ShelterDashboardController extends Controller
         ]);
     }
     // for addingpets
-    public function store(Request $request)
+    public function createPetListing(Request $request)
     {
         $shelter = auth()->user()->shelter;
         $data = $request->validate([

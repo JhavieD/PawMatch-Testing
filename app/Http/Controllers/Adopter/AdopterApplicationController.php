@@ -57,4 +57,4 @@ class AdopterApplicationController extends Controller
         ]);
         return response()->json(['success' => true, 'application_id' => $application->application_id]);
     }
-} 
+}

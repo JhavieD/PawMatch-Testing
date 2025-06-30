@@ -90,7 +90,7 @@
 
     function showApplicationModal(id) {
         currentApplicationId = id;
-        fetch(`/shelter/applications/${id}`)
+        fetch(`/shelter/applications/${id}/review`)
             .then(response => response.text())
             .then(html => {
                 document.getElementById('applicationModalBody').innerHTML = html;
