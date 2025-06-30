@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\GoogleController;
 // Adopter Controllers
 use App\Http\Controllers\Adopter\AdopterDashboardController;
 use App\Http\Controllers\Adopter\AdopterPetListingsController;
@@ -277,3 +278,6 @@ Route::get('/application-status', fn() => view('adopter.application-status'))->n
 Route::get('/pets', fn() => 'Pet listings coming soon!')->name('pets.index');
 Route::get('/applications', fn() => 'Applications page coming soon!')->name('applications.index');
 Route::get('/profile/edit', fn() => 'Profile edit page coming soon!')->name('profile.edit');
+
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
