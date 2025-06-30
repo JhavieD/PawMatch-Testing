@@ -71,17 +71,22 @@
         }
     @endphp
     
-    @if(!$googleUser)
-    <div class="flex justify-center mb-6">
-        <a href="{{ route('google.login') }}"
-           class="flex items-center gap-3 px-6 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-700 font-medium w-full max-w-xs">
-            <span class="inline-block align-middle">
-                <svg width="20" height="20" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.22l6.85-6.85C35.63 2.36 30.18 0 24 0 14.82 0 6.73 5.82 2.69 14.09l7.98 6.2C12.13 13.13 17.57 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.6C43.93 37.36 46.1 31.45 46.1 24.55z"/><path fill="#FBBC05" d="M10.67 28.29a14.5 14.5 0 010-8.58l-7.98-6.2A23.94 23.94 0 000 24c0 3.77.9 7.34 2.69 10.49l7.98-6.2z"/><path fill="#EA4335" d="M24 44c6.18 0 11.36-2.05 15.18-5.59l-7.19-5.6c-2.01 1.35-4.59 2.16-7.99 2.16-6.43 0-11.87-3.63-13.33-8.79l-7.98 6.2C6.73 42.18 14.82 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></g></svg>
-            </span>
-            <span>Sign up with Google</span>
-        </a>
+    <div id="google-signup-section" @if(!$googleUser) style="" @else style="display:none;" @endif>
+        <div class="flex justify-center mb-2">
+            <a href="{{ route('google.login') }}"
+               class="flex items-center justify-center gap-3 px-8 py-3 border border-gray-300 rounded-xl bg-white shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-800 font-semibold text-lg w-full max-w-xs hover:bg-gray-50">
+                <span>
+                    <svg width="24" height="24" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.22l6.85-6.85C35.63 2.36 30.18 0 24 0 14.82 0 6.73 5.82 2.69 14.09l7.98 6.2C12.13 13.13 17.57 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.6C43.93 37.36 46.1 31.45 46.1 24.55z"/><path fill="#FBBC05" d="M10.67 28.29a14.5 14.5 0 010-8.58l-7.98-6.2A23.94 23.94 0 000 24c0 3.77.9 7.34 2.69 10.49l7.98-6.2z"/><path fill="#EA4335" d="M24 44c6.18 0 11.36-2.05 15.18-5.59l-7.19-5.6c-2.01 1.35-4.59 2.16-7.99 2.16-6.43 0-11.87-3.63-13.33-8.79l-7.98 6.2C6.73 42.18 14.82 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></g></svg>
+                </span>
+                <span class="ml-2">Sign up with Google</span>
+            </a>
+        </div>
+        <div class="flex items-center my-10 py-4">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="mx-8 text-gray-500 font-medium text-base whitespace-nowrap">or</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
     </div>
-    @endif
     
     <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" class="space-y-8" id="registerForm">
         @csrf
@@ -212,9 +217,9 @@
                     <label for="password" class="register-label">
                         Password <span class="required">*</span>
                     </label>
-                    <div class="register-input-wrapper">
-                        <input type="password" name="password" id="password" required class="register-input register-placeholder-small" placeholder="Create a strong password" autocomplete="new-password">
-                        <button type="button" class="password-toggle" id="togglePassword">
+                    <div class="relative">
+                        <input type="password" name="password" id="password" required class="register-input register-placeholder-small pr-12" placeholder="Create a strong password" autocomplete="new-password">
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center px-3" id="togglePassword" tabindex="-1">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
@@ -226,11 +231,8 @@
                     <label for="password_confirmation" class="register-label">
                         Confirm Password <span class="required">*</span>
                     </label>
-                    <div class="register-input-wrapper">
-                        <input type="password" name="password_confirmation" id="password_confirmation" required class="register-input register-placeholder-small" placeholder="Confirm your password" autocomplete="new-password">
-                        <button type="button" class="password-toggle" id="toggleConfirmPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                    <div class="relative">
+                        <input type="password" name="password_confirmation" id="password_confirmation" required class="register-input register-placeholder-small pr-12" placeholder="Confirm your password" autocomplete="new-password">
                     </div>
                     <div class="field-error" id="password_confirmationError"></div>
                     <div class="field-success" id="password_confirmationSuccess"></div>
@@ -294,18 +296,18 @@
                 </div>
                 <div id="customShelterAddress" style="display:none;">
                     <div class="mb-2">
-                        <label for="shelter_street_address" class="block text-sm font-medium text-gray-700">Street Address <span class="text-red-500">*</span></label>
-                        <input type="text" name="shelter_street_address" id="shelter_street_address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's street address" value="{{ old('shelter_street_address') }}">
+                        <label for="shelter_street_address" class="register-label">Street Address <span class="required">*</span></label>
+                        <input type="text" name="shelter_street_address" id="shelter_street_address" class="register-input register-placeholder-small" placeholder="Enter your shelter's street address" value="{{ old('shelter_street_address') }}">
                         <div class="field-error" id="shelter_street_addressError"></div>
                     </div>
                     <div class="mb-2">
-                        <label for="shelter_city" class="block text-sm font-medium text-gray-700">City <span class="text-red-500">*</span></label>
-                        <input type="text" name="shelter_city" id="shelter_city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's city" value="{{ old('shelter_city') }}">
+                        <label for="shelter_city" class="register-label">City <span class="required">*</span></label>
+                        <input type="text" name="shelter_city" id="shelter_city" class="register-input register-placeholder-small" placeholder="Enter your shelter's city" value="{{ old('shelter_city') }}">
                         <div class="field-error" id="shelter_cityError"></div>
                     </div>
                     <div class="mb-2">
-                        <label for="shelter_zip_code" class="block text-sm font-medium text-gray-700">ZIP Code <span class="text-red-500">*</span></label>
-                        <input type="text" name="shelter_zip_code" id="shelter_zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's ZIP code" value="{{ old('shelter_zip_code') }}">
+                        <label for="shelter_zip_code" class="register-label">ZIP Code <span class="required">*</span></label>
+                        <input type="text" name="shelter_zip_code" id="shelter_zip_code" class="register-input register-placeholder-small" placeholder="Enter your shelter's ZIP code" value="{{ old('shelter_zip_code') }}">
                         <div class="field-error" id="shelter_zip_codeError"></div>
                     </div>
                 </div>
@@ -340,12 +342,35 @@
                     <input type="text" name="organization_name" id="organization_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your organization's name" value="{{ old('organization_name') }}">
                     <div class="field-error" id="organization_nameError"></div>
                 </div>
-                <div>
+                <div class="mb-2">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="useRescuerPersonalAddress" name="useRescuerPersonalAddress" value="on" {{ old('useRescuerPersonalAddress', 'on') == 'on' ? 'checked' : '' }} class="form-checkbox mr-2">
+                        <span class="text-sm">Use the address from Step 2</span>
+                    </label>
+                </div>
+                <div id="rescuerLocationGroup">
                     <label for="rescuer_location" class="block text-sm font-medium text-gray-700">
                         Location <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="rescuer_location" id="rescuer_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your organization's address" value="{{ old('rescuer_location') }}">
+                    <input type="text" name="rescuer_location" id="rescuer_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your organization's address" value="{{ old('rescuer_location') }}" readonly>
                     <div class="field-error" id="rescuer_locationError"></div>
+                </div>
+                <div id="customRescuerAddress" style="display:none;">
+                    <div class="mb-2">
+                        <label for="rescuer_street_address" class="register-label">Street Address <span class="required">*</span></label>
+                        <input type="text" name="rescuer_street_address" id="rescuer_street_address" class="register-input register-placeholder-small" placeholder="Enter your organization's street address" value="{{ old('rescuer_street_address') }}">
+                        <div class="field-error" id="rescuer_street_addressError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="rescuer_city" class="register-label">City <span class="required">*</span></label>
+                        <input type="text" name="rescuer_city" id="rescuer_city" class="register-input register-placeholder-small" placeholder="Enter your organization's city" value="{{ old('rescuer_city') }}">
+                        <div class="field-error" id="rescuer_cityError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="rescuer_zip_code" class="register-label">ZIP Code <span class="required">*</span></label>
+                        <input type="text" name="rescuer_zip_code" id="rescuer_zip_code" class="register-input register-placeholder-small" placeholder="Enter your organization's ZIP code" value="{{ old('rescuer_zip_code') }}">
+                        <div class="field-error" id="rescuer_zip_codeError"></div>
+                    </div>
                 </div>
                 <div>
                     <label for="rescuer_valid_id" class="block text-sm font-medium text-gray-700">
@@ -409,6 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     showRoleFieldsForStep4();
     showCorrectNav();
+    showGoogleSignupSection();
     updateNavigationButtons();
     // Enable Next button on role select
     const nextBtn1 = document.getElementById('nextBtn1');
@@ -426,31 +452,22 @@ document.addEventListener('DOMContentLoaded', function() {
             updateNavigationButtons();
             showRoleFieldsForStep4();
             showCorrectNav();
+            showGoogleSignupSection();
         }
     });
     // Password toggle for main password
     document.getElementById('togglePassword').addEventListener('click', function() {
         const passwordInput = document.getElementById('password');
-        const icon = this.querySelector('i');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    });
-    // Password toggle for confirm password
-    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
         const confirmInput = document.getElementById('password_confirmation');
         const icon = this.querySelector('i');
-        if (confirmInput.type === 'password') {
+        // If either is password, show both as text; else, show both as password
+        if (passwordInput.type === 'password' || confirmInput.type === 'password') {
+            passwordInput.type = 'text';
             confirmInput.type = 'text';
             icon.classList.remove('fa-eye');
             icon.classList.add('fa-eye-slash');
         } else {
+            passwordInput.type = 'password';
             confirmInput.type = 'password';
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');
@@ -468,6 +485,88 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     showCorrectNav();
+    document.getElementById('registerForm').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            if (currentStep < totalSteps) {
+                e.preventDefault();
+                nextStep();
+            }
+        }
+    });
+    // Shelter address logic
+    const usePersonalAddress = document.getElementById('usePersonalAddress');
+    const shelterLocation = document.getElementById('shelter_location');
+    const customShelterAddress = document.getElementById('customShelterAddress');
+    const shelterLocationGroup = document.getElementById('shelterLocationGroup');
+    function updateShelterLocation() {
+        if (usePersonalAddress && shelterLocation && customShelterAddress && shelterLocationGroup) {
+            if (usePersonalAddress.checked) {
+                const street = document.getElementById('street_address').value;
+                const city = document.getElementById('city').value;
+                const zip = document.getElementById('zip_code').value;
+                shelterLocation.value = [street, city, zip].filter(Boolean).join(', ');
+                shelterLocation.readOnly = true;
+                shelterLocationGroup.style.display = '';
+                customShelterAddress.style.display = 'none';
+            } else {
+                shelterLocation.value = '';
+                shelterLocation.readOnly = false;
+                shelterLocationGroup.style.display = 'none';
+                customShelterAddress.style.display = '';
+            }
+        }
+    }
+    if (usePersonalAddress) {
+        usePersonalAddress.addEventListener('change', updateShelterLocation);
+        ['street_address', 'city', 'zip_code'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function() {
+                    if (usePersonalAddress.checked) {
+                        updateShelterLocation();
+                    }
+                });
+            }
+        });
+        updateShelterLocation();
+    }
+    // Rescuer address logic
+    const useRescuerPersonalAddress = document.getElementById('useRescuerPersonalAddress');
+    const rescuerLocation = document.getElementById('rescuer_location');
+    const customRescuerAddress = document.getElementById('customRescuerAddress');
+    const rescuerLocationGroup = document.getElementById('rescuerLocationGroup');
+    function updateRescuerLocation() {
+        if (useRescuerPersonalAddress && rescuerLocation && customRescuerAddress && rescuerLocationGroup) {
+            if (useRescuerPersonalAddress.checked) {
+                const street = document.getElementById('street_address').value;
+                const city = document.getElementById('city').value;
+                const zip = document.getElementById('zip_code').value;
+                rescuerLocation.value = [street, city, zip].filter(Boolean).join(', ');
+                rescuerLocation.readOnly = true;
+                rescuerLocationGroup.style.display = '';
+                customRescuerAddress.style.display = 'none';
+            } else {
+                rescuerLocation.value = '';
+                rescuerLocation.readOnly = false;
+                rescuerLocationGroup.style.display = 'none';
+                customRescuerAddress.style.display = '';
+            }
+        }
+    }
+    if (useRescuerPersonalAddress) {
+        useRescuerPersonalAddress.addEventListener('change', updateRescuerLocation);
+        ['street_address', 'city', 'zip_code'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function() {
+                    if (useRescuerPersonalAddress.checked) {
+                        updateRescuerLocation();
+                    }
+                });
+            }
+        });
+        updateRescuerLocation();
+    }
 });
 
 function setupEventListeners() {
@@ -510,6 +609,7 @@ function nextStep() {
             updateNavigationButtons();
             showRoleFieldsForStep4();
             showCorrectNav();
+            showGoogleSignupSection();
         }
     }
 }
@@ -523,6 +623,7 @@ function prevStep() {
         updateNavigationButtons();
         showRoleFieldsForStep4();
         showCorrectNav();
+        showGoogleSignupSection();
     }
 }
 
@@ -858,5 +959,16 @@ showRoleFieldsForStep4();
 @if ($errors->any())
     updateNavigationButtons();
 @endif
+
+function showGoogleSignupSection() {
+    var section = document.getElementById('google-signup-section');
+    if (section) {
+        if (currentStep === 1) {
+            section.style.display = '';
+        } else {
+            section.style.display = 'none';
+        }
+    }
+}
 </script>
 @endsection 
