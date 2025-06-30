@@ -140,7 +140,33 @@ body {
   text-align: center;
   font-size: 1rem;
 }
-/* main dashboard */
+
+/* =====================
+        MAIN STYLES
+   ===================== */
+
+@media (min-width: 901px) {
+  .container {
+    margin-left: 250px !important;
+    max-width: calc(100vw - 250px);
+    width: 100%;
+    padding: 2rem 5rem 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 900px) {
+  .container {
+    margin-left: 70px !important;
+    max-width: calc(100vw - 70px);
+    width: 100%;
+    padding: 1rem 5rem 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+}
 
 .container {
   max-width: 1200px;
@@ -265,7 +291,7 @@ body {
   color: #854d0e;
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   text-transform: capitalize;
 }
@@ -275,7 +301,7 @@ body {
   color: #15803d;
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   text-transform: capitalize;
 }
@@ -285,7 +311,7 @@ body {
   color: #991b1b;
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
   text-transform: capitalize;
 }
@@ -295,7 +321,7 @@ body {
   color: #0284c7;
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
   text-transform: capitalize;
 }
@@ -335,9 +361,11 @@ body {
   background: #f9fafb;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .container {
-    padding: 0 1rem;
+    margin-left: 70px !important;
+    max-width: calc(100vw - 70px);
+    padding: 1rem;
   }
 
   .header {

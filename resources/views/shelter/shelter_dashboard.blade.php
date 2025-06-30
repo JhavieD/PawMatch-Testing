@@ -225,7 +225,7 @@
                 <button class="close-btn" type="button">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="addPetForm" method="POST" action="{{ route('shelter.pets.store') }}"
+                <form id="addPetForm" method="POST" action="{{ route('shelter.pets.create') }}"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="form-grid">
@@ -421,7 +421,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // --- Modal functions that must be global ---
         function showApplicationModal(id) {
-            fetch(`/shelter/applications/${id}`)
+            fetch(`/shelter/applications/${id}/review`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('applicationModalBody').innerHTML = html;

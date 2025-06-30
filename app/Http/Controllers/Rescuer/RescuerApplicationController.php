@@ -20,7 +20,7 @@ class RescuerApplicationController extends Controller
         return view('rescuer.pet_applications', compact('applications'));
     }
 
-    public function show($id)
+    public function reviewApplication($id)
     {
         $application = AdoptionApplication::with(['adopter.user', 'pet'])->findOrFail($id);
         if (request()->ajax()) {
