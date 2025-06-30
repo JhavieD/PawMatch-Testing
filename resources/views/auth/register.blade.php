@@ -275,7 +275,7 @@
                         <div class="field-error" id="shelter_cityError"></div>
                     </div>
                     <div class="mb-2">
-                        <label for="shelter_zip_code" class="block text-sm font-medium text-gray-700">ZIP Code <span class="text-red-500">*</span></label>
+                        <label for="shelter_zip_code" class="block text-sm font-medium text-gray-700">ZIP code <span class="text-red-500">*</span></label>
                         <input type="text" name="shelter_zip_code" id="shelter_zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's ZIP code" value="{{ old('shelter_zip_code') }}">
                         <div class="field-error" id="shelter_zip_codeError"></div>
                     </div>
