@@ -3,8 +3,8 @@
 @section('title', 'Pet Management - PawMatch')
 
 @section('rescuer-content')
-    <main class="rescuer-content">
-        <div class="container">
+    <div class="main-content">
+        <div class="content-wrapper">
             <div class="header">
                 <h1>Pet Management</h1>
                 <button class="btn add-pet-btn">+ Add New Pet</button>
@@ -202,7 +202,7 @@
                     <button class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="addPetForm" method="POST" action="{{ route('rescuer.pets.store') }}"
+                    <form id="addPetForm" method="POST" action="{{ route('rescuer.pets.create') }}"
                         enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="adoption_status" value="available">
@@ -326,7 +326,7 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
         function logout() {

@@ -47,7 +47,7 @@ class AdoptionApplicationController extends Controller
 
     // for pet aadoption application modal
 
-    public function show($id)
+    public function reviewApplication($id)
     {
         $application = AdoptionApplication::with(['adopter.user', 'pet'])->findOrFail($id);
         return view('shelter.application_modal', compact('application'));
@@ -81,6 +81,4 @@ class AdoptionApplicationController extends Controller
             'message' => 'Request sent.'
         ]);
     }
-
-
 }

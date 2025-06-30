@@ -292,16 +292,18 @@ body {
     margin-left: 0;
     grid-template-columns: 1fr;
     padding: 1rem;
+    display: block;
   }
-  .conversations {
-    display: none;
+  .conversations,
+  .chat-area {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
   }
   .conversations.active {
     display: block;
   }
-  .chat-area {
-    display: none;
-  }
+
   .chat-area.active {
     display: flex;
   }
