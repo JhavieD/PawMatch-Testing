@@ -44,9 +44,17 @@
                                 <p class="text-sm text-gray-500">{{ $approval->user->email }}</p>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <button class="btn btn-primary btn-sm">Approve</button>
-                            <button class="btn btn-danger btn-sm">Reject</button>
+
+                        <!-- Work in Progress -->
+                        <!-- <div class="flex gap-2">
+                            <form action="{{ route('admin.verifications.approve', $approval->verification_id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                            </form>
+                            <form action="{{ route('admin.verifications.reject', $approval->verification_id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
                         </div>
                     </li>
                     @endforeach
@@ -54,7 +62,7 @@
             @else
                 <p class="text-gray-500 text-center py-4">No pending approvals.</p>
             @endif
-        </div>
+        </div> -->
 
         <!-- Recent Stray Reports -->
         <div class="bg-white rounded-xl shadow p-6">
