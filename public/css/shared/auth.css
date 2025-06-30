@@ -573,6 +573,62 @@ body {
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+/* =====================
+   Login Form Slide Animations
+   ===================== */
+.login-container {
+    position: relative;
+    min-height: 0;
+}
+
+.login-choice,
+.login-form {
+    position: static;
+    width: 100%;
+}
+
+.login-choice {
+    display: block;
+    pointer-events: auto;
+    z-index: 2;
+}
+.login-choice.hidden {
+    display: none;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.login-form {
+    display: none;
+    pointer-events: none;
+    z-index: 1;
+    margin-top: 0;
+}
+.login-form.visible {
+    display: block;
+    pointer-events: auto;
+    z-index: 2;
+    margin-top: 0;
+}
+
+/* Enhanced button animations */
+.google-btn, .email-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.google-btn:hover, .email-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.back-btn {
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    transform: translateX(-3px);
+}
+
 /* ========== Register Page Custom Styles ========== */
 .progress-bar {
     width: 100%;
@@ -972,4 +1028,35 @@ body {
     color: #059669;
     font-size: 0.85em;
     margin-top: 0.2em;
+}
+
+.compact-choice {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+.choice-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0.5rem 0;
+}
+.choice-divider .flex-grow {
+    flex-grow: 1;
+    height: 1px;
+    background: #e5e7eb;
+}
+.choice-divider span {
+    margin: 0 0.5rem;
+    color: #a1a1aa;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.card-animator {
+    max-width: 400px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.card-animator.expanded {
+    /* No effect needed */
 } 
