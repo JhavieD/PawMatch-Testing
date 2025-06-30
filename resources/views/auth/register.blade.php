@@ -231,6 +231,24 @@
                     <input type="text" name="shelter_location" id="shelter_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's address" value="{{ old('shelter_location') }}">
                     <div class="field-error" id="shelter_locationError"></div>
                 </div>
+
+                <div id="customShelterAddress" style="display:none;">
+                    <div class="mb-2">
+                        <label for="shelter_street_address" class="block text-sm font-medium text-gray-700">Street Address <span class="text-red-500">*</span></label>
+                        <input type="text" name="shelter_street_address" id="shelter_street_address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's street address" value="{{ old('shelter_street_address') }}">
+                        <div class="field-error" id="shelter_street_addressError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="shelter_city" class="block text-sm font-medium text-gray-700">City <span class="text-red-500">*</span></label>
+                        <input type="text" name="shelter_city" id="shelter_city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's city" value="{{ old('shelter_city') }}">
+                        <div class="field-error" id="shelter_cityError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="shelter_zip_code" class="block text-sm font-medium text-gray-700">ZIP code <span class="text-red-500">*</span></label>
+                        <input type="text" name="shelter_zip_code" id="shelter_zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's ZIP code" value="{{ old('shelter_zip_code') }}">
+                        <div class="field-error" id="shelter_zip_codeError"></div>
+                    </div>
+                </div>
                 <div>
                     <label for="shelter_valid_id" class="block text-sm font-medium text-gray-700">
                         Business License/ID <span class="text-red-500">*</span>
