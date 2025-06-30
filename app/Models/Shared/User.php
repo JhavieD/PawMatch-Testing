@@ -11,6 +11,7 @@ use App\Models\Shelter\Shelter;
 use App\Models\Adopter\Adopter;
 use App\Models\Rescuer\Rescuer;
 use App\Models\Shared\Message;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -32,8 +33,6 @@ class User extends Authenticatable
         'phone_number',
         'role',
     ];
-
-    protected $appends = ['last_message', 'last_message_time'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -169,22 +168,27 @@ class User extends Authenticatable
     //Upload New Photo Feature
     public function getProfileImageAttribute()
     {
-        $profilePic = \DB::table('user_profile_pic')
-            ->where('user_id', $this->user_id)
-            ->where('is_displayed', true)
-            ->first();
+        // Cache the profile image URL for 1 hour to reduce storage checks
+        $cacheKey = "user_profile_image_{$this->user_id}";
+        
+        return Cache::remember($cacheKey, 3600, function () {
+            $profilePic = \DB::table('user_profile_pic')
+                ->where('user_id', $this->user_id)
+                ->where('is_displayed', true)
+                ->first();
 
-        if ($profilePic && $profilePic->image_url) {
-            // Check S3 first
-            if (\Storage::disk('s3')->exists($profilePic->image_url)) {
-                return \Storage::disk('s3')->url($profilePic->image_url);
+            if ($profilePic && $profilePic->image_url) {
+                // Check S3 first (most common case)
+                if (\Storage::disk('s3')->exists($profilePic->image_url)) {
+                    return \Storage::disk('s3')->url($profilePic->image_url);
+                }
+                // Then check public storage (local fallback)
+                if (\Storage::disk('public')->exists($profilePic->image_url)) {
+                    return \Storage::disk('public')->url($profilePic->image_url);
+                }
             }
-            // Then check public storage (local fallback)
-            if (\Storage::disk('public')->exists($profilePic->image_url)) {
-                return \Storage::disk('public')->url($profilePic->image_url);
-            }
-        }
 
-        return asset('images/default-profile.png');
+            return asset('images/default-profile.png');
+        });
     }
 }

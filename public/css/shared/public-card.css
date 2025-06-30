@@ -1,0 +1,158 @@
+/* Shared public card styles for FAQ, About, Terms, etc. */
+.hamburger-spacer { height: 0; }
+@media (max-width: 768px) {
+    .hamburger-spacer { height: 3.5rem; }
+}
+.public-card-container {
+    max-width: 700px;
+    margin: 2.5rem auto;
+    padding: 2.2rem 1.5rem 2.5rem 1.5rem;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(74,144,226,0.07), 0 1.5px 6px rgba(0,0,0,0.04);
+}
+.public-card-header {
+    text-align: center;
+    margin-bottom: 2.2rem;
+}
+.public-card-header h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 0.7rem;
+}
+.public-card-header p {
+    color: #6b7280;
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+}
+.public-card-section {
+    margin-bottom: 2.2rem;
+}
+.public-card-section-header {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #4a90e2;
+    margin-bottom: 0.7rem;
+    margin-top: 2rem;
+}
+.public-card-list {
+    background: #f8fafc;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(74,144,226,0.04);
+    padding: 1.2rem 1.1rem;
+    margin-bottom: 1.2rem;
+}
+.public-card-list h3 {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 0.2rem;
+    margin-top: 1.1rem;
+}
+.public-card-list ul {
+    margin: 0 0 1rem 1.2rem;
+    padding: 0;
+    color: #444;
+    font-size: 1rem;
+}
+.public-card-list li {
+    margin-bottom: 0.4rem;
+    line-height: 1.6;
+}
+.public-card-list p {
+    color: #444;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+}
+.public-card-stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+.public-card-stat-item {
+    background: #f3f4f6;
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+    min-width: 120px;
+    text-align: center;
+    flex: 1 1 120px;
+    max-width: 180px;
+}
+.public-card-stat-item h3 {
+    color: #4a90e2;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+.public-card-stat-item p {
+    color: #444;
+    font-size: 1rem;
+}
+.public-card-team-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+}
+.public-card-team-member {
+    background: #f8fafc;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(74,144,226,0.04);
+    padding: 1.1rem 1rem;
+    text-align: center;
+    min-width: 160px;
+    max-width: 200px;
+    flex: 1 1 160px;
+}
+.public-card-team-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.7rem;
+    background: #e5e7eb;
+}
+.public-card-team-member h3 {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 0.2rem;
+}
+.public-card-team-member p {
+    color: #6b7280;
+    font-size: 0.98rem;
+}
+@media (max-width: 700px) {
+    .public-card-container {
+        max-width: 98vw;
+        padding: 0.7rem;
+    }
+}
+.public-card-stats-grid.public-card-stats-wide {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.public-card-stats-wide .public-card-stat-item {
+    min-width: 0;
+    max-width: 100%;
+    padding: 2rem 1.2rem;
+    font-size: 1.1rem;
+}
+@media (max-width: 900px) {
+    .public-card-stats-grid.public-card-stats-wide {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .public-card-stats-grid.public-card-stats-wide {
+        grid-template-columns: 1fr;
+    }
+    .public-card-stats-wide .public-card-stat-item {
+        padding: 1.2rem 0.7rem;
+    }
+} 

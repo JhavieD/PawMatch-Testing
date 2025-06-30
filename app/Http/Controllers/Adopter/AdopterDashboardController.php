@@ -9,27 +9,57 @@ use App\Models\Application;
 use App\Models\Shared\Message;
 use App\Models\Shared\User;
 use App\Http\Controllers\Shared\Controller;
+use Illuminate\Support\Facades\Cache;
 
 class AdopterDashboardController extends Controller
 {
     public function index()
     {
         $user = auth()->user();
-        $adopter = $user->adopter()->with('savedPets')->first();
-        $favoritePets = $adopter ? $adopter->savedPets : collect();
-
-        // Get recent applications
-        $recentApplications = $adopter ? $adopter->applications()->with(['pet', 'shelter'])->latest()->take(5)->get() : collect();
-
-        // Get recent messages (temporarily disabled)
-        $recentMessages = collect();
-
-        return view('adopter.adopter_dashboard', compact(
-            'user',
-            'favoritePets',
-            'recentApplications',
-            'recentMessages'
+        $userId = $user->user_id;
+        
+        // Cache the dashboard data for 5 minutes to improve performance
+        $cacheKey = "adopter_dashboard_{$userId}";
+        
+        $dashboardData = Cache::remember($cacheKey, 300, function () use ($user) {
+            $adopter = $user->adopter()->with([
+                'savedPets.images',
+                'applications.pet.images',
+                'applications.pet.shelter'
+            ])->first();
+            
+            $favoritePets = $adopter ? $adopter->savedPets : collect();
+            
+            // Get recent applications with proper eager loading
+            $recentApplications = $adopter ? $adopter->applications()
+                ->with(['pet.images', 'pet.shelter'])
+                ->latest()
+                ->take(5)
+                ->get() : collect();
+            
+            // Get recent messages (temporarily disabled)
+            $recentMessages = collect();
+            
+            return [
+                'favoritePets' => $favoritePets,
+                'recentApplications' => $recentApplications,
+                'recentMessages' => $recentMessages
+            ];
+        });
+        
+        return view('adopter.adopter_dashboard', array_merge(
+            ['user' => $user],
+            $dashboardData
         ));
+    }
+
+    /**
+     * Clear dashboard cache when data is updated
+     */
+    private function clearDashboardCache($userId)
+    {
+        Cache::forget("adopter_dashboard_{$userId}");
+        Cache::forget("user_profile_image_{$userId}");
     }
 
     public function profile()
@@ -87,6 +117,9 @@ class AdopterDashboardController extends Controller
                 ->where('user_id', $user->user_id)
                 ->update(['is_displayed' => false]); // hide image
         }
+
+        // Clear cache after profile update
+        $this->clearDashboardCache($user->user_id);
 
         return back()->with('success', 'Profile updated!');
     }
@@ -150,3 +183,7 @@ class AdopterDashboardController extends Controller
     }
     
 }
+
+
+        
+

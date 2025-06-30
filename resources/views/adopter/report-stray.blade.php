@@ -8,9 +8,9 @@
 
 @section('adopter-content')
 <nav>
-<div class="nav-container">
-<a href="{{ url('/') }}" class="logo">PawMatch</a>
-</div>
+    <div class="nav-container">
+        <a href="{{ url('/') }}" class="logo">PawMatch</a>
+    </div>
 </nav>
 
 <div class="main-container">
@@ -66,14 +66,13 @@
         <div class="form-group">
             <label>Location</label>
             <div class="location-group">
-                <input type="text" name="street" placeholder="Street Address" required>
-                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="street" placeholder="Street Address" required style="font-family: 'Inter', sans-serif;">
+                <input type="text" name="city" placeholder="City" required style="font-family: 'Inter', sans-serif;">
             </div>
             <div class="location-group" style="margin-top: 1rem;">
-                <input type="text" name="state" placeholder="State" required>
-                <input type="text" name="zip" placeholder="ZIP Code" required>
+                <input type="text" name="zip" placeholder="ZIP Code" required style="font-family: 'Inter', sans-serif;">
             </div>
-        </div>
+        </div>  
 
         <div class="form-group">
             <label for="landmarks">Nearby Landmarks</label>
@@ -82,18 +81,18 @@
 
         <div class="form-group">
             <label for="contactName">Your Contact Information</label>
-            <input type="text" id="contactName" name="contactName" placeholder="Your Name" required>
+            <input type="text" id="contactName" name="contactName" placeholder="Your Name" required style="font-family: 'Inter', sans-serif;">
         </div>
 
         <div class="form-group">
-            <input type="tel" id="contactPhone" name="contactPhone" placeholder="Phone Number" required>
+            <input type="tel" id="contactPhone" name="contactPhone" placeholder="Phone Number" required style="font-family: 'Inter', sans-serif;">
         </div>
 
         <div class="form-group">
-            <input type="email" id="contactEmail" name="contactEmail" placeholder="Email Address" required>
+            <input type="email" id="contactEmail" name="contactEmail" placeholder="Email Address" required style="font-family: 'Inter', sans-serif;">
         </div>
 
-        <button type="submit" class="btn">Submit Report</button>
+        <button type="submit" class="btn" style="font-family: 'Inter', sans-serif;">Submit Report</button>
     </form>
 </div>
 
