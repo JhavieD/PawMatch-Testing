@@ -62,13 +62,26 @@
     @endif
     
     @php
+        $googleUser = session('google_user');
         $initialStep = 1;
-        if ($errors->any() && old('role')) {
+        if (!$googleUser && $errors->any() && old('role')) {
             if (old('role') === 'shelter' || old('role') === 'rescuer' || old('role') === 'adopter') {
                 $initialStep = 4;
             }
         }
     @endphp
+    
+    @if(!$googleUser)
+    <div class="flex justify-center mb-6">
+        <a href="{{ route('google.login') }}"
+           class="flex items-center gap-3 px-6 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-700 font-medium w-full max-w-xs">
+            <span class="inline-block align-middle">
+                <svg width="20" height="20" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.22l6.85-6.85C35.63 2.36 30.18 0 24 0 14.82 0 6.73 5.82 2.69 14.09l7.98 6.2C12.13 13.13 17.57 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.6C43.93 37.36 46.1 31.45 46.1 24.55z"/><path fill="#FBBC05" d="M10.67 28.29a14.5 14.5 0 010-8.58l-7.98-6.2A23.94 23.94 0 000 24c0 3.77.9 7.34 2.69 10.49l7.98-6.2z"/><path fill="#EA4335" d="M24 44c6.18 0 11.36-2.05 15.18-5.59l-7.19-5.6c-2.01 1.35-4.59 2.16-7.99 2.16-6.43 0-11.87-3.63-13.33-8.79l-7.98 6.2C6.73 42.18 14.82 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></g></svg>
+            </span>
+            <span>Sign up with Google</span>
+        </a>
+    </div>
+    @endif
     
     <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" class="space-y-8" id="registerForm">
         @csrf
@@ -92,11 +105,13 @@
             </div>
             <input type="hidden" id="role" name="role" required value="{{ old('role') }}">
             <div class="field-error" id="roleError">Please select a role to continue</div>
+            @if(!$googleUser)
             <div class="flex justify-end mt-6" id="step1Nav">
                 <button type="button" id="nextBtn1" class="flex items-center justify-center py-3 px-6 rounded-lg text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow transition w-56" disabled>
                     Next <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
+            @endif
         </div>
         
         <!-- Step 2: Personal Information -->
@@ -107,7 +122,10 @@
                     <label for="first_name" class="register-label">
                         First Name <span class="required">*</span>
                     </label>
-                    <input type="text" name="first_name" id="first_name" required class="register-input register-placeholder-small" placeholder="Enter your first name" value="{{ old('first_name') }}">
+                    <input type="text" name="first_name" id="first_name" required class="register-input register-placeholder-small" placeholder="Enter your first name" value="{{ $googleUser ? $googleUser['first_name'] : old('first_name') }}" @if($googleUser) readonly @endif>
+                    @if($googleUser)
+                        <input type="hidden" name="first_name" value="{{ $googleUser['first_name'] }}">
+                    @endif
                     <div class="field-error" id="first_nameError"></div>
                     <div class="field-success" id="first_nameSuccess"></div>
                 </div>
@@ -115,7 +133,10 @@
                     <label for="last_name" class="register-label">
                         Last Name <span class="required">*</span>
                     </label>
-                    <input type="text" name="last_name" id="last_name" required class="register-input register-placeholder-small" placeholder="Enter your last name" value="{{ old('last_name') }}">
+                    <input type="text" name="last_name" id="last_name" required class="register-input register-placeholder-small" placeholder="Enter your last name" value="{{ $googleUser ? $googleUser['last_name'] : old('last_name') }}" @if($googleUser) readonly @endif>
+                    @if($googleUser)
+                        <input type="hidden" name="last_name" value="{{ $googleUser['last_name'] }}">
+                    @endif
                     <div class="field-error" id="last_nameError"></div>
                     <div class="field-success" id="last_nameSuccess"></div>
                 </div>
@@ -127,7 +148,10 @@
                             <span class="tooltip-text">We'll use this to send you important updates about your account and pet matches</span>
                         </div>
                     </label>
-                    <input type="email" name="email" id="email" required class="register-input register-placeholder-small" placeholder="your.email@example.com" value="{{ old('email') }}">
+                    <input type="email" name="email" id="email" required class="register-input register-placeholder-small" placeholder="your.email@example.com" value="{{ $googleUser ? $googleUser['email'] : old('email') }}" @if($googleUser) readonly @endif>
+                    @if($googleUser)
+                        <input type="hidden" name="email" value="{{ $googleUser['email'] }}">
+                    @endif
                     <div class="field-error" id="emailError"></div>
                     <div class="field-success" id="emailSuccess"></div>
                 </div>
@@ -135,10 +159,38 @@
                     <label for="phone_number" class="register-label">
                         Phone Number <span class="required">*</span>
                     </label>
-                    <input type="tel" name="phone_number" id="phone_number" required class="register-input register-placeholder-small" placeholder="+63 912 345 6789" value="{{ old('phone_number') }}">
+                    <input type="tel" name="phone_number" id="phone_number" required class="register-input register-placeholder-small" placeholder="+63 912 345 6789" value="{{ $googleUser && $googleUser['phone_number'] ? $googleUser['phone_number'] : old('phone_number') }}" @if($googleUser && $googleUser['phone_number']) readonly @endif>
+                    @if($googleUser && $googleUser['phone_number'])
+                        <input type="hidden" name="phone_number" value="{{ $googleUser['phone_number'] }}">
+                    @endif
                     <div class="field-error" id="phone_numberError"></div>
                     <div class="field-success" id="phone_numberSuccess"></div>
                 </div>
+                <div class="register-grid-span-2">
+                    <label for="street_address" class="register-label">
+                        Street Address <span class="required">*</span>
+                    </label>
+                    <input type="text" name="street_address" id="street_address" required class="register-input register-placeholder-small" placeholder="Enter your street address" value="{{ old('street_address') }}">
+                    <div class="field-error" id="street_addressError"></div>
+                    <div class="field-success" id="street_addressSuccess"></div>
+                </div>
+                <div>
+                    <label for="city" class="register-label">
+                        City <span class="required">*</span>
+                    </label>
+                    <input type="text" name="city" id="city" required class="register-input register-placeholder-small" placeholder="Enter your city" value="{{ old('city') }}">
+                    <div class="field-error" id="cityError"></div>
+                    <div class="field-success" id="citySuccess"></div>
+                </div>
+                <div>
+                    <label for="zip_code" class="register-label">
+                        ZIP Code <span class="required">*</span>
+                    </label>
+                    <input type="text" name="zip_code" id="zip_code" required class="register-input register-placeholder-small" placeholder="Enter your ZIP code" value="{{ old('zip_code') }}">
+                    <div class="field-error" id="zip_codeError"></div>
+                    <div class="field-success" id="zip_codeSuccess"></div>
+                </div>
+                {{--
                 <div class="register-grid-span-2">
                     <label for="address" class="register-label">
                         Address <span class="required">*</span>
@@ -147,10 +199,12 @@
                     <div class="field-error" id="addressError"></div>
                     <div class="field-success" id="addressSuccess"></div>
                 </div>
+                --}}
             </div>
         </div>
         
         <!-- Step 3: Security -->
+        @if(!$googleUser)
         <div class="form-step hidden" data-step="3">
             <h2 class="step-title">Step 3: Create Your Password</h2>
             <div class="register-grid">
@@ -183,10 +237,11 @@
                 </div>
             </div>
         </div>
+        @endif
         
         <!-- Step 4: Role-Specific Information -->
-        <div class="form-step hidden" data-step="4">
-            <h2 class="text-lg font-semibold mb-4">Step 4: Additional Information</h2>
+        <div class="form-step hidden" data-step="{{ $googleUser ? 3 : 4 }}">
+            <h2 class="text-lg font-semibold mb-4">Step {{ $googleUser ? 3 : 4 }}: Additional Information</h2>
             <!-- Adopter Fields -->
             <div id="adopterFields" class="role-fields space-y-6" style="display:none;">
                 <div>
@@ -224,14 +279,19 @@
                     <input type="text" name="shelter_name" id="shelter_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's name" value="{{ old('shelter_name') }}">
                     <div class="field-error" id="shelter_nameError"></div>
                 </div>
-                <div>
+                <div class="mb-2">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="usePersonalAddress" name="usePersonalAddress" value="on" {{ old('usePersonalAddress', 'on') == 'on' ? 'checked' : '' }} class="form-checkbox mr-2">
+                        <span class="text-sm">Use the address from Step 2</span>
+                    </label>
+                </div>
+                <div id="shelterLocationGroup">
                     <label for="shelter_location" class="block text-sm font-medium text-gray-700">
                         Location <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="shelter_location" id="shelter_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's address" value="{{ old('shelter_location') }}">
+                    <input type="text" name="shelter_location" id="shelter_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's address" value="{{ old('shelter_location') }}" readonly>
                     <div class="field-error" id="shelter_locationError"></div>
                 </div>
-
                 <div id="customShelterAddress" style="display:none;">
                     <div class="mb-2">
                         <label for="shelter_street_address" class="block text-sm font-medium text-gray-700">Street Address <span class="text-red-500">*</span></label>
@@ -244,7 +304,7 @@
                         <div class="field-error" id="shelter_cityError"></div>
                     </div>
                     <div class="mb-2">
-                        <label for="shelter_zip_code" class="block text-sm font-medium text-gray-700">ZIP code <span class="text-red-500">*</span></label>
+                        <label for="shelter_zip_code" class="block text-sm font-medium text-gray-700">ZIP Code <span class="text-red-500">*</span></label>
                         <input type="text" name="shelter_zip_code" id="shelter_zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your shelter's ZIP code" value="{{ old('shelter_zip_code') }}">
                         <div class="field-error" id="shelter_zip_codeError"></div>
                     </div>
@@ -329,12 +389,15 @@
                 Already have an account? <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500">Login</a>
             </p>
         </div>
+        @if($googleUser)
+            <input type="hidden" name="is_google_registration" value="1">
+        @endif
     </form>
 </div>
 
 <script>
 let currentStep = {{ $initialStep }};
-const totalSteps = 4;
+const totalSteps = {{ $googleUser ? 3 : 4 }};
 
 // Initialize the form
 document.addEventListener('DOMContentLoaded', function() {
@@ -346,6 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     showRoleFieldsForStep4();
     showCorrectNav();
+    updateNavigationButtons();
     // Enable Next button on role select
     const nextBtn1 = document.getElementById('nextBtn1');
     document.querySelectorAll('.role-card').forEach(card => {
@@ -392,6 +456,18 @@ document.addEventListener('DOMContentLoaded', function() {
             icon.classList.add('fa-eye');
         }
     });
+    var isGoogle = {{ $googleUser ? 'true' : 'false' }};
+    if (isGoogle) {
+        // Hide password step
+        var step3 = document.querySelector('[data-step="3"]');
+        if (step3) step3.style.display = 'none';
+        // Disable fields
+        ['first_name', 'last_name', 'email', 'phone_number'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && el.value) el.setAttribute('disabled', 'disabled');
+        });
+    }
+    showCorrectNav();
 });
 
 function setupEventListeners() {
@@ -460,16 +536,22 @@ function updateNavigationButtons() {
     const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
     
-    if (currentStep === 1) {
-        prevBtn.classList.add('hidden');
-        nextBtn.classList.add('hidden'); // Hide general nextBtn on Step 1
-    } else {
+    // Always show Previous button on steps 2–4
+    if (currentStep > 1) {
         prevBtn.classList.remove('hidden');
-        nextBtn.classList.remove('hidden'); // Show general nextBtn on other steps
+    } else {
+        prevBtn.classList.add('hidden');
     }
-    
-    if (currentStep === totalSteps) {
+    // Next button logic
+    if (currentStep === 1) {
+        nextBtn.classList.add('hidden'); // Hide general nextBtn on Step 1
+    } else if (currentStep < totalSteps) {
+        nextBtn.classList.remove('hidden');
+    } else {
         nextBtn.classList.add('hidden');
+    }
+    // Submit button logic
+    if (currentStep === totalSteps) {
         submitBtn.classList.remove('hidden');
     } else {
         submitBtn.classList.add('hidden');
@@ -488,7 +570,7 @@ function validateCurrentStep() {
             }
             break;
         case 2:
-            const requiredFields = ['first_name', 'last_name', 'email', 'phone_number', 'address'];
+            const requiredFields = ['first_name', 'last_name', 'email', 'phone_number', 'street_address', 'city', 'zip_code'];
             requiredFields.forEach(field => {
                 const value = document.getElementById(field).value.trim();
                 if (!value) {
@@ -532,6 +614,46 @@ function validateCurrentStep() {
             break;
         case 4:
             const roleValue = document.getElementById('role').value;
+            if (roleValue === 'shelter') {
+                const usePersonal = document.getElementById('usePersonalAddress');
+                if (usePersonal && !usePersonal.checked) {
+                    const customFields = ['shelter_street_address', 'shelter_city', 'shelter_zip_code'];
+                    customFields.forEach(field => {
+                        const value = document.getElementById(field).value.trim();
+                        if (!value) {
+                            showError(field + 'Error', 'This field is required');
+                            isValid = false;
+                        } else {
+                            hideError(field + 'Error');
+                        }
+                    });
+                } else {
+                    const shelterLocation = document.getElementById('shelter_location').value.trim();
+                    if (!shelterLocation) {
+                        showError('shelter_locationError', 'This field is required');
+                        isValid = false;
+                    } else {
+                        hideError('shelter_locationError');
+                    }
+                }
+                // Validate shelter_name as usual
+                const shelterName = document.getElementById('shelter_name').value.trim();
+                if (!shelterName) {
+                    showError('shelter_nameError', 'This field is required');
+                    isValid = false;
+                } else {
+                    hideError('shelter_nameError');
+                }
+                // Validate shelter_valid_id as usual
+                const shelterValidId = document.getElementById('shelter_valid_id');
+                if (!shelterValidId.value) {
+                    showError('shelter_valid_idError', 'This field is required');
+                    isValid = false;
+                } else {
+                    hideError('shelter_valid_idError');
+                }
+                break;
+            }
             const roleFields = getRoleFields(roleValue);
             roleFields.forEach(field => {
                 const value = document.getElementById(field).value.trim();
@@ -667,9 +789,12 @@ function showRoleFieldsForStep4() {
     adopterFields.style.display = 'none';
     shelterFields.style.display = 'none';
     rescuerFields.style.display = 'none';
-    if (currentStep === 4) {
+    if (currentStep === totalSteps) {
         if (role === 'adopter') adopterFields.style.display = 'block';
-        if (role === 'shelter') shelterFields.style.display = 'block';
+        if (role === 'shelter') {
+            shelterFields.style.display = 'block';
+            autofillShelterLocation();
+        }
         if (role === 'rescuer') rescuerFields.style.display = 'block';
     }
 }
@@ -686,11 +811,52 @@ function showCorrectNav() {
     }
 }
 
+function autofillShelterLocation() {
+    const usePersonal = document.getElementById('usePersonalAddress');
+    const shelterLocation = document.getElementById('shelter_location');
+    const group = document.getElementById('shelterLocationGroup');
+    const custom = document.getElementById('customShelterAddress');
+    if (!usePersonal || !shelterLocation || !group || !custom) return;
+    function setPersonal() {
+        const street = document.getElementById('street_address').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const zip = document.getElementById('zip_code').value.trim();
+        shelterLocation.value = street && city && zip ? `${street}, ${city}, ${zip}` : '';
+        shelterLocation.readOnly = true;
+        group.style.display = '';
+        custom.style.display = 'none';
+    }
+    function setCustom() {
+        shelterLocation.value = '';
+        shelterLocation.readOnly = true;
+        group.style.display = 'none';
+        custom.style.display = '';
+    }
+    usePersonal.addEventListener('change', function() {
+        if (this.checked) {
+            setPersonal();
+        } else {
+            setCustom();
+        }
+    });
+    // On load
+    if (usePersonal.checked) {
+        setPersonal();
+    } else {
+        setCustom();
+    }
+}
+
 document.getElementById('role').addEventListener('change', function() {
     showRoleFieldsForStep4();
 });
 
 // On page load, ensure correct fields are shown if user reloads on step 4
 showRoleFieldsForStep4();
+
+// If there are validation errors, ensure nav buttons are correct
+@if ($errors->any())
+    updateNavigationButtons();
+@endif
 </script>
 @endsection 
