@@ -1,107 +1,107 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Pet Details') }}
-            </h2>
-            <a href="{{ route('pet-listings') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                Back to Listings
-            </a>
-        </div>
-    </x-slot>
+@extends('layouts.pet-details')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Pet Images -->
-                        <div>
-                            <div class="relative">
-                                <pre>{{ print_r($pet->images->toArray(), true) }}</pre>
-                                @if ($pet->images->isNotEmpty())
-                            <div class="pet-gallery">
-                                @foreach ($pet->images as $image)
-                                    <img src="{{ $image->image_url }}" alt="{{ $pet->name }}" class="pet-detail-image">
-                                @endforeach
-                            </div>
-                                @else
-                                    <p>No images found for this pet.</p>
-                                @endif
-                                <div class="absolute top-4 right-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                        Available for Adoption
-                                    </span>
+@section('title', 'Pet Details - PawMatch')
+
+@section('adopter-content')
+<div class="pet-details-page">
+    <div class="main-content">
+        <div class="content-wrapper">
+            <!-- Header -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1>Pet Details</h1>
+                    <a href="{{ route('adopter.pet-listings') }}" class="btn btn-outline">Back to Listings</a>
+                </div>
+            </div>
+
+            <div class="pet-details-container">
+                <div class="pet-details-grid">
+                    <!-- Pet Images -->
+                    <div class="pet-images-section">
+                        <div class="main-image-container">
+                            @if ($pet->images->isNotEmpty())
+                                <div class="pet-gallery">
+                                    @foreach ($pet->images as $image)
+                                        <img src="{{ $image->image_url }}" alt="{{ $pet->name }}" class="pet-detail-image">
+                                    @endforeach
                                 </div>
+                            @else
+                                <p>No images found for this pet.</p>
+                            @endif
+                            <div class="pet-status-badge">
+                                <span class="status-available">Available for Adoption</span>
                             </div>
-                            <div class="grid grid-cols-4 gap-4 mt-4">
-                                @for ($i = 1; $i <= 4; $i++)
-                                    <img src="https://source.unsplash.com/random/200x200/?pet" alt="Pet thumbnail" class="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-75">
-                                @endfor
+                        </div>
+                        <div class="thumbnail-grid">
+                            @for ($i = 1; $i <= 4; $i++)
+                                <img src="https://source.unsplash.com/random/200x200/?pet" alt="Pet thumbnail" class="thumbnail-image">
+                            @endfor
+                        </div>
+                    </div>
+
+                    <!-- Pet Information -->
+                    <div class="pet-info-section">
+                        <h1 class="pet-name">Max</h1>
+                        <p class="pet-description">Friendly and Playful Golden Retriever</p>
+                        
+                        <div class="pet-details-grid">
+                            <div class="detail-item">
+                                <h3>Age</h3>
+                                <p>2 years old</p>
+                            </div>
+                            <div class="detail-item">
+                                <h3>Gender</h3>
+                                <p>Male</p>
+                            </div>
+                            <div class="detail-item">
+                                <h3>Size</h3>
+                                <p>Large</p>
+                            </div>
+                            <div class="detail-item">
+                                <h3>Breed</h3>
+                                <p>Golden Retriever</p>
                             </div>
                         </div>
 
-                        <!-- Pet Information -->
-                        <div>
-                            <h1 class="text-3xl font-bold text-gray-900">Max</h1>
-                            <p class="mt-2 text-lg text-gray-600">Friendly and Playful Golden Retriever</p>
-                            
-                            <div class="mt-6 grid grid-cols-2 gap-4">
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Age</h3>
-                                    <p class="mt-1 text-sm text-gray-900">2 years old</p>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Gender</h3>
-                                    <p class="mt-1 text-sm text-gray-900">Male</p>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Size</h3>
-                                    <p class="mt-1 text-sm text-gray-900">Large</p>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Breed</h3>
-                                    <p class="mt-1 text-sm text-gray-900">Golden Retriever</p>
-                                </div>
-                            </div>
+                        <div class="pet-section">
+                            <h3>About</h3>
+                            <p>
+                                Max is a friendly and playful Golden Retriever who loves to play fetch and go for long walks. 
+                                He's great with children and other dogs, and he's already house-trained. Max would make a 
+                                wonderful addition to any active family.
+                            </p>
+                        </div>
 
-                            <div class="mt-6">
-                                <h3 class="text-sm font-medium text-gray-500">About</h3>
-                                <p class="mt-2 text-sm text-gray-900">
-                                    Max is a friendly and playful Golden Retriever who loves to play fetch and go for long walks. 
-                                    He's great with children and other dogs, and he's already house-trained. Max would make a 
-                                    wonderful addition to any active family.
-                                </p>
-                            </div>
+                        <div class="pet-section">
+                            <h3>Health Information</h3>
+                            <ul class="health-list">
+                                <li>Vaccinated</li>
+                                <li>Spayed/Neutered</li>
+                                <li>Microchipped</li>
+                                <li>Regular check-ups</li>
+                            </ul>
+                        </div>
 
-                            <div class="mt-6">
-                                <h3 class="text-sm font-medium text-gray-500">Health Information</h3>
-                                <ul class="mt-2 text-sm text-gray-900 list-disc list-inside">
-                                    <li>Vaccinated</li>
-                                    <li>Spayed/Neutered</li>
-                                    <li>Microchipped</li>
-                                    <li>Regular check-ups</li>
-                                </ul>
+                        <div class="pet-section">
+                            <h3>Shelter Information</h3>
+                            <div class="shelter-info">
+                                <p class="shelter-name">Happy Paws Shelter</p>
+                                <p class="shelter-address">123 Pet Street, City, State</p>
+                                <p class="shelter-phone">(555) 123-4567</p>
                             </div>
+                        </div>
 
-                            <div class="mt-6">
-                                <h3 class="text-sm font-medium text-gray-500">Shelter Information</h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-900">Happy Paws Shelter</p>
-                                    <p class="text-sm text-gray-600">123 Pet Street, City, State</p>
-                                    <p class="text-sm text-gray-600">(555) 123-4567</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-8">
-                                <a href="#" class="w-full inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Start Adoption Process
-                                </a>
-                            </div>
+                        <div class="pet-actions">
+                            <a href="{{ route('adopter.adoption-form') }}" class="btn btn-primary">Start Adoption Process</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</x-app-layout> 
+</div>
+@endsection
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/adopter/pet-details.css') }}">
+@endpush 

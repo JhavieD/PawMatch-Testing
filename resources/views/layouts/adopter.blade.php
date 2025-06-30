@@ -12,7 +12,6 @@
 @section('content')
     <div class="adopter-layout">
         @include('components.adopter-sidebar')
-        
         <main class="adopter-content">
             @yield('adopter-content')
         </main>

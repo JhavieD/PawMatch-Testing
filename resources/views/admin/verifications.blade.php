@@ -74,13 +74,20 @@
                         </span>
                     </td>
                     <td>
+
+                        <!-- Work in progress -->
                         <div class="document-previews">
                             @if($verification->type === 'shelter')
-                                <a href="{{ asset('storage/' . $verification->document_url) }}" target="_blank" class="document-link">
+                                <button class="action-icon" 
+                                        onclick="viewRegistrationDocument('{{ Storage::disk('s3')->url($verification->document_url) }}')" 
+                                        title="View Registration Document">
                                     <i class="fas fa-file-alt"></i> Registration Doc
+                                </button>
+                        <!-- Work in progress -->
+
                                 </a>
                             @elseif($verification->type === 'rescuer')
-                                <a href="{{ asset('storage/' . $verification->document_url) }}" target="_blank" class="document-link">
+                                <a href="{{ Storage::disk('s3')->url($verification->document_url) }}" target="_blank" class="document-link">
                                     <i class="fas fa-file-alt"></i> Credentials
                                 </a>
                             @endif
@@ -180,6 +187,24 @@
         </div>
     </div>
 </div>
+<!-- Document Modal - To view registration document -->
+<div id="documentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Registration Document</h2>
+            <button class="close-document-modal" title="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="document-frame-wrapper" style="max-height: 80vh; overflow-y: auto;">
+                <iframe id="registrationDocViewer"
+                        width="100%"
+                        height="500"
+                        frameborder="0"
+                        style="border-radius: 6px; border: 1px solid #ccc;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -192,7 +217,7 @@
         fetch(`/admin/verifications/${id}`)
             .then(response => response.json())
             .then(data => {
-                currentVerificationStatus = data.verification.status;
+                currentVerificationStatus = data.status;
                 // Show/hide review section based on status
                 document.getElementById('reviewSection').style.display = 
                     currentVerificationStatus === 'pending' ? 'block' : 'none';
@@ -201,9 +226,9 @@
                 document.getElementById('modalUserName').textContent = data.first_name + ' ' + data.last_name;
                 document.getElementById('modalUserEmail').textContent = data.email;
                 document.getElementById('modalUserType').textContent = data.type;
-                document.getElementById('modalUserStatus').textContent = data.verification.status;
+                document.getElementById('modalUserStatus').textContent = data.status;
                 document.getElementById('modalSubmissionDate').textContent = 
-                    new Date(data.verification.submitted_at).toLocaleDateString('en-US', {
+                    new Date(data.submitted_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
@@ -213,6 +238,7 @@
                 document.getElementById('verificationModal').style.display = 'flex';
             });
     }
+    //Replaced data.verification.status with data.status
 
     function approveVerification(id) {
         if (confirm('Are you sure you want to approve this verification?')) {
@@ -242,15 +268,53 @@
         }
     }
 
-    // Close modal when clicking the close button or outside the modal
-    document.querySelector('.close-modal').addEventListener('click', () => {
-        document.getElementById('verificationModal').style.display = 'none';
-    });
+    //Close modal when clicking the close button or outside the modal
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeBtn = document.querySelector('.close-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                document.getElementById('verificationModal').style.display = 'none';
+            });
+        }
 
-    window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('verificationModal')) {
-            document.getElementById('verificationModal').style.display = 'none';
+        const modal = document.getElementById('verificationModal');
+        if (modal) {
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
         }
     });
+
+    // Registration Doc Modal
+        window.viewRegistrationDocument = function(url) {
+            const viewer = document.getElementById('registrationDocViewer');
+            const modal = document.getElementById('documentModal');
+            viewer.src = url;
+            modal.style.display = 'flex';
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const closeDocBtn = document.querySelector('.close-document-modal');
+            const docModal = document.getElementById('documentModal');
+            const docViewer = document.getElementById('registrationDocViewer');
+
+            if (closeDocBtn) {
+                closeDocBtn.addEventListener('click', () => {
+                    docModal.style.display = 'none';
+                    docViewer.src = '';
+                });
+            }
+
+            if (docModal) {
+                window.addEventListener('click', (e) => {
+                    if (e.target === docModal) {
+                        docModal.style.display = 'none';
+                        docViewer.src = '';
+                    }
+                });
+            }
+        });
 </script>
 @endsection 

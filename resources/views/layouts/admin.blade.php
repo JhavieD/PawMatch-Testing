@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('page-title', 'Admin Dashboard') - PawMatch</title>
     
     <!-- Styles -->
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @stack('styles')
 </head>
+@yield('scripts')
 <body>
     <div class="admin-layout">
         <!-- Sidebar -->
@@ -25,7 +27,7 @@
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="{{ route('admin.dashboard') }}" 
-                           class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             <i class="fas fa-chart-line"></i>
                             <span>Dashboard</span>
                         </a>
