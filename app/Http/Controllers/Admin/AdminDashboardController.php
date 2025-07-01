@@ -611,33 +611,33 @@ class AdminDashboardController extends Controller
 
         return view('admin.verifications', compact('verifications', 'stats'));
     }
-
+    // Shelter and Rescuer Verification
     public function showVerification($id)
     {
-        // First try to find in shelter verifications
-        $verification = DB::table('shelter_verifications')
-            ->join('users', 'shelter_verifications.submitted_by', '=', 'users.user_id')
-            ->join('shelters', 'shelter_verifications.shelter_id', '=', 'shelters.shelter_id')
-            ->select(
-                'shelter_verifications.verification_id',
-                'shelter_verifications.submitted_by',
-                'shelter_verifications.registration_doc_url as document_url',
-                'shelter_verifications.facebook_link',
-                'shelter_verifications.status',
-                'shelter_verifications.submitted_at',
-                'shelter_verifications.reviewed_at',
-                'shelter_verifications.reviewed_by',
-                'users.first_name',
-                'users.last_name',
-                'users.email',
-                'shelters.shelter_name as organization_name',
-                DB::raw("'shelter' as type")
-            )
-            ->where('shelter_verifications.verification_id', $id)
-            ->first();
+        $type = request()->query('type');
 
-        if (!$verification) {
-            // If not found, try rescuer verifications
+        if ($type === 'shelter') {
+            $verification = DB::table('shelter_verifications')
+                ->join('users', 'shelter_verifications.submitted_by', '=', 'users.user_id')
+                ->join('shelters', 'shelter_verifications.shelter_id', '=', 'shelters.shelter_id')
+                ->select(
+                    'shelter_verifications.verification_id',
+                    'shelter_verifications.submitted_by',
+                    'shelter_verifications.registration_doc_url as document_url',
+                    'shelter_verifications.facebook_link',
+                    'shelter_verifications.status',
+                    'shelter_verifications.submitted_at',
+                    'shelter_verifications.reviewed_at',
+                    'shelter_verifications.reviewed_by',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'shelters.shelter_name as organization_name',
+                    DB::raw("'shelter' as type")
+                )
+                ->where('shelter_verifications.verification_id', $id)
+                ->first();
+        } elseif ($type === 'rescuer') {
             $verification = DB::table('rescuer_verifications')
                 ->join('users', 'rescuer_verifications.submitted_by', '=', 'users.user_id')
                 ->join('rescuers', 'rescuer_verifications.rescuer_id', '=', 'rescuers.rescuer_id')
@@ -658,10 +658,16 @@ class AdminDashboardController extends Controller
                 )
                 ->where('rescuer_verifications.verification_id', $id)
                 ->first();
+        } else {
+            return response()->json(['error' => 'Invalid or missing verification type'], 400);
         }
 
         if (!$verification) {
             return response()->json(['error' => 'Verification not found'], 404);
+        }
+
+        if ($verification->document_url) {
+            $verification->document_url = Storage::disk('s3')->url($verification->document_url);
         }
 
         return response()->json($verification);
@@ -679,31 +685,34 @@ class AdminDashboardController extends Controller
 
     private function updateVerificationStatus($id, $status)
     {
-        // Try to update in shelter verifications
-        $updated = DB::table('shelter_verifications')
-            ->where('verification_id', $id)
-            ->update([
-                'status' => $status,
-                'reviewed_by' => auth()->id(),
-                'reviewed_at' => now()
-            ]);
+        $type = request()->query('type');
 
-        if (!$updated) {
-            // If not found, try rescuer verifications
+        if ($type === 'shelter') {
+            $updated = DB::table('shelter_verifications')
+                ->where('verification_id', $id)
+                ->update([
+                    'status' => $status,
+                    'reviewed_by' => auth()->id(),
+                    'reviewed_at' => now(),
+                    'updated_at' => now()
+                ]);
+        } elseif ($type === 'rescuer') {
             $updated = DB::table('rescuer_verifications')
                 ->where('verification_id', $id)
                 ->update([
                     'status' => $status,
                     'reviewed_by' => auth()->id(),
-                    'reviewed_at' => now()
+                    'reviewed_at' => now(),
+                    'updated_at' => now()
                 ]);
+        } else {
+            return response()->json(['error' => 'Invalid verification type'], 400);
         }
 
         if (!$updated) {
             return response()->json(['error' => 'Verification not found'], 404);
         }
 
-        // Send notification to user
         $verification = DB::table('shelter_verifications')
             ->where('verification_id', $id)
             ->first() ?? DB::table('rescuer_verifications')
@@ -712,8 +721,6 @@ class AdminDashboardController extends Controller
 
         $user = User::find($verification->submitted_by);
         
-        // You can implement notification logic here
-        // Notification::send($user, new VerificationStatusUpdated($status));
         return redirect()->back()->with('success', 'Verification status updated.');
     }
 
