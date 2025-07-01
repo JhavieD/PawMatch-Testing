@@ -59,13 +59,16 @@
                                 <div class="item-subtitle">{{ $approval->organization_name }}</div>
                             @endif
                         </div>
-                        <div class="btn-group">
-                            <button class="btn btn-approve" onclick="approveVerification({{ $approval->verification_id }}, '{{ $approval->type }}')">
-                                Approve
-                            </button>
-                            <button class="btn btn-reject" onclick="rejectVerification({{ $approval->verification_id }}, '{{ $approval->type }}')">
-                                Reject
-                            </button>
+                        <!-- Work in Progress -->
+                        <div class="flex gap-2">
+                            <form action="{{ route('admin.verifications.approve', $approval->verification_id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                            </form>
+                            <form action="{{ route('admin.verifications.reject', $approval->verification_id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
                         </div>
                     </li>
                     @endforeach
