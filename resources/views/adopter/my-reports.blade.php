@@ -1,4 +1,3 @@
-
 @extends('layouts.adopter')
 
 @section('title', 'My Stray Reports - PawMatch')
@@ -14,6 +13,11 @@
             <div class="welcome-section">
                 <h1>My Stray Reports</h1>
                 <p>Track the status of your submitted stray animal reports</p>
+            </div>
+            <div style="text-align: right; margin-top: 1rem;">
+                <a href="{{ route('adopter.report-stray') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Report a Stray
+                </a>
             </div>
         </div>
 
