@@ -49,4 +49,14 @@ class RescuerVerificationController extends Controller
 
         return redirect()->back()->with('success', 'Your verification request has been submitted successfully.');
     }
+    
+    public function approveVerification($id, Request $request)
+    {
+        $verification = RescuerVerification::findOrFail($id);
+        $verification->status = 'approved';
+        $verification->notes = $request->input('notes');
+        $verification->save();
+
+        return redirect()->route('admin.verifications')->with('success', 'Verification approved successfully.');
+    }
 }
