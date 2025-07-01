@@ -51,4 +51,13 @@ class ShelterVerificationController extends Controller
 
         return redirect()->back()->with('success', 'Your verification request has been submitted successfully.');
     }
+    public function approve($id, Request $request)
+    {
+        $verification = ShelterVerification::findOrFail($id);
+        $verification->status = 'approved';
+        $verification->notes = $request->input('notes');
+        $verification->save();
+
+        return redirect()->back()->with('success', 'Shelter verification approved.');
+    }
 } 
