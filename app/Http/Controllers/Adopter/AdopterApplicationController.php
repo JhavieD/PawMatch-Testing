@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Adopter;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Shared\AdoptionApplication;
-use App\Http\Controllers\Shared\Controller;
+use App\Http\Controllers\Controller;
 
 class AdopterApplicationController extends Controller
 {
@@ -57,4 +57,4 @@ class AdopterApplicationController extends Controller
         ]);
         return response()->json(['success' => true, 'application_id' => $application->application_id]);
     }
-} 
+}

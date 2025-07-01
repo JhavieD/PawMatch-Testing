@@ -1,68 +1,69 @@
-@extends ('layouts.pet-management')
+@extends('layouts.pet-management')
 
 @section('title', 'Pet Management')
 
 @section('shelter-content')
-<div class="container">
-    <div class="header">
-        <h1>Pet Management</h1>
-        <button class="btn add-pet-btn">+ Add New Pet</button>
-    </div>
-
-    <div class="search-bar">
-        <input type="text" id="petSearchInput" class="search-input" placeholder="Search pets by name, breed, or ID...">
-        <select class="filter-dropdown">
-            <option value="all">All Status</option>
-            <option value="available">Available</option>
-            <option value="pending">Pending</option>
-            <option value="adopted">Adopted</option>
-        </select>
-    </div>
-
-    <!-- Pet Cards -->
-    <div class="pets-grid">
-        @forelse($pets as $pet)
-        <div class="pet-card"
-            data-name="{{ $pet->name }}"
-            data-breed="{{ $pet->breed }}"
-            data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}">
-            <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
-            <div class="pet-info">
-                <h3 class="pet-name">{{ $pet->name }}</h3>
-                <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>
-                <span class="pet-status status-{{ $pet->adoption_status }}">
-                    {{ ucfirst($pet->adoption_status) }}
-                </span>
-                <div class="card-actions">
-                    <button type="button" class="edit-pet-btn" data-pet-id="{{ $pet->pet_id }}"
-                        data-name="{{ $pet->name }}"
-                        data-species="{{ $pet->species }}"
-                        data-breed="{{ $pet->breed }}"
-                        data-age="{{ $pet->age }}"
-                        data-gender="{{ $pet->gender }}"
-                        data-size="{{ $pet->size }}"
-                        data-description="{{ $pet->description }}"
-                        data-adoption_status="{{ $pet->adoption_status }}"
-                        data-behavior="{{ $pet->behavior }}"
-                        data-daily_activity="{{ $pet->daily_activity }}"
-                        data-special_needs="{{ $pet->special_needs }}"
-                        data-compatibility="{{ $pet->compatibility }}"
-                        data-images='@json($pet->images)'
-                        data-eating_habits="{{ $pet->eating_habits}}">
-                        Edit
-                    </button>
-                    <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}" data-pet-name="{{ $pet->name }}">View Applications</button>
-                    <form method="POST" action="{{ route('shelter.pets.destroy', $pet->pet_id) }}" style="display: contents;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn" onclick="return confirm('Are you sure you want to delete this pet?')" style="justify-content: center;">Delete</button>
-                    </form>
-                </div>
-            </div>
+<div class="main-content">
+    <div class="content-wrapper">
+        <div class="header">
+            <h1>Pet Management</h1>
+            <button class="btn add-pet-btn">+ Add New Pet</button>
         </div>
-        @empty
-        <div>No pets found.</div>
-        @endforelse
+
+        <div class="search-bar">
+            <input type="text" id="petSearchInput" class="search-input" placeholder="Search pets by name, breed, or ID...">
+            <select class="filter-dropdown">
+                <option value="all">All Status</option>
+                <option value="available">Available</option>
+                <option value="pending">Pending</option>
+                <option value="adopted">Adopted</option>
+            </select>
+        </div>
+
+        <div class="pets-grid">
+            @forelse($pets as $pet)
+                <div class="pet-card"
+                    data-name="{{ $pet->name }}"
+                    data-breed="{{ $pet->breed }}"
+                    data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}">
+                    <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" class="pet-image">
+                    <div class="pet-info">
+                        <h3 class="pet-name">{{ $pet->name }}</h3>
+                        <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>
+                        <span class="pet-status status-{{ $pet->adoption_status }}">
+                            {{ ucfirst($pet->adoption_status) }}
+                        </span>
+                        <div class="card-actions">
+                            <button type="button" class="edit-pet-btn" data-pet-id="{{ $pet->pet_id }}"
+                                data-name="{{ $pet->name }}"
+                                data-species="{{ $pet->species }}"
+                                data-breed="{{ $pet->breed }}"
+                                data-age="{{ $pet->age }}"
+                                data-gender="{{ $pet->gender }}"
+                                data-size="{{ $pet->size }}"
+                                data-description="{{ $pet->description }}"
+                                data-adoption_status="{{ $pet->adoption_status }}"
+                                data-behavior="{{ $pet->behavior }}"
+                                data-daily_activity="{{ $pet->daily_activity }}"
+                                data-special_needs="{{ $pet->special_needs }}"
+                                data-compatibility="{{ $pet->compatibility }}"
+                                data-images='@json($pet->images)'
+                                data-eating_habits="{{ $pet->eating_habits}}">
+                                Edit
+                            </button>
+                            <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}" data-pet-name="{{ $pet->name }}">View Applications</button>
+                            <form method="POST" action="{{ route('shelter.pets.destroy', $pet->pet_id) }}" style="display: contents;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn" onclick="return confirm('Are you sure you want to delete this pet?')" style="justify-content: center;">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div>No pets found.</div>
+            @endforelse
+        </div>
     </div>
 
     <!-- Edit Pet Modal -->
@@ -173,7 +174,6 @@
                     <div class="image-upload">
                         <h3>Pet Images</h3>
                         <div class="image-grid" id="edit-image-grid">
-                            <!-- Existing images will be injected here by JS -->
                             <label class="upload-box">
                                 <input type="file" name="images[]" id="edit-images" multiple accept="image/*">
                                 <span>+ Add Photos</span>
@@ -198,7 +198,7 @@
                 <button class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="addPetForm" method="POST" action="{{ route('shelter.pets.store') }}" enctype="multipart/form-data">
+                <form id="addPetForm" method="POST" action="{{ route('shelter.pets.create') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="form-grid">
                         <div class="form-group">

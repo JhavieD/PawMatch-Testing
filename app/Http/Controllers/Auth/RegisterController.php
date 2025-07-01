@@ -28,15 +28,29 @@ class RegisterController extends Controller
                 $request->merge(['address' => $address]);
             }
         }
-        $validated = $request->validate([
+        // Combine address for adopter
+        if ($request->role === 'adopter') {
+            $address = trim($request->street_address) . ', ' . trim($request->city) . ', ' . trim($request->zip_code);
+            $request->merge(['address' => $address]);
+        }
+        // Combine address for rescuer
+        if ($request->role === 'rescuer') {
+            $address = trim($request->street_address) . ', ' . trim($request->city) . ', ' . trim($request->zip_code);
+            $request->merge(['address' => $address]);
+        }
+        $isGoogle = $request->has('is_google_registration');
+        $validationRules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'in:adopter,shelter,rescuer'],
             'phone_number' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
-        ]);
+        ];
+        if (!$isGoogle) {
+            $validationRules['password'] = ['required', 'string', 'min:8', 'confirmed'];
+        }
+        $validated = $request->validate($validationRules);
 
         // Additional validation for shelter role
         if ($request->role === 'shelter') {
@@ -66,7 +80,7 @@ class RegisterController extends Controller
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => $isGoogle ? Hash::make(\Illuminate\Support\Str::random(24)) : Hash::make($validated['password']),
             'role' => $validated['role'],
             'phone_number' => $validated['phone_number'],
             'address' => $validated['address'],

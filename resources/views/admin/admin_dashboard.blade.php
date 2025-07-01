@@ -1,50 +1,64 @@
+
 @extends('layouts.admin')
 
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Welcome back, ' . Auth::user()->name)
+@section('page-subtitle', 'Welcome back, ' . Auth::user()->first_name . ' ' . Auth::user()->last_name)
 
 @section('content')
+    <!-- Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">👥</div>
+            </div>
             <div class="stat-value">{{ $totalUsers }}</div>
             <div class="stat-title">Total Users</div>
         </div>
         <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">🐾</div>
+            </div>
             <div class="stat-value">{{ $activeAdoptions }}</div>
             <div class="stat-title">Active Adoptions</div>
         </div>
         <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">📋</div>
+            </div>
             <div class="stat-value">{{ $pendingReports }}</div>
             <div class="stat-title">Pending Reports</div>
         </div>
         <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">✨</div>
+            </div>
             <div class="stat-value">{{ $newUsersToday }}</div>
             <div class="stat-title">New Users Today</div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Content Grid -->
+    <div class="content-grid">
         <!-- Pending User Approvals -->
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Pending User Approvals</h2>
+        <div class="content-card">
+            <div class="card-header">
+                <h2>Pending User Approvals</h2>
+                <a href="{{ route('admin.verifications') }}" class="btn btn-outline">View All</a>
+            </div>
             @if(isset($pendingApprovals) && count($pendingApprovals) > 0)
-                <ul class="divide-y divide-gray-200">
+                <ul class="user-list">
                     @foreach($pendingApprovals as $approval)
-                    <li class="py-4 flex items-center justify-between">
-                        <div class="flex items-center">
-                            @if($approval->user->profile_photo_path)
-                                <img src="{{ asset($approval->user->profile_photo_path) }}" alt="Profile" class="w-10 h-10 rounded-full">
-                            @else
-                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-gray-600 font-medium">{{ substr($approval->user->name, 0, 2) }}</span>
-                                </div>
-                            @endif
-                            <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">{{ $approval->user->name }}</p>
-                                <p class="text-sm text-gray-500">{{ $approval->user->email }}</p>
+                    <li class="list-item">
+                        <div class="item-info">
+                            <div class="item-title">
+                                {{ $approval->first_name }} {{ $approval->last_name }}
+                                <span class="verification-type">({{ ucfirst($approval->type) }})</span>
                             </div>
+                            <div class="item-subtitle">{{ $approval->email }}</div>
+                            @if($approval->type === 'shelter')
+                                <div class="item-subtitle">{{ $approval->organization_name }}</div>
+                            @endif
                         </div>
-
                         <!-- Work in Progress -->
                         <div class="flex gap-2">
                             <form action="{{ route('admin.verifications.approve', $approval->verification_id) }}" method="POST">
@@ -60,33 +74,109 @@
                     @endforeach
                 </ul>
             @else
-                <p class="text-gray-500 text-center py-4">No pending approvals.</p>
+                <div class="list-item">
+                    <div class="item-info">
+                        <div class="item-subtitle">No pending approvals</div>
+                    </div>
+                </div>
             @endif
         </div>
 
         <!-- Recent Stray Reports -->
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Stray Reports</h2>
+        <div class="content-card">
+            <div class="card-header">
+                <h2>Recent Stray Reports</h2>
+                <a href="{{ route('admin.stray-reports') }}" class="btn btn-outline">View All</a>
+            </div>
             @if(isset($recentReports) && count($recentReports) > 0)
-                <ul class="divide-y divide-gray-200">
+                <ul class="report-list">
                     @foreach($recentReports as $report)
-                    <li class="py-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-900">{{ $report->location }}</h3>
-                                <p class="text-sm text-gray-500">Reported by {{ $report->reporter_name }}</p>
-                            </div>
-                            <span class="status-badge status-{{ $report->status }}">
-                                {{ ucfirst($report->status) }}
-                            </span>
+                    <li class="list-item">
+                        <div class="item-info">
+                            <div class="item-title">{{ $report->animal_type ?? 'Stray Animal' }}</div>
+                            <div class="item-subtitle">{{ $report->location }}</div>
+                            <div class="item-subtitle">Reported {{ \Carbon\Carbon::parse($report->reported_at)->diffForHumans() }}</div>
                         </div>
-                        <p class="mt-2 text-sm text-gray-600">{{ Str::limit($report->description, 100) }}</p>
+                        <div class="btn-group">
+                            <span class="status status-{{ $report->status }}">{{ ucfirst($report->status) }}</span>
+                            <button class="btn btn-outline" onclick="window.location.href='{{ route('admin.stray-reports') }}?search={{ $report->report_id }}'">
+                                View
+                            </button>
+                        </div>
                     </li>
                     @endforeach
                 </ul>
             @else
-                <p class="text-gray-500 text-center py-4">No recent stray reports.</p>
+                <ul class="report-list">
+                    <li class="list-item">
+                        <div class="item-info">
+                            <div class="item-subtitle">No recent stray reports</div>
+                        </div>
+                    </li>
+                </ul>
             @endif
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+function approveVerification(verificationId, type) {
+    if (confirm('Are you sure you want to approve this verification?')) {
+        const url = type === 'shelter' 
+            ? `/admin/verifications/shelter/${verificationId}/approve`
+            : `/admin/verifications/rescuer/${verificationId}/approve`;
+            
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error approving verification');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+
+function rejectVerification(verificationId, type) {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (reason) {
+        const url = type === 'shelter' 
+            ? `/admin/verifications/shelter/${verificationId}/reject`
+            : `/admin/verifications/rescuer/${verificationId}/reject`;
+            
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error rejecting verification');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+</script>
+@endpush
