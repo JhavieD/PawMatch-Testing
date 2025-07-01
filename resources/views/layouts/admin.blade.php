@@ -91,6 +91,27 @@
             @endif
         </div>
         <div class="profile-section">
+    <!-- Notification Bell -->
+            <div class="notification-bell-wrapper position-relative me-3">
+            <i id="notification-bell" class="fas fa-bell fa-lg text-primary" style="cursor: pointer;"></i>
+
+            @if (isset($pendingCount) && $pendingCount > 0)
+                <span class="notification-bell">
+                    {{ $pendingCount }}
+                </span>
+            @endif
+            <div id="notification-dropdown" class="notification-dropdown">
+            @forelse ($pendingVerifications as $verification)
+                <div class="notification-item">
+                    <strong>{{ $verification->shelter->shelter_name ?? 'Unknown Shelter' }}</strong> applied for verification.
+                    <small class="text-muted">{{ $verification->created_at->diffForHumans() }}</small>
+                </div>
+            @empty
+                <div class="notification-item text-muted">No new notifications</div>
+            @endforelse
+        </div>
+    </div>
+    <!-- Profile Picture and Name -->
             @if(auth()->user()->profile_photo_path)
                 <img src="{{ asset(auth()->user()->profile_photo_path) }}" alt="Profile Picture" class="profile-img">
             @else
@@ -114,7 +135,23 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const bell = document.getElementById('notification-bell');
+        const dropdown = document.getElementById('notification-dropdown');
+
+        bell.addEventListener('click', () => {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+    </script>
+    <!-- <script src="{{ asset('js/app.js') }}"></script> -->
     @stack('scripts')
 </body>
 </html> 

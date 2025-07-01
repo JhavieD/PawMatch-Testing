@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rescuer;
 
 use Illuminate\Http\Request;
+use App\Models\Rescuer\RescuerVerification;
 use App\Http\Controllers\Shared\Controller;
 
 class RescuerDashboardController extends Controller
@@ -22,6 +23,7 @@ class RescuerDashboardController extends Controller
         $recentApplications = $rescuer->applications()->latest()->take(5)->get();
         $recentMessages = $rescuer->messages()->latest()->take(5)->get();
         $recentReviews = $rescuer->reviews()->latest()->take(5)->get();
+        $verification = $rescuer->verifications()->latest()->first();
 
         return view('rescuer.rescuer_dashboard', compact(
             'rescuer',
@@ -34,7 +36,8 @@ class RescuerDashboardController extends Controller
             'recentPets',
             'recentApplications',
             'recentMessages',
-            'recentReviews'
+            'recentReviews',
+            'verification'
         ));
     }
 
