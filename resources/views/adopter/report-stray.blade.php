@@ -7,11 +7,6 @@
 @endpush
 
 @section('adopter-content')
-<nav>
-    <div class="nav-container">
-        <a href="{{ url('/') }}" class="logo">PawMatch</a>
-    </div>
-</nav>
 
 <div class="main-container">
     {{-- Success Message --}}
