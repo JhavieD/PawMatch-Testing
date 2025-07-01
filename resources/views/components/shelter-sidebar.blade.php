@@ -15,6 +15,20 @@
             <i class="fas fa-clipboard-list"></i>
             <span class="nav-label">Applications</span>
         </a>
+         <!-- NEWLY ADDED BY ANDREA 1224-->
+        <a href="{{ route('shelter.stray-reports') }}" class="shelter-nav-item {{ request()->routeIs('shelter.stray-reports') ? 'active' : '' }}">
+                <i class="fas fa-search"></i>
+                <span>Stray Reports</span>
+                @php
+                    $unreadCount = \DB::table('stray_report_notifications')
+                        ->where('shelter_id', auth()->user()->shelter->shelter_id ?? 0)
+                        ->where('is_read', false)
+                        ->count();
+                @endphp
+                @if($unreadCount > 0)
+                    <span class="notification-badge">{{ $unreadCount }}</span>
+                @endif
+        </a>
         <a href="{{ route('shelter.messages') }}" class="shelter-nav-item {{ request()->routeIs('shelter.messages') ? 'active' : '' }}">
             <i class="fas fa-envelope"></i>
             <span class="nav-label">Messages</span>

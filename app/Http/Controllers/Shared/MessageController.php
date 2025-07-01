@@ -59,7 +59,7 @@ class MessageController extends Controller
         return view('messages', compact('partners', 'receiver'));
     }
 
-    public function send(Request $request)
+    public function sendMessage(Request $request)
     {
         $request->validate([
             'receiver_id' => 'required|exists:users,user_id',

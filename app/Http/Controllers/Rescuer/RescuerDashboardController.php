@@ -188,7 +188,7 @@ class RescuerDashboardController extends Controller
         return view('rescuer.pet-management', compact('pets'));
     }
 
-    public function store(Request $request)
+    public function AddPetListing(Request $request)
     {
         $rescuer = auth()->user()->rescuer;
         $data = $request->validate([

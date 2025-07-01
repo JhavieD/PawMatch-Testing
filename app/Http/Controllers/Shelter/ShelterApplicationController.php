@@ -22,7 +22,7 @@ class ShelterApplicationController extends Controller
     }
 
     // Show details of a specific application
-    public function show($id)
+    public function reviewApplication($id)
     {
         $application = AdoptionApplication::with(['adopter.user', 'pet', 'answers'])
             ->findOrFail($id);

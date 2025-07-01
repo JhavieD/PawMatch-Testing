@@ -233,7 +233,7 @@
                 <button class="close-btn" type="button">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="addPetForm" method="POST" action="{{ route('rescuer.pets.store') }}"
+                <form id="addPetForm" method="POST" action="{{ route('rescuer.pets.create') }}"
                     enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="adoption_status" value="available">

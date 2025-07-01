@@ -145,11 +145,35 @@ body {
 /* =========================
     MAIN CONTENT STYLES
    ========================= */
+
+@media (min-width: 901px) {
+  .container {
+    margin-left: 250px !important;
+    max-width: calc(100vw - 250px);
+    width: 100%;
+    padding: 2rem 1rem 2rem 2.5rem;
+    display: flex;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .container {
+    margin-left: 70px !important;
+    max-width: calc(150vw - 70px);
+    width: 100%;
+    padding: 1rem 0.5rem 1rem 1.2rem;
+    display: flex;
+    justify-content: flex-start;
+  }
+}
+
 .container {
-  max-width: 800px;
-  /* margin: 2rem auto; */
-  padding: 1.5rem 2rem;
-  margin-left: 250px;
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .header {
