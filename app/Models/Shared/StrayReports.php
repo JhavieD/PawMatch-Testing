@@ -17,7 +17,18 @@ class StrayReports extends Model
         'status',
         'reported_at',
         'image_url',      
-        'animal_type',    
+        'animal_type',
+        'is_flagged',
+        'flag_reason',
+        'is_duplicate',
+        'flagged_by',
+        'flagged_at',
+    ];
+
+    protected $casts = [
+        'is_flagged' => 'boolean',
+        'is_duplicate' => 'boolean',
+        'flagged_at' => 'datetime',
     ];
 
     public function adopter()
