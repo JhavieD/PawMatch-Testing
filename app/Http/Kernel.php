@@ -68,7 +68,7 @@ class Kernel extends HttpKernel
         'adopter' => \App\Http\Middleware\AdopterMiddleware::class,
         'rescuer' => \App\Http\Middleware\RescuerMiddleware::class,
         'shelter' => \App\Http\Middleware\ShelterMiddleware::class,
-
+        'check.user.status' => \App\Http\Middleware\CheckUserStatus::class,
     ];
 
     

@@ -73,7 +73,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // =====================
 // AUTHENTICATED USER ROUTES
 // =====================
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check.user.status'])->group(function () {
     // -------- ADMIN --------
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -289,9 +289,14 @@ Route::get('/profile/edit', fn() => 'Profile edit page coming soon!')->name('pro
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('settings', [SettingsController::class, 'index'])->name('admin.settings');
-    Route::post('settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/users/{user}/activate', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'activateUser'])->name('users.activate');
+    Route::post('/users/{user}/deactivate', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'deactivateUser'])->name('users.deactivate');
+    Route::post('/users/{user}/ban', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'banUser'])->name('users.ban');
+    Route::post('/users/{user}/unban', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'unbanUser'])->name('users.unban');
+    Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'deleteUser'])->name('users.delete');
 });
 
 //MGA MESSED UP NA NAGLOGIN AS USER DYAN
