@@ -3,8 +3,8 @@
 </button>
 <div id="sidebarOverlay" class="sidebar-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;"></div>
 <aside class="adopter-sidebar" id="adopterSidebar">
-    <div class="sidebar-header">
-        <a href="{{ route('adopter.dashboard') }}">
+    <div class="sidebar-header" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+        <a href="{{ route('adopter.dashboard') }}" style="display: block; margin: 0 auto;">
             <img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" style="height: 40px; display: block; margin: 0 auto;" />
         </a>
     </div>
@@ -46,6 +46,17 @@
         </button>
     </form>
 </aside>
+@push('styles')
+<style>
+.sidebar-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+</style>
+@endpush
 @push('scripts')
 <script>
 function toggleSidebar(show) {
@@ -100,5 +111,45 @@ function handleResize() {
 }
 window.addEventListener('resize', handleResize);
 document.addEventListener('DOMContentLoaded', handleResize);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const bell = document.getElementById('notificationBell');
+    const dropdown = document.getElementById('notificationDropdown');
+    function positionDropdown() {
+        if (!bell || !dropdown) return;
+        const bellRect = bell.getBoundingClientRect();
+        dropdown.style.left = (bellRect.right + 8) + 'px';
+        dropdown.style.top = (bellRect.top + bellRect.height/2 - 8) + 'px'; // small vertical offset
+        dropdown.style.width = '340px';
+        dropdown.style.maxWidth = '90vw';
+        dropdown.style.borderRadius = '12px';
+    }
+    if (bell && dropdown) {
+        bell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            positionDropdown();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', function() {
+            dropdown.style.display = 'none';
+        });
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        // Mark notification as read when clicked
+        dropdown.querySelectorAll('.notification-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                const notifId = this.getAttribute('data-id');
+                fetch(`/notifications/${notifId}/read`, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content } })
+                    .then(() => { this.style.background = '#fff'; this.style.fontWeight = 'normal'; });
+            });
+        });
+    }
+    window.addEventListener('resize', function() {
+        if (dropdown && dropdown.style.display === 'block') {
+            positionDropdown();
+        }
+    });
+});
 </script>
 @endpush 

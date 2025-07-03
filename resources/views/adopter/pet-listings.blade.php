@@ -223,6 +223,103 @@
     const messageShelterButton = document.getElementById('message-shelter');
     let currentShelterUserId = null;
 
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    async function openPetModalById(petId) {
+        // Find the card and simulate click, or fetch and open modal directly
+        try {
+            // Fetch pet details
+            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+            const petDetails = await petDetailsResponse.json();
+
+            // Fetch pet images
+            const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
+            const petImagesData = await petImagesResponse.json();
+
+            // Update modal content
+            document.getElementById('petName').textContent = petDetails.name;
+            document.getElementById('petNameDesc').textContent = petDetails.name;
+            document.getElementById('petBreed').textContent = petDetails.breed;
+            document.getElementById('petAge').textContent = `${petDetails.age} years`;
+            document.getElementById('petGender').textContent = petDetails.gender;
+            document.getElementById('petSize').textContent = petDetails.size;
+            document.getElementById('petStatus').textContent = petDetails.status;
+            document.getElementById('petDescription').textContent = petDetails.description;
+            document.getElementById('shelterName').textContent = petDetails.shelter.name;
+            document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
+            document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
+
+            // Update images
+            if (petImagesData.images.length > 0) {
+                mainImage.src = petImagesData.images[0].image_url;
+                thumbnailGrid.innerHTML = petImagesData.images.map(img => 
+                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail" style="font-family: 'Inter', sans-serif;">`
+                ).join('');
+            } else {
+                mainImage.src = '';
+                thumbnailGrid.innerHTML = '<p>No images available.</p>';
+            }
+
+            // Update buttons
+            applyButton.dataset.petId = petId;
+            applyButton.onclick = function() {
+                adoptionModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                adoptionPetId.value = petId;
+            };
+            favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+            favoriteButton.dataset.petId = petId;
+
+            // Set the message button handler for this pet
+            const messageShelterBtn = document.getElementById('message-shelter');
+            messageShelterBtn.onclick = async function () {
+                const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
+                if (shelterUserId) {
+                    try {
+                        const res = await fetch('/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                receiver_id: shelterUserId,
+                                message: `Hi! I'm interested in adopting ${petDetails.name} from your shelter.`
+                            })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                            alert('Failed to send message: ' + (data.message || res.status));
+                            return;
+                        }
+                        setTimeout(() => {
+                            window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                        }, 400);
+                    } catch (e) {
+                        alert('Error sending message: ' + e);
+                    }
+                } else {
+                    alert('Shelter user ID not found. Please try again later.');
+                }
+            };
+
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        } catch (error) {
+            console.error('Error fetching pet details:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const petIdFromQuery = getQueryParam('pet_id');
+        if (petIdFromQuery) {
+            openPetModalById(petIdFromQuery);
+        }
+    });
+
     function closeModal() {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';

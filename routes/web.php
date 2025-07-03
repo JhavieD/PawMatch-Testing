@@ -254,6 +254,11 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         if (!$pet) {
             return response()->json(['error' => 'Pet not found'], 404);
         }
+        $isFavorite = false;
+        $user = auth()->user();
+        if ($user && $user->adopter) {
+            $isFavorite = $user->adopter->savedPets()->where('saved_pets.pet_id', $pet->pet_id)->exists();
+        }
         return response()->json([
             'pet_id' => $pet->pet_id,
             'name' => $pet->name,
@@ -265,7 +270,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
             'status' => $pet->adoption_status ?? $pet->status ?? 'available',
             'description' => $pet->description,
             'images' => [$pet->image_url ?? 'https://placehold.co/400x300'],
-            'is_favorite' => false, // Placeholder, implement favorite logic if needed
+            'is_favorite' => $isFavorite,
             'shelter_id' => $pet->shelter->shelter_id ?? null,
             'user_id' => $pet->shelter->user_id ?? null,
             'shelter' => [
@@ -314,3 +319,14 @@ Route::get('/debug-session', function () {
         'session' => session()->all(),
     ];
 });
+
+// Notification: Mark as read
+Route::post('/notifications/{id}/read', function ($id) {
+    $notification = \App\Models\Notification::where('id', $id)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+    $notification->is_read = true;
+    $notification->read_at = now();
+    $notification->save();
+    return response()->json(['success' => true]);
+})->middleware('auth');
