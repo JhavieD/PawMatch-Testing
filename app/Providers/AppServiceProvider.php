@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\Shared\Verification;
+use App\Models\Setting;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +34,18 @@ class AppServiceProvider extends ServiceProvider
             'pendingVerifications' => $pendingVerifications,
         ]);
     });
+
+    // Share site_name and contact_email with all views
+    $siteName = Setting::where('key', 'site_name')->value('value') ?? 'PawMatch';
+    $contactEmail = Setting::where('key', 'contact_email')->value('value') ?? 'support@pawmatch.com';
+    view()->share('site_name', $siteName);
+    view()->share('contact_email', $contactEmail);
+
+    // Global helper for settings
+    if (!function_exists('get_setting')) {
+        function get_setting($key, $default = null) {
+            return Setting::where('key', $key)->value('value') ?? $default;
+        }
+    }
 }
 }

@@ -19,6 +19,7 @@ class Adopter extends Model
         'user_id',
         'address',
         'adoption_status',
+        'purpose',
     ];
 
     public function user()

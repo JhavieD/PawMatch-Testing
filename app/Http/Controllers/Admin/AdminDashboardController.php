@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use App\Http\Controllers\Shared\Controller;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminDashboardController extends Controller
 {
@@ -394,9 +395,41 @@ class AdminDashboardController extends Controller
         ]);    
     }
 
+    /**
+     * Show the settings page with maintenance mode status.
+     */
     public function settings()
     {
-        return view('admin.settings');
+        $isMaintenance = app()->isDownForMaintenance();
+        // ...fetch other settings as needed...
+        return view('admin.settings', [
+            'isMaintenance' => $isMaintenance,
+            // ...other settings...
+        ]);
+    }
+
+    /**
+     * Toggle Laravel's built-in maintenance mode.
+     */
+    public function toggleMaintenance(Request $request)
+    {
+        if ($request->has('maintenance_mode')) {
+            // List of admin IPs to allow during maintenance (edit as needed)
+            $adminIps = [
+                '127.0.0.1', // Localhost IPv4
+                '::1',       // Localhost IPv6
+                // Add your real public IP(s) below for production, e.g.:
+                // '203.0.113.42',
+            ];
+            foreach ($adminIps as $ip) {
+                Artisan::call('down', [
+                    '--allow' => $ip,
+                ]);
+            }
+        } else {
+            Artisan::call('up');
+        }
+        return redirect()->back()->with('status', 'Maintenance mode updated!');
     }
 
     public function updateSettings(Request $request)
@@ -404,13 +437,14 @@ class AdminDashboardController extends Controller
         $request->validate([
             'site_name' => 'required|string|max:255',
             'contact_email' => 'required|email',
-            'maintenance_mode' => 'boolean',
             'notifications_enabled' => 'boolean',
         ]);
 
         // Store settings (this will be replaced with actual settings storage)
-        return response()->json([
-            'message' => 'Settings updated successfully'
+        $isMaintenance = app()->isDownForMaintenance();
+        return view('admin.settings', [
+            'isMaintenance' => $isMaintenance,
+            // ...other settings...
         ]);
     }
 

@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             AdoptersSeeder::class,
             PetsSeeder::class,
             Adoption_applicationsSeeder::class,
+            \Database\Seeders\SettingsSeeder::class,
         ]);
     }
 }
