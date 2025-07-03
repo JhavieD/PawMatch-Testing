@@ -10,7 +10,8 @@
         </a>
     </div>
     <nav class="sidebar-nav">
-        <a href="{{ route('shelter.dashboard') }}" class="nav-item {{ request()->routeIs('shelter.dashboard') ? 'active' : '' }}">
+        <a href="{{ route('shelter.dashboard') }}"
+            class="nav-item {{ request()->routeIs('shelter.dashboard') ? 'active' : '' }}">
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
@@ -18,11 +19,13 @@
             <i class="fas fa-paw"></i>
             <span>Pet Management</span>
         </a>
-        <a href="{{ route('shelter.pet_applications') }}" class="nav-item {{ request()->routeIs('shelter.pet_applications') ? 'active' : '' }}">
+        <a href="{{ route('shelter.pet_applications') }}"
+            class="nav-item {{ request()->routeIs('shelter.pet_applications') ? 'active' : '' }}">
             <i class="fas fa-clipboard-list"></i>
             <span>Applications</span>
         </a>
-        <a href="{{ route('shelter.stray-reports') }}" class="nav-item {{ request()->routeIs('shelter.stray-reports') ? 'active' : '' }}">
+        <a href="{{ route('shelter.stray-reports') }}"
+            class="nav-item {{ request()->routeIs('shelter.stray-reports') ? 'active' : '' }}">
             <i class="fas fa-search"></i>
             <span>Stray Reports</span>
             @php
@@ -31,15 +34,17 @@
                     ->where('is_read', false)
                     ->count();
             @endphp
-            @if($unreadCount > 0)
+            @if ($unreadCount > 0)
                 <span class="notification-badge">{{ $unreadCount }}</span>
             @endif
         </a>
-        <a href="{{ route('shelter.messages') }}" class="nav-item {{ request()->routeIs('shelter.messages') ? 'active' : '' }}">
+        <a href="{{ route('shelter.messages') }}"
+            class="nav-item {{ request()->routeIs('shelter.messages') ? 'active' : '' }}">
             <i class="fas fa-envelope"></i>
             <span>Messages</span>
         </a>
-        <a href="{{ route('shelter.profile') }}" class="nav-item {{ request()->routeIs('shelter.profile') ? 'active' : '' }}">
+        <a href="{{ route('shelter.profile') }}"
+            class="nav-item {{ request()->routeIs('shelter.profile') ? 'active' : '' }}">
             <i class="fas fa-user"></i>
             <span>Profile</span>
         </a>
@@ -53,71 +58,74 @@
     </form>
 </aside>
 <script>
-function toggleSidebar(show) {
-    const sidebar = document.getElementById('shelterSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const mainContent = document.querySelector('.main-content, .shelter-content, .content-wrapper');
-    if (show) {
-        sidebar.style.display = 'block';
-        setTimeout(() => {
-            sidebar.style.transform = 'translateX(0)';
-            sidebar.style.opacity = '1';
-            overlay.style.display = 'block';
-            overlay.style.opacity = '1';
-        }, 10);
-        document.body.style.overflow = 'hidden';
-        if (mainContent) {
-            mainContent.classList.add('dashboard-shifted');
-            mainContent.style.pointerEvents = 'none';
-        }
-    } else {
-        sidebar.style.transform = 'translateX(-100%)';
-        sidebar.style.opacity = '0';
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            sidebar.style.display = '';
-            overlay.style.display = 'none';
-        }, 300); // match CSS transition duration
-        document.body.style.overflow = '';
-        if (mainContent) {
-            mainContent.classList.remove('dashboard-shifted');
-            mainContent.style.pointerEvents = '';
+    function toggleSidebar(show) {
+        const sidebar = document.getElementById('shelterSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.querySelector('.main-content, .shelter-content, .content-wrapper');
+        if (show) {
+            sidebar.style.display = 'block';
+            setTimeout(() => {
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.opacity = '1';
+                overlay.style.display = 'block';
+                overlay.style.opacity = '1';
+            }, 10);
+            document.body.style.overflow = 'hidden';
+            if (mainContent) {
+                mainContent.classList.add('dashboard-shifted');
+                mainContent.style.pointerEvents = 'none';
+            }
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.opacity = '0';
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                sidebar.style.display = '';
+                overlay.style.display = 'none';
+            }, 300); // match CSS transition duration
+            document.body.style.overflow = '';
+            if (mainContent) {
+                mainContent.classList.remove('dashboard-shifted');
+                mainContent.style.pointerEvents = '';
+            }
         }
     }
-}
-const sidebarToggle = document.getElementById('sidebarToggle');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
-if (sidebarToggle && sidebarOverlay) {
-    sidebarToggle.addEventListener('click', () => toggleSidebar(true));
-    sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
-}
-function handleResize() {
-    const sidebar = document.getElementById('shelterSidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const mainContent = document.querySelector('.main-content, .shelter-content, .content-wrapper');
-    if (window.innerWidth <= 900) {
-        sidebar.style.display = 'none';
-        sidebar.style.transform = 'translateX(-100%)';
-        sidebar.style.opacity = '0';
-        sidebarToggle.style.display = 'block';
-        if (mainContent) {
-            mainContent.classList.remove('dashboard-shifted');
-            mainContent.style.pointerEvents = '';
-        }
-    } else {
-        sidebar.style.display = '';
-        sidebar.style.transform = '';
-        sidebar.style.opacity = '';
-        sidebarToggle.style.display = 'none';
-        document.getElementById('sidebarOverlay').style.display = 'none';
-        document.getElementById('sidebarOverlay').style.opacity = '0';
-        document.body.style.overflow = '';
-        if (mainContent) {
-            mainContent.classList.remove('dashboard-shifted');
-            mainContent.style.pointerEvents = '';
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (sidebarToggle && sidebarOverlay) {
+        sidebarToggle.addEventListener('click', () => toggleSidebar(true));
+        sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
+    }
+
+    function handleResize() {
+        const sidebar = document.getElementById('shelterSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.querySelector('.main-content, .shelter-content, .content-wrapper');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !sidebarToggle || !overlay) return; // Prevent errors if any element is missing
+        if (window.innerWidth <= 900) {
+            sidebar.style.display = 'none';
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.opacity = '0';
+            sidebarToggle.style.display = 'block';
+            if (mainContent) {
+                mainContent.classList.remove('dashboard-shifted');
+                mainContent.style.pointerEvents = '';
+            }
+        } else {
+            sidebar.style.display = '';
+            sidebar.style.transform = '';
+            sidebar.style.opacity = '';
+            sidebarToggle.style.display = 'none';
+            overlay.style.display = 'none';
+            overlay.style.opacity = '0';
+            document.body.style.overflow = '';
+            if (mainContent) {
+                mainContent.classList.remove('dashboard-shifted');
+                mainContent.style.pointerEvents = '';
+            }
         }
     }
-}
-window.addEventListener('resize', handleResize);
-document.addEventListener('DOMContentLoaded', handleResize);
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('DOMContentLoaded', handleResize);
 </script>
