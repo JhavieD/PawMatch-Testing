@@ -899,11 +899,16 @@ function showRoleFieldsForStep4() {
     const adopterFields = document.getElementById('adopterFields');
     const shelterFields = document.getElementById('shelterFields');
     const rescuerFields = document.getElementById('rescuerFields');
+    const purposeField = document.getElementById('purpose');
     adopterFields.style.display = 'none';
     shelterFields.style.display = 'none';
     rescuerFields.style.display = 'none';
+    if (purposeField) purposeField.required = false;
     if (currentStep === totalSteps) {
-        if (role === 'adopter') adopterFields.style.display = 'block';
+        if (role === 'adopter') {
+            adopterFields.style.display = 'block';
+            if (purposeField) purposeField.required = true;
+        }
         if (role === 'shelter') {
             shelterFields.style.display = 'block';
             autofillShelterLocation();
