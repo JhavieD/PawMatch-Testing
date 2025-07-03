@@ -39,6 +39,17 @@ class ShelterApplicationController extends Controller
         $application->status = 'approved';
         $application->save();
 
+        // Send notification to adopter
+        if ($application->adopter && $application->adopter->user) {
+            \App\Models\Notification::create([
+                'user_id' => $application->adopter->user->user_id,
+                'type' => 'application',
+                'title' => 'Application Approved!',
+                'message' => 'Your adoption application for ' . ($application->pet->name ?? 'a pet') . ' has been approved. Please schedule your meet & greet!',
+                'is_read' => false,
+            ]);
+        }
+
         return response()->json(['success' => true]);
     }
 

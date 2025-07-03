@@ -191,4 +191,9 @@ class User extends Authenticatable
             return asset('images/default-profile.png');
         });
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class, 'user_id', 'user_id');
+    }
 }
