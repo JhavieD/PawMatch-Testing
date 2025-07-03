@@ -37,9 +37,6 @@
         <div class="content-card">
             <div class="card-header">
                 <h2>All Users ({{ $stats['total'] }})</h2>
-                <button class="btn btn-primary" onclick="openAddUserModal()">
-                    <i class="fas fa-plus"></i> Add New User
-                </button>
             </div>
 
             <!-- Search and Filter -->
@@ -77,26 +74,27 @@
             </form>
 
             <!-- User Statistics -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">{{ $stats['total'] }}</div>
-                    <div style="color: #6b7280; font-size: 0.875rem;">Total Users</div>
+            <div class="user-stats">
+                <div class="user-stats-card user-stats-total">
+                    <div class="user-stats-value">{{ $stats['total'] ?? 0 }}</div>
+                    <div class="user-stats-label">Total Users</div>
                 </div>
-                <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 600; color: #10b981;">{{ $stats['active'] }}</div>
-                    <div style="color: #6b7280; font-size: 0.875rem;">Active</div>
+                <div class="user-stats-card user-stats-active">
+                    <div class="user-stats-value">{{ $stats['active'] ?? 0 }}</div>
+                    <div class="user-stats-label">Active</div>
                 </div>
-                <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 600; color: #f59e0b;">{{ $stats['inactive'] }}</div>
-                    <div style="color: #6b7280; font-size: 0.875rem;">Inactive</div>
+                <div class="user-stats-card user-stats-inactive">
+                    <div class="user-stats-value">{{ $stats['inactive'] ?? 0 }}</div>
+                    <div class="user-stats-label">Inactive</div>
                 </div>
-                <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 600; color: #ef4444;">{{ $stats['banned'] }}</div>
-                    <div style="color: #6b7280; font-size: 0.875rem;">Banned</div>
+                <div class="user-stats-card user-stats-banned">
+                    <div class="user-stats-value">{{ $stats['banned'] ?? 0 }}</div>
+                    <div class="user-stats-label">Banned</div>
                 </div>
             </div>
 
             <!-- Users Table -->
+            <div class="user-table-container">
             <table class="user-table">
                 <thead>
                     <tr>
@@ -105,75 +103,72 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="user-actions-header">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($users as $user)
                     <tr>
-                        <td>#{{ str_pad($user->user_id, 3, '0', STR_PAD_LEFT) }}</td>
-                        <td>
-                            <div class="user-cell">
-                                <div class="user-avatar">
-                                    @if($user->profile_photo_path)
-                                        <img src="{{ asset($user->profile_photo_path) }}" alt="User Avatar">
-                                    @else
-                                        {{ $user->initials }}
-                                    @endif
-                                </div>
-                                <div class="user-info">
-                                    <div class="user-name">{{ $user->name }}</div>
-                                    <div class="user-id">{{ $user->phone_number ?? 'No phone' }}</div>
-                                </div>
+                        <td class="user-id">#{{ str_pad($user->user_id, 3, '0', STR_PAD_LEFT) }}</td>
+                        <td class="user-name-cell">
+                            <div class="user-avatar">
+                                @if($user->profile_photo_path)
+                                    <img src="{{ asset($user->profile_photo_path) }}" alt="User Avatar">
+                                @else
+                                    <span class="user-initials">{{ $user->initials }}</span>
+                                @endif
+                            </div>
+                            <div class="user-name-info">
+                                <div class="user-name">{{ $user->name }}</div>
+                                <div class="user-phone">{{ $user->phone_number ?? 'No phone' }}</div>
                             </div>
                         </td>
-                        <td>
-                            <div class="contact-info">
-                                <div class="contact-email">{{ $user->email }}</div>
-                                <div class="contact-phone">Joined {{ $user->created_at->format('M d, Y') }}</div>
-                            </div>
+                        <td class="user-email-cell">
+                            <div class="user-email">{{ $user->email }}</div>
+                            <div class="user-joined">Joined {{ $user->created_at->format('M d, Y') }}</div>
                         </td>
-                        <td>
-                            <span class="role-badge role-{{ strtolower($user->role) }}">
-                                {{ ucfirst($user->role) }}
-                            </span>
+                        <td class="user-role-cell">
+                            <span class="user-role user-role-{{ strtolower($user->role) }}">{{ ucfirst($user->role) }}</span>
                         </td>
-                        <td>
-                            @if($user->is_banned)
-                                <span class="status-badge" style="background: #fee2e2; color: #991b1b;">Banned</span>
-                            @elseif($user->status)
-                                <span class="status-badge status-active">Active</span>
+                        <td class="user-status-cell">
+                            @if($user->status === 'banned')
+                                <span class="user-status user-status-banned">Banned</span>
+                            @elseif($user->status === 'active')
+                                <span class="user-status user-status-active">Active</span>
                             @else
-                                <span class="status-badge status-inactive">Inactive</span>
+                                <span class="user-status user-status-inactive">Inactive</span>
                             @endif
                         </td>
-                        <td class="action-buttons">
-                            <button class="btn-icon" title="View Details" onclick="viewUser({{ $user->user_id }})">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            @if($user->role !== 'admin')
-                                @if($user->is_banned)
-                                    <button class="btn-icon" title="Unban User" onclick="unbanUser({{ $user->user_id }})">
-                                        <i class="fas fa-user-check" style="color: #10b981;"></i>
-                                    </button>
-                                @else
-                                    <button class="btn-icon" title="Ban User" onclick="banUser({{ $user->user_id }})">
-                                        <i class="fas fa-user-slash" style="color: #ef4444;"></i>
-                                    </button>
-                                @endif
-                                <button class="btn-icon" title="Delete User" onclick="deleteUser({{ $user->user_id }})">
-                                    <i class="fas fa-trash" style="color: #ef4444;"></i>
+                        <td class="user-actions">
+                            @if($user->user_id !== auth()->user()->user_id)
+                                <button class="user-action-btn view" title="View Details" onclick="viewUser({{ $user->user_id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="user-action-btn unban" title="Unban User" onclick="userAction({{ $user->user_id }}, 'unban')">
+                                    <i class="fas fa-user-check"></i>
+                                </button>
+                                <button class="user-action-btn ban" title="Ban User" onclick="userAction({{ $user->user_id }}, 'ban')">
+                                    <i class="fas fa-user-slash"></i>
+                                </button>
+                                <button class="user-action-btn deactivate" title="Deactivate User" onclick="userAction({{ $user->user_id }}, 'deactivate')">
+                                    <i class="fas fa-user-times"></i>
+                                </button>
+                                <button class="user-action-btn activate" title="Activate User" onclick="userAction({{ $user->user_id }}, 'activate')">
+                                    <i class="fas fa-user-check"></i>
+                                </button>
+                                <button class="user-action-btn delete" title="Delete User" onclick="userAction({{ $user->user_id }}, 'delete')">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
-                            <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 1rem; color: #d1d5db;"></i>
+                        <td colspan="6" class="user-table-empty">
+                            <i class="fas fa-users"></i>
                             <div>No users found</div>
                             @if(request()->hasAny(['search', 'role', 'status']))
-                                <div style="margin-top: 0.5rem;">
+                                <div class="user-table-clear">
                                     <a href="{{ route('admin.users') }}" class="btn btn-outline">Clear Filters</a>
                                 </div>
                             @endif
@@ -182,6 +177,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
 
             <!-- Pagination -->
             @if($users->hasPages())
@@ -192,61 +188,6 @@
         </div>
     </div>
 </main>
-
-<!-- Add User Modal -->
-<div class="modal" id="addUserModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Add New User</h2>
-            <button class="close-modal" onclick="closeAddUserModal()">&times;</button>
-        </div>
-        <form id="addUserForm" onsubmit="handleAddUser(event)">
-            <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" name="first_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" name="last_name" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone_number">
-                </div>
-                <div class="form-group">
-                    <label for="role">Role</label>
-                    <select id="role" name="role" required>
-                        <option value="adopter">Adopter</option>
-                        <option value="shelter">Shelter</option>
-                        <option value="rescuer">Rescuer</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required minlength="8">
-                    </div>
-                    <div class="form-group">
-                        <label for="passwordConfirmation">Confirm Password</label>
-                        <input type="password" id="passwordConfirmation" name="password_confirmation" required minlength="8">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Add User</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- View User Modal -->
 <div class="modal" id="viewUserModal">
@@ -271,7 +212,6 @@
 
             <div class="tab-navigation">
                 <button class="tab-button active" onclick="switchTab('info')">Information</button>
-                <button class="tab-button" onclick="switchTab('activity')">Activity Log</button>
             </div>
 
             <div id="infoTab" class="tab-content active">
@@ -293,12 +233,6 @@
                         <div class="info-value" id="viewUserJoined">Jan 1, 2024</div>
                     </div>
                 </div>
-            </div>
-
-            <div id="activityTab" class="tab-content">
-                <ul class="activity-list" id="userActivityList">
-                    <!-- Activity items will be populated by JavaScript -->
-                </ul>
             </div>
         </div>
     </div>
@@ -326,51 +260,14 @@
         </form>
     </div>
 </div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-6 right-6 z-50 space-y-2"></div>
 @endsection
 
 @push('scripts')
 <script>
 let currentUserId = null;
-
-// Add User Modal Functions
-function openAddUserModal() {
-    document.getElementById('addUserModal').style.display = 'flex';
-}
-
-function closeAddUserModal() {
-    document.getElementById('addUserModal').style.display = 'none';
-    document.getElementById('addUserForm').reset();
-}
-
-function handleAddUser(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData.entries());
-    
-    fetch("{{ route('admin.users.store') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('User added successfully!');
-            closeAddUserModal();
-            window.location.reload();
-        } else {
-            alert(data.message || 'Error adding user');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error adding user');
-    });
-}
 
 // View User Modal Functions
 function viewUser(userId) {
@@ -407,9 +304,6 @@ function viewUser(userId) {
                 avatarElement.textContent = data.initials;
             }
             
-            // Load activity
-            loadUserActivity(userId);
-            
             document.getElementById('viewUserModal').style.display = 'flex';
         })
         .catch(error => {
@@ -420,23 +314,6 @@ function viewUser(userId) {
 
 function closeViewUserModal() {
     document.getElementById('viewUserModal').style.display = 'none';
-}
-
-function loadUserActivity(userId) {
-    fetch(`{{ url('admin/users') }}/${userId}/activity`)
-        .then(response => response.json())
-        .then(activities => {
-            const activityList = document.getElementById('userActivityList');
-            activityList.innerHTML = activities.map(activity => `
-                <li class="activity-item">
-                    <span>${activity.description}</span>
-                    <span class="activity-date">${new Date(activity.created_at).toLocaleString()}</span>
-                </li>
-            `).join('');
-        })
-        .catch(error => {
-            console.error('Error loading activity:', error);
-        });
 }
 
 function switchTab(tabName) {
@@ -588,5 +465,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `px-4 py-3 rounded shadow text-white font-semibold flex items-center space-x-2 animate-fadeIn ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+    toast.innerHTML = `<span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('animate-fadeOut');
+        setTimeout(() => toast.remove(), 500);
+    }, 2000);
+}
+
+function userAction(userId, action) {
+    let url = '';
+    let method = 'POST';
+    if (action === 'activate') url = `{{ url('admin/users') }}/${userId}/activate`;
+    else if (action === 'deactivate') url = `{{ url('admin/users') }}/${userId}/deactivate`;
+    else if (action === 'ban') url = `{{ url('admin/users') }}/${userId}/ban`;
+    else if (action === 'unban') url = `{{ url('admin/users') }}/${userId}/unban`;
+    else if (action === 'delete') { url = `{{ url('admin/users') }}/${userId}`; method = 'DELETE'; }
+    if (action === 'delete' && !confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    fetch(url, {
+        method: method,
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showToast(data.message || 'Action failed', 'error');
+        }
+    })
+    .catch(() => showToast('Action failed', 'error'));
+}
+
+// Toast animation
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px);} to { opacity: 1; transform: translateY(0);} }
+@keyframes fadeOut { from { opacity: 1;} to { opacity: 0; transform: translateY(-10px);} }
+.animate-fadeIn { animation: fadeIn 0.3s; }
+.animate-fadeOut { animation: fadeOut 0.5s; }
+`;
+document.head.appendChild(style);
 </script>
 @endpush
