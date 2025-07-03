@@ -473,6 +473,16 @@ class AdminDashboardController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
         }
+        // Filter by flagged status - THIS IS THE NEW PART
+        if ($request->filled('flagged')) {
+            $flagged = $request->input('flagged');
+            if ($flagged === 'flagged') {
+                $query->where('is_flagged', true);
+            } elseif ($flagged === 'duplicate') {
+                $query->where('is_duplicate', true);
+            }
+        }
+
 
         $reports = $query->orderByDesc('reported_at')->paginate(12);
 
@@ -999,6 +1009,98 @@ class AdminDashboardController extends Controller
         $user->status = 'active';
         $user->save();
         return response()->json(['success' => true, 'message' => 'User unbanned']);
+    }
+
+    /**ADDED BY ANDREA - UPDATED FLAG FUNCTIONS */
+
+    public function flagReport(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'flag_reason' => 'required|string|max:500',
+                'is_duplicate' => 'boolean'
+            ]);
+
+            $report = StrayReports::findOrFail($id);
+            
+            // Determine the new status - flagged reports are automatically cancelled
+            $newStatus = 'cancelled';  // Always set to cancelled when flagged
+            $oldStatus = $report->status;
+            
+            $report->update([
+                'status' => $newStatus, // Always cancelled when flagged
+                'is_flagged' => true,
+                'flag_reason' => $request->flag_reason,
+                'is_duplicate' => $request->boolean('is_duplicate', false),
+                'flagged_by' => 'Admin',
+                'flagged_at' => now()
+            ]);
+
+            // Add timeline entry for flag action
+            DB::table('admin_actions')->insert([
+                'action_type' => 'status_update',
+                'target_report_id' => $report->report_id,
+                'reason' => $request->boolean('is_duplicate', false) 
+                    ? "Report marked as duplicate and cancelled: {$request->flag_reason}"
+                    : "Report flagged and cancelled: {$request->flag_reason}",
+                'admin_id' => auth()->id(),
+                'created_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $request->boolean('is_duplicate', false) 
+                    ? 'Report marked as duplicate and cancelled successfully'
+                    : 'Report flagged and cancelled successfully',
+                'new_status' => $newStatus
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Flag report error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to flag report: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function unflagReport($id)
+    {
+        try {
+            $report = StrayReports::findOrFail($id);
+            $oldStatus = $report->status;
+            
+            $report->update([
+                'status' => 'pending', // Reset to pending when unflagged to reactivate
+                'is_flagged' => false,
+                'flag_reason' => null,
+                'is_duplicate' => false,
+                'flagged_by' => null,
+                'flagged_at' => null
+            ]);
+
+            // Add timeline entry for unflag action
+            DB::table('admin_actions')->insert([
+                'action_type' => 'status_update',
+                'target_report_id' => $report->report_id,
+                'reason' => "Report unflagged and reactivated - status reset to pending",
+                'admin_id' => auth()->id(),
+                'created_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Report unflagged and reactivated successfully',
+                'new_status' => 'pending'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Unflag report error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to unflag report: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

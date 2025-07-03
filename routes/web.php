@@ -91,7 +91,9 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/admin/stray-reports/{id}/comments', [AdminDashboardController::class, 'strayReportComments']);
         Route::post('/admin/stray-reports/{reportId}/mark-investigating', [AdminDashboardController::class, 'markAsInvestigating']);
         Route::get('/admin/stray-reports/{reportId}/nearby-shelters', [AdminDashboardController::class, 'findNearbyShelters'])->name('admin.stray-reports.nearby-shelters');
-
+        // FLAGGING andrea
+        Route::post('/admin/stray-reports/{id}/flag', [AdminDashboardController::class, 'flagReport'])->name('admin.stray-reports.flag');
+        Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport'])->name('admin.stray-reports.unflag');
         // User Management
         Route::get('/admin/users/{user}', [AdminDashboardController::class, 'showUser'])->name('admin.users.show');
         Route::post('/admin/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
