@@ -200,6 +200,4 @@
         chatMessages.appendChild(bubble);
     }
 </script>
-
-<pre>{{ var_export($receiver, true) }}</pre>
 @endsection
