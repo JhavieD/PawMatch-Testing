@@ -46,6 +46,7 @@ class MessageController extends Controller
                         'receiver_id' => $msg->receiver_id,
                         'message_content' => $decrypted,
                         'sent_at' => optional($msg->sent_at)->timezone('Asia/Manila')->toIso8601String(),
+                        'is_read' => $msg->is_read,
                     ];
                 })
             );
@@ -226,5 +227,17 @@ class MessageController extends Controller
         $partners = $partners->unique('user_id')->values();
 
         return view('rescuer.rescuer-messages', compact('partners', 'receiver'));
+    }
+
+    public function markAsRead(Request $request)
+    {
+        $senderId = $request->input('sender_id');
+        $receiverId = auth()->id();
+
+        Message::where('sender_id', $senderId)
+            ->where('receiver_id', $receiverId)
+            ->where('is_read', 0)
+            ->update(['is_read' => 1]);
+        return response()->json(['success' => true]);
     }
 }
