@@ -9,7 +9,7 @@
 @section('content')
 <div class="flex-1 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md mx-auto">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="auth-card">
             <div class="p-8">
                 <div class="text-center mb-6">
                     <div class="auth-icon">
@@ -29,22 +29,16 @@
                             Email Address
                         </label>
                         <div class="input-wrapper">
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                required 
-                                value="{{ old('email') }}" 
+                            <input type="email" id="email" name="email" required value="{{ old('email') }}"
                                 placeholder="Enter your email address"
-                                class="form-input @error('email') is-invalid @enderror"
-                            >
+                                class="form-input @error('email') is-invalid @enderror">
                             <i class="fas fa-envelope input-icon"></i>
                         </div>
                         @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </span>
+                        <span class="invalid-feedback" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </span>
                         @enderror
                     </div>
 
@@ -54,24 +48,19 @@
                             New Password
                         </label>
                         <div class="input-wrapper">
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
-                                required 
+                            <input type="password" id="password" name="password" required
                                 placeholder="Enter new password"
-                                class="form-input @error('password') is-invalid @enderror"
-                            >
+                                class="form-input @error('password') is-invalid @enderror">
                             <i class="fas fa-lock input-icon"></i>
                             <button type="button" class="password-toggle" onclick="togglePassword('password')">
                                 <i class="fas fa-eye" id="passwordToggleIcon"></i>
                             </button>
                         </div>
                         @error('password')
-                            <span class="invalid-feedback" role="alert">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </span>
+                        <span class="invalid-feedback" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </span>
                         @enderror
                     </div>
 
@@ -81,16 +70,11 @@
                             Confirm New Password
                         </label>
                         <div class="input-wrapper">
-                            <input 
-                                type="password" 
-                                id="password_confirmation" 
-                                name="password_confirmation" 
-                                required 
-                                placeholder="Confirm new password"
-                                class="form-input"
-                            >
+                            <input type="password" id="password_confirmation" name="password_confirmation" required
+                                placeholder="Confirm new password" class="form-input">
                             <i class="fas fa-lock input-icon"></i>
-                            <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
+                            <button type="button" class="password-toggle"
+                                onclick="togglePassword('password_confirmation')">
                                 <i class="fas fa-eye" id="passwordConfirmationToggleIcon"></i>
                             </button>
                         </div>
@@ -133,4 +117,4 @@
     }
 </script>
 @endpush
-@endsection 
+@endsection
