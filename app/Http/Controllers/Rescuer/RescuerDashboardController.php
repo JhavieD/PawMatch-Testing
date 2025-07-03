@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rescuer;
 
 use Illuminate\Http\Request;
+use App\Models\Rescuer\RescuerVerification;
 use App\Http\Controllers\Shared\Controller;
 
 class RescuerDashboardController extends Controller
@@ -22,6 +23,7 @@ class RescuerDashboardController extends Controller
         $recentApplications = $rescuer->applications()->latest()->take(5)->get();
         $recentMessages = $rescuer->messages()->latest()->take(5)->get();
         $recentReviews = $rescuer->reviews()->latest()->take(5)->get();
+        $verification = $rescuer->verifications()->latest()->first();
 
         return view('rescuer.rescuer_dashboard', compact(
             'rescuer',
@@ -34,7 +36,8 @@ class RescuerDashboardController extends Controller
             'recentPets',
             'recentApplications',
             'recentMessages',
-            'recentReviews'
+            'recentReviews',
+            'verification'
         ));
     }
 
@@ -203,6 +206,7 @@ class RescuerDashboardController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
             'eating_habits' => 'nullable|string',
             'adoption_status' => 'required|string',
+            'suitable_for' => 'nullable|string',
         ]);
         $data['rescuer_id'] = $rescuer->rescuer_id;
         $pet = \App\Models\Shared\Pet::create($data);
@@ -241,6 +245,7 @@ class RescuerDashboardController extends Controller
             'compatibility' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'eating_habits' => 'nullable|string',
+            'suitable_for' => 'nullable|string',
         ]);
         $pet->update($data);
         if ($request->hasFile('images')) {

@@ -61,4 +61,8 @@ class Rescuer extends Model
     {
         return $this->hasMany(AdopterReview::class, 'rescuer_id', 'rescuer_id');
     }
+    public function verifications()
+    {
+        return $this->hasMany(RescuerVerification::class, 'rescuer_id', 'rescuer_id');
+    }
 }

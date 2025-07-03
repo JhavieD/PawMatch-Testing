@@ -271,6 +271,18 @@
                     </div>
                     <div class="field-error" id="adopter_valid_idError"></div>
                 </div>
+                <div>
+                    <label for="purpose" class="block text-sm font-medium text-gray-700">
+                        What is your main reason for adopting a pet? <span class="text-red-500">*</span>
+                    </label>
+                    <select name="purpose" id="purpose" class="register-input" required>
+                        <option value="">Select purpose</option>
+                        <option value="Family Companion" {{ old('purpose') == 'Family Companion' ? 'selected' : '' }}>Family Companion</option>
+                        <option value="Emotional Support / Mental Health" {{ old('purpose') == 'Emotional Support / Mental Health' ? 'selected' : '' }}>Emotional Support / Mental Health</option>
+                        <option value="Senior Citizen Companion" {{ old('purpose') == 'Senior Citizen Companion' ? 'selected' : '' }}>Senior Citizen Companion</option>
+                    </select>
+                    <div class="field-error" id="purposeError"></div>
+                </div>
             </div>
             <!-- Shelter Fields -->
             <div id="shelterFields" class="role-fields space-y-6" style="display:none;">
@@ -887,11 +899,16 @@ function showRoleFieldsForStep4() {
     const adopterFields = document.getElementById('adopterFields');
     const shelterFields = document.getElementById('shelterFields');
     const rescuerFields = document.getElementById('rescuerFields');
+    const purposeField = document.getElementById('purpose');
     adopterFields.style.display = 'none';
     shelterFields.style.display = 'none';
     rescuerFields.style.display = 'none';
+    if (purposeField) purposeField.required = false;
     if (currentStep === totalSteps) {
-        if (role === 'adopter') adopterFields.style.display = 'block';
+        if (role === 'adopter') {
+            adopterFields.style.display = 'block';
+            if (purposeField) purposeField.required = true;
+        }
         if (role === 'shelter') {
             shelterFields.style.display = 'block';
             autofillShelterLocation();

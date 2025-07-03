@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'adopter' => \App\Http\Middleware\AdopterMiddleware::class,
             'shelter' => \App\Http\Middleware\ShelterMiddleware::class,
             'rescuer' => \App\Http\Middleware\RescuerMiddleware::class,
+            'check.user.status' => \App\Http\Middleware\CheckUserStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
