@@ -95,6 +95,7 @@ class AdopterDashboardController extends Controller
         ]);
         $adopter->update([
             'address' => $request->address,
+            'purpose' => $request->purpose,
         ]);
 
         if ($request->hasFile('profile_image')) {
