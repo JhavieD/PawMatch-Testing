@@ -26,6 +26,12 @@ class AdopterPetListingsController extends Controller
         if ($request->has('size')) {
             $query->whereIn('size', $request->input('size'));
         }
+        if ($request->has('match_purpose') && $request->input('match_purpose')) {
+            $adopterPurpose = auth()->user()->adopter->purpose;
+            if ($adopterPurpose) {
+                $query->where('suitable_for', $adopterPurpose);
+            }
+        }
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -128,5 +134,19 @@ class AdopterPetListingsController extends Controller
             $adopter->savedPets()->attach($petId);
         }
         return response()->json(['is_favorite' => !$isFavorite]);
+    }
+
+    public function publicIndex(Request $request)
+    {
+        $pets = \App\Models\Shared\Pet::where('adoption_status', 'available')
+            ->with('shelter', 'images')
+            ->paginate(12);
+        return view('public.pet-listings', compact('pets'));
+    }
+
+    public function publicPetDetails(Pet $pet)
+    {
+        $pet->load(['images', 'shelter']);
+        return view('public.pet-details', compact('pet'));
     }
 } 

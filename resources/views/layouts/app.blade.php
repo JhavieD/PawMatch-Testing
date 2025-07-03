@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="csrf-token" content="{{ csrf_token() }}">  {{-- pls don't remove yaw q na mag debug ng messages -allainne --}}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>@yield('title', 'PawMatch - Find Your Perfect Pet Companion')</title>
+        <title>@yield('title', $site_name . ' - Find Your Perfect Pet Companion')</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -31,7 +31,7 @@
                 <div class="nav-links" id="navLinks">
                     <a href="{{ route('home') }}" class="nav-link{{ request()->routeIs('home') ? ' active' : '' }}">Home</a>
                     <a href="{{ route('about') }}" class="nav-link{{ request()->routeIs('about') ? ' active' : '' }}">About</a>
-                    <a href="{{ route('pet-listings') }}" class="nav-link{{ request()->routeIs('adopter.pet-listings') ? ' active' : '' }}">Find Pets</a>
+                    <a href="{{ route('public.pet-listings') }}" class="nav-link{{ request()->routeIs('public.pet-listings') ? ' active' : '' }}">Find Pets</a>
                     <a href="{{ route('faq') }}" class="nav-link{{ request()->routeIs('faq') ? ' active' : '' }}">FAQ</a>
                     <a href="{{ route('terms') }}" class="nav-link{{ request()->routeIs('terms') ? ' active' : '' }}">Terms</a>
                     @auth
@@ -65,7 +65,7 @@
                     <i class="fas fa-info-circle"></i>
                     <span>About</span>
                 </a>
-                <a href="{{ route('pet-listings') }}" class="mobile-nav-link{{ request()->routeIs('adopter.pet-listings') ? ' active' : '' }}">
+                <a href="{{ route('public.pet-listings') }}" class="mobile-nav-link{{ request()->routeIs('public.pet-listings') ? ' active' : '' }}">
                     <i class="fas fa-paw"></i>
                     <span>Find Pets</span>
                 </a>

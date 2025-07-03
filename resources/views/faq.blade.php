@@ -64,7 +64,7 @@
                         <li>Completing the verification process</li>
                         <li>Setting up their profile and adding available pets</li>
                     </ul>
-                    <p>Contact our <a href="mailto:support@pawmatch.com">support team</a> for assistance.</p>
+                    <p>Contact our <a href="mailto:{{ $contact_email }}">support team</a> for assistance.</p>
                 </div>
             </div>
         </div>

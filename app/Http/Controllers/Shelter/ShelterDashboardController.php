@@ -117,6 +117,7 @@ class ShelterDashboardController extends Controller
             'compatibility' => 'nullable|string',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
             'eating_habits' => 'nullable|string',
+            'suitable_for' => 'nullable|string',
         ]);
         $data['adoption_status'] = 'available';
         $data['shelter_id'] = $shelter->shelter_id;
@@ -172,6 +173,7 @@ class ShelterDashboardController extends Controller
             'compatibility' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'eating_habits' => 'nullable|string',
+            'suitable_for' => 'nullable|string',
         ]);
         
         $pet->update($request->only([
@@ -188,6 +190,7 @@ class ShelterDashboardController extends Controller
             'special_needs',
             'compatibility',
             'eating_habits',
+            'suitable_for',
         ]));
 
         if ($request->hasFile('images')) {
