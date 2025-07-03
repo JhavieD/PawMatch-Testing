@@ -45,7 +45,8 @@
                                     data-special_needs="{{ $pet->special_needs }}"
                                     data-compatibility="{{ $pet->compatibility }}"
                                     data-images='@json($pet->images)'
-                                    data-eating_habits="{{ $pet->eating_habits }}">
+                                    data-eating_habits="{{ $pet->eating_habits }}"
+                                    data-suitable_for="{{ $pet->suitable_for }}">
                                     Edit
                                 </button>
                                 <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}"
@@ -174,6 +175,15 @@
                                 <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="edit-suitable_for">Suitable For</label>
+                            <select name="suitable_for" id="edit-suitable_for">
+                                <option value="">Select Purpose (Optional)</option>
+                                <option value="Family Companion">Family Companion</option>
+                                <option value="Emotional Support / Mental Health">Emotional Support / Mental Health</option>
+                                <option value="Senior Citizen Companion">Senior Citizen Companion</option>
+                            </select>
+                        </div>
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
@@ -294,6 +304,15 @@
                                 <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="suitable_for">Suitable For</label>
+                            <select name="suitable_for" id="suitable_for">
+                                <option value="">Select Purpose (Optional)</option>
+                                <option value="Family Companion">Family Companion</option>
+                                <option value="Emotional Support / Mental Health">Emotional Support / Mental Health</option>
+                                <option value="Senior Citizen Companion">Senior Citizen Companion</option>
+                            </select>
+                        </div>
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid">
@@ -392,6 +411,7 @@
                 const specialNeeds = btn.getAttribute('data-special_needs');
                 const compatibility = btn.getAttribute('data-compatibility');
                 const eatingHabits = btn.getAttribute('data-eating_habits');
+                const suitableFor = btn.getAttribute('data-suitable_for');
 
                 // Display existing images and Delete
                 document.getElementById('edit-name').value = name;
@@ -407,6 +427,9 @@
                 document.getElementById('edit-special_needs').value = specialNeeds;
                 document.getElementById('edit-compatibility').value = compatibility;
                 document.getElementById('edit-eating_habits').value = eatingHabits;
+                if (document.getElementById('edit-suitable_for')) {
+                    document.getElementById('edit-suitable_for').value = suitableFor || '';
+                }
                 document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
 
                 // TODO: Display images and delete buttons dynamically if needed

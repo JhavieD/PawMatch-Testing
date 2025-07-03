@@ -1,53 +1,29 @@
 @extends('layouts.admin')
 
-@section('page-title', 'Settings')
-@section('page-subtitle', 'Manage system settings and configurations')
+@section('title', 'Platform Settings')
 
 @section('content')
-    <div class="bg-white rounded-xl shadow p-6">
-        <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-            @csrf
-            
-            <!-- General Settings -->
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label for="site_name" class="block text-sm font-medium text-gray-700">Site Name</label>
-                        <input type="text" name="site_name" id="site_name" class="form-input mt-1" value="{{ old('site_name', 'PawMatch') }}">
-                    </div>
-                    <div>
-                        <label for="contact_email" class="block text-sm font-medium text-gray-700">Contact Email</label>
-                        <input type="email" name="contact_email" id="contact_email" class="form-input mt-1" value="{{ old('contact_email', 'contact@pawmatch.com') }}">
-                    </div>
-                </div>
-            </div>
-
-            <!-- System Settings -->
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">System Settings</h3>
-                <div class="grid grid-cols-1 gap-4">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="maintenance_mode" id="maintenance_mode" class="form-checkbox" value="1">
-                        <label for="maintenance_mode" class="ml-2 block text-sm text-gray-700">
-                            Enable Maintenance Mode
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" name="notifications_enabled" id="notifications_enabled" class="form-checkbox" value="1" checked>
-                        <label for="notifications_enabled" class="ml-2 block text-sm text-gray-700">
-                            Enable Email Notifications
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Save Button -->
-            <div class="flex justify-end">
-                <button type="submit" class="btn btn-primary">
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
+<div class="container mt-4">
+    <h2>General Settings</h2>
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    <form method="POST" action="{{ route('admin.settings.update') }}">
+        @csrf
+        <div class="mb-3">
+            <label for="site_name" class="form-label">Site Name</label>
+            <input type="text" class="form-control" id="site_name" name="site_name" value="{{ $settings['site_name']->value ?? '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="contact_email" class="form-label">Contact Email</label>
+            <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ $settings['contact_email']->value ?? '' }}">
+        </div>
+        <h4>System Settings</h4>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" value="1" {{ !empty($settings['email_notifications']) && $settings['email_notifications']->value == '1' ? 'checked' : '' }}>
+            <label class="form-check-label" for="email_notifications">Enable Email Notifications</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
 @endsection 

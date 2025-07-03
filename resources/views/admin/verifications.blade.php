@@ -39,14 +39,12 @@
             <div class="stat-title">Rejected Today</div>
         </div>
     </div>
-
     <div class="table-container">
         <table class="verification-table">
             <thead>
                 <tr>
                     <th>USER</th>
                     <th>TYPE</th>
-                    <th>DOCUMENTS</th>
                     <th>SUBMITTED</th>
                     <th>STATUS</th>
                     <th>ACTIONS</th>
@@ -74,26 +72,6 @@
                         </span>
                     </td>
                     <td>
-
-                        <!-- Work in progress -->
-                        <div class="document-previews">
-                            @if($verification->type === 'shelter')
-                                <button class="action-icon" 
-                                        onclick="viewRegistrationDocument('{{ Storage::disk('s3')->url($verification->document_url) }}')" 
-                                        title="View Registration Document">
-                                    <i class="fas fa-file-alt"></i> Registration Doc
-                                </button>
-                        <!-- Work in progress -->
-
-                                </a>
-                            @elseif($verification->type === 'rescuer')
-                                <a href="{{ Storage::disk('s3')->url($verification->document_url) }}" target="_blank" class="document-link">
-                                    <i class="fas fa-file-alt"></i> Credentials
-                                </a>
-                            @endif
-                        </div>
-                    </td>
-                    <td>
                         <div class="submitted-info">
                             <div>{{ \Carbon\Carbon::parse($verification->submitted_at)->format('M d, Y') }}</div>
                             <div class="time-ago">{{ \Carbon\Carbon::parse($verification->submitted_at)->diffForHumans() }}</div>
@@ -105,18 +83,12 @@
                         </span>
                     </td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="action-icon" title="View Details" onclick="viewVerification({{ $verification->verification_id }})">
-                                <i class="fas fa-eye"></i>
+                        <button class="action-icon"
+                                title="View Details"
+                                onclick="viewVerification({{ $verification->verification_id }}, '{{ $verification->type }}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
                             </button>
-                            @if($verification->status === 'pending')
-                                <button class="action-icon approve" title="Approve" onclick="approveVerification({{ $verification->verification_id }})">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="action-icon reject" title="Reject" onclick="rejectVerification({{ $verification->verification_id }})">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            @endif
                         </div>
                     </td>
                 </tr>
@@ -164,11 +136,29 @@
 
                 <div class="documents-section">
                     <h4>Submitted Documents</h4>
-                    <div id="documentPreviews" class="document-preview-grid">
-                        <!-- Document previews will be inserted here -->
+
+                    <div id="documentPreviewContainer" class="document-preview-container">
+                        <!-- Injected preview (image/pdf) goes here -->
+                    </div>
+
+                    <div class="facebook-link-container mt-2">
+                        <a id="modalFacebookLink"
+                        href="#"
+                        class="btn btn-primary btn-sm"
+                        target="_blank"
+                        style="display: none;">
+                            <i class="fab fa-facebook-square"></i> View Facebook Page
+                        </a>
+                        <div id="modalFacebookFallback"
+                            class="text-muted"
+                            style="display: none;">
+                            No Facebook link provided.
+                        </div>
                     </div>
                 </div>
+                </div>
 
+                <!-- Transfer Functionality of buttons here -->
                 <div id="reviewSection" class="review-section" style="display: none;">
                     <h4>Review Decision</h4>
                     <div class="review-form">
@@ -187,88 +177,104 @@
         </div>
     </div>
 </div>
-<!-- Document Modal - To view registration document -->
-<div id="documentModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Registration Document</h2>
-            <button class="close-document-modal" title="Close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="document-frame-wrapper" style="max-height: 80vh; overflow-y: auto;">
-                <iframe id="registrationDocViewer"
-                        width="100%"
-                        height="500"
-                        frameborder="0"
-                        style="border-radius: 6px; border: 1px solid #ccc;"></iframe>
-            </div>
-        </div>
-    </div>
-</div>
 
 @endsection
 
 @section('scripts')
 <script>
+    let currentVerificationId = null;
     let currentVerificationStatus = '';
+    let currentVerificationType = '';
 
-    function viewVerification(id) {
-        // Implementation for viewing verification details
-        fetch(`/admin/verifications/${id}`)
+    function viewVerification(id, type) {
+        currentVerificationId = id;
+        currentVerificationType = type;
+
+        fetch(`/admin/verifications/${id}?type=${type}`)
             .then(response => response.json())
             .then(data => {
                 currentVerificationStatus = data.status;
-                // Show/hide review section based on status
-                document.getElementById('reviewSection').style.display = 
-                    currentVerificationStatus === 'pending' ? 'block' : 'none';
-                
-                // Populate modal with verification details
-                document.getElementById('modalUserName').textContent = data.first_name + ' ' + data.last_name;
+
+                document.getElementById('modalUserName').textContent = `${data.first_name} ${data.last_name}`;
                 document.getElementById('modalUserEmail').textContent = data.email;
                 document.getElementById('modalUserType').textContent = data.type;
                 document.getElementById('modalUserStatus').textContent = data.status;
-                document.getElementById('modalSubmissionDate').textContent = 
-                    new Date(data.submitted_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                
-                // Show modal
+                document.getElementById('modalSubmissionDate').textContent = new Date(data.submitted_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                document.getElementById('reviewSection').style.display = data.status === 'pending' ? 'block' : 'none';
+
+                const docContainer = document.getElementById('documentPreviewContainer');
+                docContainer.innerHTML = '';
+
+                if (data.document_url) {
+                    const fileType = data.document_url.split('.').pop().toLowerCase();
+                    if (fileType === 'pdf') {
+                        docContainer.innerHTML = `<iframe src="${data.document_url}" style="width: 100%; height: 400px; border: 1px solid #ccc; border-radius: 6px;"></iframe>`;
+                    } else {
+                        docContainer.innerHTML = `<img src="${data.document_url}" alt="Document Image" style="max-width: 90%; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">`;
+                    }
+                } else {
+                    docContainer.innerHTML = `<p class="text-muted">No document uploaded.</p>`;
+                }
+
+                const fbLinkBtn = document.getElementById('modalFacebookLink');
+                const fbFallback = document.getElementById('modalFacebookFallback');
+
+                if (data.facebook_link && data.facebook_link.trim() !== '') {
+                    fbLinkBtn.href = data.facebook_link;
+                    fbLinkBtn.style.display = 'inline-block';
+                    fbFallback.style.display = 'none';
+                } else {
+                    fbLinkBtn.style.display = 'none';
+                    fbFallback.style.display = 'block';
+                }
+
                 document.getElementById('verificationModal').style.display = 'flex';
             });
     }
-    //Replaced data.verification.status with data.status
 
-    function approveVerification(id) {
+    function approveWithNotes() {
+        if (!currentVerificationId) return;
+
         if (confirm('Are you sure you want to approve this verification?')) {
-            fetch(`/admin/verifications/${id}/approve`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            }).then(() => {
-                window.location.reload();
-            });
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/verifications/${currentVerificationId}/approve?type=${currentVerificationType}`;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
+
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
         }
     }
 
-    function rejectVerification(id) {
+    function rejectWithNotes() {
+        if (!currentVerificationId) return;
+
         if (confirm('Are you sure you want to reject this verification?')) {
-            fetch(`/admin/verifications/${id}/reject`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            }).then(() => {
-                window.location.reload();
-            });
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/verifications/${currentVerificationId}/reject?type=${currentVerificationType}`;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
+
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
         }
     }
 
-    //Close modal when clicking the close button or outside the modal
     document.addEventListener('DOMContentLoaded', () => {
         const closeBtn = document.querySelector('.close-modal');
         if (closeBtn) {
@@ -286,35 +292,5 @@
             });
         }
     });
-
-    // Registration Doc Modal
-        window.viewRegistrationDocument = function(url) {
-            const viewer = document.getElementById('registrationDocViewer');
-            const modal = document.getElementById('documentModal');
-            viewer.src = url;
-            modal.style.display = 'flex';
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const closeDocBtn = document.querySelector('.close-document-modal');
-            const docModal = document.getElementById('documentModal');
-            const docViewer = document.getElementById('registrationDocViewer');
-
-            if (closeDocBtn) {
-                closeDocBtn.addEventListener('click', () => {
-                    docModal.style.display = 'none';
-                    docViewer.src = '';
-                });
-            }
-
-            if (docModal) {
-                window.addEventListener('click', (e) => {
-                    if (e.target === docModal) {
-                        docModal.style.display = 'none';
-                        docViewer.src = '';
-                    }
-                });
-            }
-        });
 </script>
-@endsection 
+@endsection

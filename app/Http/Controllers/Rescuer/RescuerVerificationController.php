@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\Shelter;
+namespace App\Http\Controllers\Rescuer;
 
-use App\Models\Shelter\ShelterVerification;
+use App\Models\Rescuer\RescuerVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Http\Controllers\Shared\Controller;
 
-class ShelterVerificationController extends Controller
+class RescuerVerificationController extends Controller
 {
     public function showVerificationForm()
     {
-        $verification = ShelterVerification::where('shelter_id', Auth::user()->shelter->shelter_id)
+        $verification = RescuerVerification::where('rescuer_id', Auth::user()->rescuer->rescuer_id)
             ->latest()
             ->first();
 
-        return view('shelter.verification', compact('verification'));
+        return view('rescuer.verification', compact('verification'));
     }
 
     public function submitVerification(Request $request)
@@ -27,23 +27,21 @@ class ShelterVerificationController extends Controller
             'facebook_link' => 'nullable|url'
         ]);
 
-        // Check if there's already a pending verification
-        $existingVerification = ShelterVerification::where('shelter_id', Auth::user()->shelter->shelter_id)
+        $existingVerification = RescuerVerification::where('rescuer_id', Auth::user()->rescuer->rescuer_id)
             ->where('status', 'pending')
             ->first();
 
         if ($existingVerification) {
             return redirect()->back()->with('error', 'You already have a pending verification request.');
         }
+        
 
-        // Store the document
-        $path = $request->file('registration_doc')->store('shelter-verifications', 's3', 'public');
+        $path = $request->file('registration_doc')->store('rescuer-verifications', 's3', 'public');
 
-        // Create verification record
-        ShelterVerification::create([
-            'shelter_id' => Auth::user()->shelter->shelter_id,
+        RescuerVerification::create([
+            'rescuer_id' => Auth::user()->rescuer->rescuer_id,
             'submitted_by' => Auth::id(),
-            'registration_doc_url' => $path,
+            'document_url' => $path, // ← Now fully functional
             'facebook_link' => $request->facebook_link,
             'status' => 'pending',
             'submitted_at' => Carbon::now(),
@@ -51,13 +49,14 @@ class ShelterVerificationController extends Controller
 
         return redirect()->back()->with('success', 'Your verification request has been submitted successfully.');
     }
-    public function approve($id, Request $request)
+    
+    public function approveVerification($id, Request $request)
     {
-        $verification = ShelterVerification::findOrFail($id);
+        $verification = RescuerVerification::findOrFail($id);
         $verification->status = 'approved';
         $verification->notes = $request->input('notes');
         $verification->save();
 
-        return redirect()->back()->with('success', 'Shelter verification approved.');
+        return redirect()->route('admin.verifications')->with('success', 'Verification approved successfully.');
     }
-} 
+}

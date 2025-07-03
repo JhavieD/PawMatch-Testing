@@ -25,8 +25,10 @@ use App\Http\Controllers\Shelter\AdoptionApplicationController as ShelterAdoptio
 // Rescuer Controllers
 use App\Http\Controllers\Rescuer\RescuerDashboardController;
 use App\Http\Controllers\Rescuer\RescuerController;
+use App\Http\Controllers\Rescuer\RescuerVerificationController;
 // Admin Controllers
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\SettingsController;
 // Shared Controllers
 use App\Http\Controllers\Shared\MessageController;
 use App\Http\Controllers\Shared\PetPersonalityQuizController;
@@ -44,8 +46,10 @@ Route::get('/', fn() => view('home'))->name('home');
 Route::get('/faq', fn() => view('faq'))->name('faq');
 Route::get('/terms', fn() => view('terms'))->name('terms');
 Route::get('/about', fn() => view('about'))->name('about');
-Route::get('/pet-listings', fn() => view('adopter.pet-listings'))->name('pet-listings');
+Route::get('/pet-listings', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'index'])->name('pet-listings');
 Route::get('/report-stray', fn() => view('report-stray'))->name('report-stray');
+Route::get('/public-pet-listings', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'publicIndex'])->name('public.pet-listings');
+Route::get('/public-pet-details/{pet}', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'publicPetDetails'])->name('public.pet-details');
 
 // Pet Personality Quiz
 Route::get('/quiz', [PetPersonalityQuizController::class, 'showQuiz'])->name('quiz.show');
@@ -69,7 +73,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // =====================
 // AUTHENTICATED USER ROUTES
 // =====================
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check.user.status'])->group(function () {
     // -------- ADMIN --------
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -99,7 +103,7 @@ Route::middleware(['auth'])->group(function () {
         // Stray Reports Management
         Route::post('/admin/stray-reports/{report}/assign', [AdminDashboardController::class, 'assignReport'])->name('admin.stray-reports.assign');
         // Settings Management
-        Route::post('/admin/settings', [AdminDashboardController::class, 'updateSettings'])->name('admin.settings.update');
+        Route::post('/admin/settings/toggle-maintenance', [AdminDashboardController::class, 'toggleMaintenance'])->name('admin.toggle-maintenance');
         Route::get('/admin/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
     });
 
@@ -139,6 +143,8 @@ Route::middleware(['auth'])->group(function () {
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {
+        Route::get('/verification', [RescuerVerificationController::class, 'showVerificationForm'])->name('rescuer.verification.form');
+        Route::post('/verification', [RescuerVerificationController::class, 'submitVerification'])->name('rescuer.verification.submit');
         Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])->name('rescuer.dashboard');
         Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
         Route::get('/rescuer/pets', [RescuerDashboardController::class, 'petManagement'])->name('rescuer.pet-management');
@@ -281,3 +287,29 @@ Route::get('/profile/edit', fn() => 'Profile edit page coming soon!')->name('pro
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/users/{user}/activate', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'activateUser'])->name('users.activate');
+    Route::post('/users/{user}/deactivate', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'deactivateUser'])->name('users.deactivate');
+    Route::post('/users/{user}/ban', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'banUser'])->name('users.ban');
+    Route::post('/users/{user}/unban', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'unbanUser'])->name('users.unban');
+    Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'deleteUser'])->name('users.delete');
+});
+
+//MGA MESSED UP NA NAGLOGIN AS USER DYAN
+Route::get('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
+});
+
+Route::get('/debug-session', function () {
+    return [
+        'session_id' => session()->getId(),
+        'user_id' => auth()->id(),
+        'session' => session()->all(),
+    ];
+});

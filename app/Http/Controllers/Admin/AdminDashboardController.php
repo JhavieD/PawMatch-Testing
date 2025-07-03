@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use App\Http\Controllers\Shared\Controller;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminDashboardController extends Controller
 {
@@ -77,7 +78,7 @@ class AdminDashboardController extends Controller
         $query = User::query();
 
         // Apply search filter
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -86,19 +87,22 @@ class AdminDashboardController extends Controller
         }
 
         // Apply role filter
-        if ($request->has('role') && $request->role !== '') {
+        if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
         // Apply status filter
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status === 'active');
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        $users = $query->latest()->get();
+        $users = $query->latest()->paginate(15)->appends($request->query());
 
         $stats = [
             'total' => User::count(),
+            'active' => User::where('status', 'active')->count(),
+            'inactive' => User::where('status', 'inactive')->count(),
+            'banned' => User::where('status', 'banned')->count(),
             'shelters' => User::where('role', 'shelter')->count(),
             'adopters' => User::where('role', 'adopter')->count(),
             'rescuers' => User::where('role', 'rescuer')->count(),
@@ -135,16 +139,10 @@ class AdminDashboardController extends Controller
     public function deleteUser(User $user)
     {
         if ($user->role === 'admin') {
-            return response()->json([
-                'message' => 'Cannot delete admin users'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Cannot delete admin user'], 403);
         }
-
         $user->delete();
-
-        return response()->json([
-            'message' => 'User deleted successfully'
-        ]);
+        return response()->json(['success' => true, 'message' => 'User deleted']);
     }
 
     public function toggleUserStatus(User $user)
@@ -394,9 +392,41 @@ class AdminDashboardController extends Controller
         ]);    
     }
 
+    /**
+     * Show the settings page with maintenance mode status.
+     */
     public function settings()
     {
-        return view('admin.settings');
+        $isMaintenance = app()->isDownForMaintenance();
+        // ...fetch other settings as needed...
+        return view('admin.settings', [
+            'isMaintenance' => $isMaintenance,
+            // ...other settings...
+        ]);
+    }
+
+    /**
+     * Toggle Laravel's built-in maintenance mode.
+     */
+    public function toggleMaintenance(Request $request)
+    {
+        if ($request->has('maintenance_mode')) {
+            // List of admin IPs to allow during maintenance (edit as needed)
+            $adminIps = [
+                '127.0.0.1', // Localhost IPv4
+                '::1',       // Localhost IPv6
+                // Add your real public IP(s) below for production, e.g.:
+                // '203.0.113.42',
+            ];
+            foreach ($adminIps as $ip) {
+                Artisan::call('down', [
+                    '--allow' => $ip,
+                ]);
+            }
+        } else {
+            Artisan::call('up');
+        }
+        return redirect()->back()->with('status', 'Maintenance mode updated!');
     }
 
     public function updateSettings(Request $request)
@@ -404,13 +434,14 @@ class AdminDashboardController extends Controller
         $request->validate([
             'site_name' => 'required|string|max:255',
             'contact_email' => 'required|email',
-            'maintenance_mode' => 'boolean',
             'notifications_enabled' => 'boolean',
         ]);
 
         // Store settings (this will be replaced with actual settings storage)
-        return response()->json([
-            'message' => 'Settings updated successfully'
+        $isMaintenance = app()->isDownForMaintenance();
+        return view('admin.settings', [
+            'isMaintenance' => $isMaintenance,
+            // ...other settings...
         ]);
     }
 
@@ -578,7 +609,7 @@ class AdminDashboardController extends Controller
             ->select(
                 'rescuer_verifications.verification_id',
                 'rescuer_verifications.submitted_by',
-                'rescuer_verifications.document_url',
+                'rescuer_verifications.document_url as rescuer_document_url',
                 'rescuer_verifications.facebook_link',
                 'rescuer_verifications.status',
                 'rescuer_verifications.submitted_at',
@@ -592,9 +623,11 @@ class AdminDashboardController extends Controller
             );
 
         // Combine and sort by submission date
-        $verifications = $shelterVerifications->union($rescuerVerifications)
+        $verifications = DB::table(DB::raw("({$shelterVerifications->toSql()} UNION {$rescuerVerifications->toSql()}) as combined"))
+            ->mergeBindings($shelterVerifications->union($rescuerVerifications))
             ->orderBy('submitted_at', 'desc')
             ->get();
+        // Work in Progres
 
         // Get counts for stats
         $stats = [
@@ -609,40 +642,40 @@ class AdminDashboardController extends Controller
 
         return view('admin.verifications', compact('verifications', 'stats'));
     }
-
+    // Shelter and Rescuer Verification
     public function showVerification($id)
     {
-        // First try to find in shelter verifications
-        $verification = DB::table('shelter_verifications')
-            ->join('users', 'shelter_verifications.submitted_by', '=', 'users.user_id')
-            ->join('shelters', 'shelter_verifications.shelter_id', '=', 'shelters.shelter_id')
-            ->select(
-                'shelter_verifications.verification_id',
-                'shelter_verifications.submitted_by',
-                'shelter_verifications.registration_doc_url as document_url',
-                'shelter_verifications.facebook_link',
-                'shelter_verifications.status',
-                'shelter_verifications.submitted_at',
-                'shelter_verifications.reviewed_at',
-                'shelter_verifications.reviewed_by',
-                'users.first_name',
-                'users.last_name',
-                'users.email',
-                'shelters.shelter_name as organization_name',
-                DB::raw("'shelter' as type")
-            )
-            ->where('shelter_verifications.verification_id', $id)
-            ->first();
+        $type = request()->query('type');
 
-        if (!$verification) {
-            // If not found, try rescuer verifications
+        if ($type === 'shelter') {
+            $verification = DB::table('shelter_verifications')
+                ->join('users', 'shelter_verifications.submitted_by', '=', 'users.user_id')
+                ->join('shelters', 'shelter_verifications.shelter_id', '=', 'shelters.shelter_id')
+                ->select(
+                    'shelter_verifications.verification_id',
+                    'shelter_verifications.submitted_by',
+                    'shelter_verifications.registration_doc_url as document_url',
+                    'shelter_verifications.facebook_link',
+                    'shelter_verifications.status',
+                    'shelter_verifications.submitted_at',
+                    'shelter_verifications.reviewed_at',
+                    'shelter_verifications.reviewed_by',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'shelters.shelter_name as organization_name',
+                    DB::raw("'shelter' as type")
+                )
+                ->where('shelter_verifications.verification_id', $id)
+                ->first();
+        } elseif ($type === 'rescuer') {
             $verification = DB::table('rescuer_verifications')
                 ->join('users', 'rescuer_verifications.submitted_by', '=', 'users.user_id')
                 ->join('rescuers', 'rescuer_verifications.rescuer_id', '=', 'rescuers.rescuer_id')
                 ->select(
                     'rescuer_verifications.verification_id',
                     'rescuer_verifications.submitted_by',
-                    'rescuer_verifications.document_url',
+                    'rescuer_verifications.document_url as document_url',
                     'rescuer_verifications.facebook_link',
                     'rescuer_verifications.status',
                     'rescuer_verifications.submitted_at',
@@ -656,10 +689,16 @@ class AdminDashboardController extends Controller
                 )
                 ->where('rescuer_verifications.verification_id', $id)
                 ->first();
+        } else {
+            return response()->json(['error' => 'Invalid or missing verification type'], 400);
         }
 
         if (!$verification) {
             return response()->json(['error' => 'Verification not found'], 404);
+        }
+
+        if ($verification->document_url) {
+            $verification->document_url = Storage::disk('s3')->url($verification->document_url);
         }
 
         return response()->json($verification);
@@ -677,31 +716,34 @@ class AdminDashboardController extends Controller
 
     private function updateVerificationStatus($id, $status)
     {
-        // Try to update in shelter verifications
-        $updated = DB::table('shelter_verifications')
-            ->where('verification_id', $id)
-            ->update([
-                'status' => $status,
-                'reviewed_by' => auth()->id(),
-                'reviewed_at' => now()
-            ]);
+        $type = request()->query('type');
 
-        if (!$updated) {
-            // If not found, try rescuer verifications
+        if ($type === 'shelter') {
+            $updated = DB::table('shelter_verifications')
+                ->where('verification_id', $id)
+                ->update([
+                    'status' => $status,
+                    'reviewed_by' => auth()->id(),
+                    'reviewed_at' => now(),
+                    'updated_at' => now()
+                ]);
+        } elseif ($type === 'rescuer') {
             $updated = DB::table('rescuer_verifications')
                 ->where('verification_id', $id)
                 ->update([
                     'status' => $status,
                     'reviewed_by' => auth()->id(),
-                    'reviewed_at' => now()
+                    'reviewed_at' => now(),
+                    'updated_at' => now()
                 ]);
+        } else {
+            return response()->json(['error' => 'Invalid verification type'], 400);
         }
 
         if (!$updated) {
             return response()->json(['error' => 'Verification not found'], 404);
         }
 
-        // Send notification to user
         $verification = DB::table('shelter_verifications')
             ->where('verification_id', $id)
             ->first() ?? DB::table('rescuer_verifications')
@@ -710,7 +752,7 @@ class AdminDashboardController extends Controller
 
         $user = User::find($verification->submitted_by);
         
-        return response()->json(['message' => 'Verification status updated successfully']);
+        return redirect()->back()->with('success', 'Verification status updated.');
     }
 
     public function addComment(Request $request, $id)
@@ -917,5 +959,54 @@ class AdminDashboardController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function activateUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot modify admin user'], 403);
+        }
+        $user->status = 'active';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User activated']);
+    }
+
+    public function deactivateUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot modify admin user'], 403);
+        }
+        $user->status = 'inactive';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User deactivated']);
+    }
+
+    public function banUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot ban admin user'], 403);
+        }
+        $user->status = 'banned';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User banned']);
+    }
+
+    public function unbanUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot unban admin user'], 403);
+        }
+        $user->status = 'active';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User unbanned']);
+    }
+
+    /**
+     * Show user details for AJAX requests.
+     */
+    public function showUser(User $user)
+    {
+        // You can load relationships as needed, e.g. $user->load('adopter', 'shelter', 'rescuer');
+        return response()->json($user);
     }
 }

@@ -169,6 +169,7 @@ class RegisterController extends Controller
                 'address' => $request->address,
                 'adoption_status' => 'pending',
                 'adopter_valid_id' => $validIdPath,
+                'purpose' => $request->purpose,
             ]);
 
             // Insert into user_valid_ids using $user->id

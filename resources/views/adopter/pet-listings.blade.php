@@ -47,6 +47,17 @@
                 @endforeach
             </div>
 
+            <div class="filter-group">
+                <h3>Match My Purpose</h3>
+                <div class="filter-option" style="display: flex; align-items: flex-start; gap: 0.5em; flex-direction: column;">
+                    <label style="display: flex; align-items: center; gap: 0.5em;">
+                        <input type="checkbox" name="match_purpose" value="1" {{ request('match_purpose') ? 'checked' : '' }}>
+                        <span>Show pets suitable for:</span>
+                    </label>
+                    <span style="margin-left: 1.8em; font-weight: bold;">{{ auth()->user()->adopter->purpose ?? 'Not specified' }}</span>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary">Apply Filters</button>
         </form>
     </aside>
