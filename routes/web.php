@@ -105,7 +105,6 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         // Settings Management
         Route::post('/admin/settings/toggle-maintenance', [AdminDashboardController::class, 'toggleMaintenance'])->name('admin.toggle-maintenance');
         Route::get('/admin/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
-
     });
 
     // -------- SHELTER --------
@@ -132,7 +131,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::delete('/shelter/pets/{pet}', [ShelterDashboardController::class, 'destroy'])->name('shelter.pets.destroy');
         Route::delete('/shelter/pet-images/{id}', [ShelterDashboardController::class, 'deleteImage'])->name('shelter.pet-images.destroy');
         Route::get('/shelter/pet_applications', [ShelterAdoptionApplicationController::class, 'index'])->name('shelter.pet_applications');
-         //STRAY REPORTS ROUTES ADDED BY ANDREa 12:22
+        //STRAY REPORTS ROUTES ADDED BY ANDREa 12:22
         Route::get('/shelter/stray-reports', [ShelterDashboardController::class, 'strayReports'])->name('shelter.stray-reports');
         Route::post('/shelter/stray-reports/{reportId}/mark-read', [ShelterDashboardController::class, 'markStrayReportRead'])->name('shelter.stray-reports.mark-read');
         Route::post('/shelter/stray-reports/{reportId}/accept', [ShelterDashboardController::class, 'acceptStrayReport'])->name('shelter.stray-reports.accept');
@@ -194,7 +193,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::post('/adopter/applications', [AdopterApplicationController::class, 'store'])->name('adopter.applications.store');
         // Messages route
         Route::get('/adopter/messages', [MessageController::class, 'adopterMessages'])->name('adopter.messages');
-         // Stray reporting routes
+        // Stray reporting routes
         Route::get('/adopter/report-stray', [ReportStrayController::class, 'show'])->name('adopter.report-stray');
         Route::post('/stray-report/submit', [ReportStrayController::class, 'submit'])->name('stray.report.submit');
         // Report status routes

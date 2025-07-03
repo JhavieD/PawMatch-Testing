@@ -1,10 +1,6 @@
-@extends('                    layouts.shelter')
+@extends('layouts.stray-reports')
 
 @section('title', 'Stray Reports')
-
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/shelter/stray-reports.css') }}">
-@endpush
 
 @section('shelter-content')
 <main class="main-content">
@@ -27,7 +23,6 @@
                 </div>
             </div>
         </div>
-        
         <!-- Search and Filter -->
         <div class="content-card">
             <form method="GET" action="{{ route('shelter.stray-reports') }}" class="search-filter">
@@ -40,7 +35,6 @@
                 <button type="submit" class="btn btn-primary">Filter</button>
             </form>
         </div>
-
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
@@ -54,22 +48,21 @@
                     data-animal-type="{{ $report->animal_type ?? '' }}"
                     data-reporter="{{ $report->reporter_name }}"
                     data-reporter-contact="{{ $report->reporter_email }}"
-                    
                     data-sent-at="{{ $report->sent_at ? \Carbon\Carbon::parse($report->sent_at)->format('F d, Y g:i A') : '' }}"
                 >
                     @if(!$report->is_read)
                         <div class="unread-indicator"></div>
                     @endif
-                    
                     <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image">
                     <div class="report-content">
-                        <h3 class="report-title">{{ Str::limit($report->description, 50) }}</h3>
+                        <div class="report-title">{{ $report->animal_type ?? 'Stray Animal' }}</div>
                         <div class="report-location">
                             <i class="fas fa-map-marker-alt"></i>
-                            {{ $report->location }}
+                            <span>{{ $report->location }}</span>
                         </div>
                         <div class="report-meta">
                             <span class="animal-type">{{ ucfirst($report->animal_type) }}</span>
+                            <span class="sent-time">{{ $report->sent_at ? \Carbon\Carbon::parse($report->sent_at)->diffForHumans() : '' }}</span>
                         </div>
                         <div class="status-badge status-{{ $report->status }}">
                             {{ ucfirst($report->status) }}
@@ -77,82 +70,19 @@
                     </div>
                 </div>
             @empty
-                <div>No reports found.</div>
+                <div class="no-reports">
+                    <div class="no-reports-icon"><i class="fas fa-dog"></i></div>
+                    <h3>No reports found.</h3>
+                    <p>There are currently no stray animal reports for your shelter.</p>
                 </div>
             @endforelse
         </div>
-
         @if($reports->hasPages())
             {{ $reports->links() }}
         @endif
     </div>
 </main>
-
-<!-- Report Details Modal -->
-<div class="report-modal" id="reportModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>🚨 Stray Report Details</h2>
-            <button class="close-modal" onclick="closeReportModal()">&times;</button>
-        </div>
-        
-        <div class="report-header">
-            <div class="report-images">
-                <img id="modalReportImage" src="" alt="Stray Animal" class="report-image">
-            </div>
-            <div class="report-header-info">
-                <div class="info-block">
-                    <div class="info-label">Report ID:</div>
-                    <div class="info-value" id="reportId"></div>
-                </div>
-                <div class="status-badge" id="reportStatus"></div>
-            </div>
-        </div>
-
-        <div class="report-info">
-            <div class="info-block">
-                <div class="info-label">📍 Location</div>
-                <div class="info-value" id="reportLocation"></div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">🐕 Animal Type</div>
-                <div class="info-value" id="animalType"></div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">👤 Reporter</div>
-                <div class="info-value" id="reporterName"></div>
-                <div class="info-value small-text" id="reporterContact"></div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">📅 Date Reported</div>
-                <div class="info-value" id="reportDate"></div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">📨 Sent to You</div>
-                <div class="info-value" id="sentAt"></div>
-            </div>
-        </div>
-
-        <div class="report-description">
-            <h3>Description</h3>
-            <p id="reportDescription"></p>
-        </div>
-
-        <div class="report-actions">
-            <button class="btn btn-primary" onclick="acceptReport()">
-                Accept Report
-            </button>
-            <button class="btn btn-info" onclick="getDirections()">
-                Get Directions
-            </button>
-        </div>
-    </div>
-</div>
-
 @endsection
-
-@push('scripts')
-<script>
 
 @push('scripts')
 <script>
