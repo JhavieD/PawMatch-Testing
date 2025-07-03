@@ -35,16 +35,18 @@ class AppServiceProvider extends ServiceProvider
         ]);
     });
 
-    // Share site_name and contact_email with all views
-    $siteName = Setting::where('key', 'site_name')->value('value') ?? 'PawMatch';
-    $contactEmail = Setting::where('key', 'contact_email')->value('value') ?? 'support@pawmatch.com';
-    view()->share('site_name', $siteName);
-    view()->share('contact_email', $contactEmail);
+    // Share site_name and contact_email with all views, only if settings table exists
+    if (\Schema::hasTable('settings')) {
+        $siteName = Setting::where('key', 'site_name')->value('value') ?? 'PawMatch';
+        $contactEmail = Setting::where('key', 'contact_email')->value('value') ?? 'support@pawmatch.com';
+        view()->share('site_name', $siteName);
+        view()->share('contact_email', $contactEmail);
 
-    // Global helper for settings
-    if (!function_exists('get_setting')) {
-        function get_setting($key, $default = null) {
-            return Setting::where('key', $key)->value('value') ?? $default;
+        // Global helper for settings
+        if (!function_exists('get_setting')) {
+            function get_setting($key, $default = null) {
+                return \App\Models\Setting::where('key', $key)->value('value') ?? $default;
+            }
         }
     }
 }
