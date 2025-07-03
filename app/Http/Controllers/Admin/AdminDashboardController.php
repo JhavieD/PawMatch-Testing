@@ -78,7 +78,7 @@ class AdminDashboardController extends Controller
         $query = User::query();
 
         // Apply search filter
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -87,19 +87,22 @@ class AdminDashboardController extends Controller
         }
 
         // Apply role filter
-        if ($request->has('role') && $request->role !== '') {
+        if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
         // Apply status filter
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status === 'active');
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        $users = $query->latest()->get();
+        $users = $query->latest()->paginate(15)->appends($request->query());
 
         $stats = [
             'total' => User::count(),
+            'active' => User::where('status', 'active')->count(),
+            'inactive' => User::where('status', 'inactive')->count(),
+            'banned' => User::where('status', 'banned')->count(),
             'shelters' => User::where('role', 'shelter')->count(),
             'adopters' => User::where('role', 'adopter')->count(),
             'rescuers' => User::where('role', 'rescuer')->count(),
@@ -136,16 +139,10 @@ class AdminDashboardController extends Controller
     public function deleteUser(User $user)
     {
         if ($user->role === 'admin') {
-            return response()->json([
-                'message' => 'Cannot delete admin users'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Cannot delete admin user'], 403);
         }
-
         $user->delete();
-
-        return response()->json([
-            'message' => 'User deleted successfully'
-        ]);
+        return response()->json(['success' => true, 'message' => 'User deleted']);
     }
 
     public function toggleUserStatus(User $user)
@@ -962,5 +959,54 @@ class AdminDashboardController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function activateUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot modify admin user'], 403);
+        }
+        $user->status = 'active';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User activated']);
+    }
+
+    public function deactivateUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot modify admin user'], 403);
+        }
+        $user->status = 'inactive';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User deactivated']);
+    }
+
+    public function banUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot ban admin user'], 403);
+        }
+        $user->status = 'banned';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User banned']);
+    }
+
+    public function unbanUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot unban admin user'], 403);
+        }
+        $user->status = 'active';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User unbanned']);
+    }
+
+    /**
+     * Show user details for AJAX requests.
+     */
+    public function showUser(User $user)
+    {
+        // You can load relationships as needed, e.g. $user->load('adopter', 'shelter', 'rescuer');
+        return response()->json($user);
     }
 }

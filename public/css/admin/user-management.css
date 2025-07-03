@@ -9,15 +9,15 @@
 }
 
 /* Main Content */
-.main-content {
-    margin-left: 280px;
+.main-content, .admin-content {
+    margin-left: 250px;
     padding: 2rem;
     background: #f0f2f5;
     min-height: 100vh;
 }
 
 .content-wrapper {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
 }
 
@@ -127,6 +127,7 @@
 .user-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 1200px;
 }
 
 .user-table th,
@@ -678,4 +679,128 @@
     .modal-footer {
         padding: 1rem;
     }
+}
+
+/* Modern User Management Styles */
+.user-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  justify-content: space-between;
+}
+.user-stats-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  flex: 1;
+}
+.user-stats-total .user-stats-value { color: #222; }
+.user-stats-active .user-stats-value { color: #16a34a; }
+.user-stats-inactive .user-stats-value { color: #f59e42; }
+.user-stats-banned .user-stats-value { color: #ef4444; }
+.user-stats-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+.user-stats-label {
+  color: #888;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.user-table-container {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow-x: auto;
+}
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+.user-table thead th {
+  background: #f3f4f6;
+  font-weight: 700;
+  padding: 1rem 0.75rem;
+  text-align: left;
+  border-bottom: 2px solid #e5e7eb;
+}
+.user-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s;
+}
+.user-table tbody tr:hover {
+  background: #f1f5f9;
+}
+.user-id, .user-name-cell, .user-email-cell, .user-role-cell, .user-status-cell, .user-actions {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+.user-avatar img, .user-initials {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: inline-block;
+  text-align: center;
+  line-height: 40px;
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 1.2rem;
+}
+.user-name-info { display: inline-block; margin-left: 0.75rem; }
+.user-name { font-weight: 600; }
+.user-phone, .user-joined { color: #888; font-size: 0.95em; }
+.user-role { padding: 0.3em 1em; border-radius: 1em; font-size: 0.95em; font-weight: 500; }
+.user-role-admin { background: #e5e7eb; color: #222; }
+.user-role-shelter { background: #dbeafe; color: #2563eb; }
+.user-role-adopter { background: #fef9c3; color: #b45309; }
+.user-role-rescuer { background: #ede9fe; color: #7c3aed; }
+.user-status { padding: 0.3em 1em; border-radius: 1em; font-size: 0.95em; font-weight: 500; }
+.user-status-active { background: #dcfce7; color: #16a34a; }
+.user-status-inactive { background: #fef9c3; color: #b45309; }
+.user-status-banned { background: #fee2e2; color: #ef4444; }
+.user-actions { display: flex; gap: 0.5rem; }
+.user-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  padding: 0.4em;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.user-action-btn:hover { background: #f3f4f6; }
+.user-table-empty {
+  text-align: center;
+  color: #888;
+  padding: 2rem 0;
+}
+.user-table-clear { margin-top: 1rem; }
+
+/* Responsive Admin Main Container */
+.admin-main-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    width: 100%;
+    min-height: 100vh;
+    background: #f7f9fb;
+}
+
+.user-table-container {
+    overflow-x: auto;
+    min-width: 0;
+}
+
+.user-table {
+    min-width: 900px;
+}
+
+.user-stats-card,
+.user-table-container {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
 }

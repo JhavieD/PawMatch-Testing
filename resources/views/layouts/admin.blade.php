@@ -10,70 +10,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/admin/admin_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/admin_sidebar.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @stack('styles')
 </head>
 @yield('scripts')
 <body>
     <div class="admin-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <a href="{{ route('admin.dashboard') }}" class="logo">
-                <img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" class="h-8 w-auto">
-                <span>PawMatch</span>
-            </a>
-
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="{{ route('admin.dashboard') }}" 
-                        class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.users') }}" 
-                           class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}">
-                            <i class="fas fa-users"></i>
-                            <span>User Management</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.verifications') }}" 
-                           class="nav-link {{ request()->routeIs('admin.verifications') ? 'active' : '' }}">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Verifications</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.stray-reports') }}" 
-                           class="nav-link {{ request()->routeIs('admin.stray-reports') ? 'active' : '' }}">
-                            <i class="fas fa-paw"></i>
-                            <span>Stray Reports</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.settings') }}" 
-                           class="nav-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="mt-auto">
-                <form method="POST" action="{{ route('logout') }}" class="nav-menu">
-                    @csrf
-                    <li class="nav-item">
-                        <button type="submit" class="nav-link w-full text-left">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </button>
-                    </li>
-                </form>
+        <!-- Sidebar (adopter-style for admin) -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <a href="{{ route('admin.dashboard') }}">
+                    <img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" style="height: 40px; display: block; margin: 0 auto;" />
+                </a>
             </div>
+            <nav class="sidebar-nav">
+                <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ route('admin.users') }}" class="nav-item {{ request()->routeIs('admin.users') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="{{ route('admin.verifications') }}" class="nav-item {{ request()->routeIs('admin.verifications') ? 'active' : '' }}">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verifications</span>
+                </a>
+                <a href="{{ route('admin.stray-reports') }}" class="nav-item {{ request()->routeIs('admin.stray-reports') ? 'active' : '' }}">
+                    <i class="fas fa-paw"></i>
+                    <span>Stray Reports</span>
+                </a>
+                <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <form method="POST" action="{{ route('logout') }}" style="margin-top:2rem;">
+                @csrf
+                <button type="submit" class="nav-item" style="width:100%;justify-content:left;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
         </aside>
 
         <!-- Main Content Area -->
