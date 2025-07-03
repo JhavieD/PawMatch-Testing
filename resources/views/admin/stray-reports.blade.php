@@ -1,4 +1,3 @@
-
 @extends('layouts.admin')
 
 @push('styles')
@@ -8,7 +7,7 @@
 @section('content')
 <main class="main-content">
     <div class="content-wrapper">
-        <!-- Top Bar-->
+        <!-- Top Bar -->
         <div class="top-bar">
             <div class="welcome-section">
                 <h1>Stray Reports</h1>
@@ -38,6 +37,7 @@
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="investigating" {{ request('status') == 'investigating' ? 'selected' : '' }}>Investigating</option>
                     <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
                 
                 <button type="submit" class="btn btn-primary">
@@ -53,7 +53,6 @@
                 @endif
             </form>
         </div>
-       
 
         <!-- Reports Grid -->
         <div class="report-grid">
@@ -68,6 +67,9 @@
                     data-animal-type="{{ $report->animal_type ?? '' }}"
                     data-reporter="{{ $report->adopter->user->name }}"
                     data-reporter-contact="{{ $report->adopter->user->email }}"
+                    data-is-flagged="{{ $report->is_flagged ? 'true' : 'false' }}"
+                    data-flag-reason="{{ $report->flag_reason ?? '' }}"
+                    data-is-duplicate="{{ $report->is_duplicate ? 'true' : 'false' }}"
                     data-timeline='@json($report->timeline ?? [])'
                     data-comments='@json($report->comments ?? [])'
                 >
@@ -138,6 +140,17 @@
             <button class="btn btn-outline" onclick="event.stopPropagation(); updateStatus('resolved')">Mark as Resolved</button>
             <button class="btn btn-danger" onclick="event.stopPropagation(); updateStatus('cancelled')">Cancel Report</button>
         </div>
+        <div class="flag-actions">
+            <button class="btn btn-warning" onclick="event.stopPropagation(); showFlagModal()" id="flagBtn">
+                Flag Report
+            </button>
+            <button class="btn btn-danger" onclick="event.stopPropagation(); markAsDuplicate()" id="duplicateBtn">
+                Mark as Duplicate
+            </button>
+            <button class="btn btn-success" onclick="event.stopPropagation(); unflagReport()" id="unflagBtn" style="display: none;">
+                Unflag Report
+            </button>
+        </div>
         <div class="status-update">
             <h3>Status Updates</h3>
             <div class="report-timeline"></div>
@@ -148,6 +161,27 @@
             <div class="form-group">
                 <textarea id="newComment" rows="3" placeholder="Add a comment..." style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1rem;"></textarea>
                 <button class="btn btn-primary" onclick="event.stopPropagation(); addComment()">Add Comment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flag Modal -->
+<div class="flag-modal" id="flagModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Flag Report</h3>
+            <button class="close-modal" onclick="closeFlagModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="flagReason">Reason for flagging:</label>
+                <textarea id="flagReason" placeholder="Explain why this report should be flagged..." rows="4" required></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-warning" onclick="submitFlag(false)" id="submitFlagBtn">Flag Report</button>
+                <button class="btn btn-outline" onclick="closeFlagModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -182,7 +216,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
@@ -222,6 +255,44 @@ function showNotification(message, type = 'info', duration = 4000) {
     }, duration);
 }
 
+function updateButtonsForStatus(status) {
+    const reportActions = document.querySelector('.report-actions');
+    const flagActions = document.querySelector('.flag-actions');
+    
+    // Get all action buttons
+    const investigatingBtn = reportActions.querySelector('.btn-primary');
+    const resolvedBtn = reportActions.querySelector('.btn-outline');
+    const cancelBtn = reportActions.querySelector('.btn-danger');
+    
+    // Get flag buttons
+    const flagBtn = document.getElementById('flagBtn');
+    const duplicateBtn = document.getElementById('duplicateBtn');
+    const unflagBtn = document.getElementById('unflagBtn');
+    
+    if (status === 'cancelled') {
+        // ONLY when cancelled: hide main actions and show flag buttons
+        investigatingBtn.style.display = 'none';
+        resolvedBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+        
+        // Show flag buttons for cancelled reports
+        flagBtn.style.display = 'inline-flex';
+        duplicateBtn.style.display = 'inline-flex';
+        unflagBtn.style.display = 'none'; // Will be shown later if report is flagged
+        
+    } else {
+        // For ALL other statuses (pending, investigating, resolved): ALWAYS show main action buttons
+        investigatingBtn.style.display = 'inline-flex';
+        resolvedBtn.style.display = 'inline-flex';
+        cancelBtn.style.display = 'inline-flex';
+        
+        // Hide flag buttons for all non-cancelled reports
+        flagBtn.style.display = 'none';
+        duplicateBtn.style.display = 'none';
+        unflagBtn.style.display = 'none';
+    }
+}
+
 function openReportModal(card) {
     const modal = document.getElementById('reportModal');
     modal.style.display = 'flex';
@@ -237,6 +308,20 @@ function openReportModal(card) {
     document.getElementById('reportDate').textContent = card.dataset.reportedAt;
     document.getElementById('animalType').textContent = card.dataset.animalType;
     document.getElementById('reportDescription').textContent = card.dataset.description;
+
+    // Set initial button visibility based on current status
+    updateButtonsForStatus(card.dataset.status);
+    
+    // Check if report is flagged and update flag buttons accordingly
+    const isFlagged = card.dataset.isFlagged === 'true';
+    const isDuplicate = card.dataset.isDuplicate === 'true';
+    const flagReason = card.dataset.flagReason || '';
+    
+    if (isFlagged) {
+        updateFlagButtons(true, flagReason, isDuplicate);
+    } else {
+        updateFlagButtons(false, '', false);
+    }
 
     // Always load timeline from backend for persistence
     loadTimeline(card.dataset.reportId);
@@ -287,6 +372,39 @@ function addComment() {
     .catch(() => showNotification('Failed to add comment. Please try again.', 'error'));
 }
 
+function updateFlagButtons(isFlagged, flagReason, isDuplicate) {
+    const flagBtn = document.getElementById('flagBtn');
+    const duplicateBtn = document.getElementById('duplicateBtn');
+    const unflagBtn = document.getElementById('unflagBtn');
+    
+    // Get current status
+    const currentStatus = document.getElementById('reportStatus').textContent.toLowerCase();
+    
+    // Only show flag buttons for cancelled reports
+    if (currentStatus !== 'cancelled') {
+        flagBtn.style.display = 'none';
+        duplicateBtn.style.display = 'none';
+        unflagBtn.style.display = 'none';
+        return;
+    }
+    
+    if (isFlagged) {
+        flagBtn.style.display = 'none';
+        duplicateBtn.style.display = 'none';
+        unflagBtn.style.display = 'inline-flex';
+        if (isDuplicate) {
+            unflagBtn.innerHTML = 'Unflag Duplicate';
+        } else {
+            unflagBtn.innerHTML = 'Unflag Report';
+        }
+    } else {
+        // Show flag buttons only for cancelled reports
+        flagBtn.style.display = 'inline-flex';
+        duplicateBtn.style.display = 'inline-flex';
+        unflagBtn.style.display = 'none';
+    }
+}
+
 function updateStatus(status) {
     const reportId = document.getElementById('reportId').textContent;
     fetch(`/admin/stray-reports/${reportId}/status`, {
@@ -307,7 +425,7 @@ function updateStatus(status) {
             statusBadge.className = `status-badge status-${status}`;
             statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
             
-            // 🎯 NEW: Update the report card in the grid
+            // Update the report card in the grid
             const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
             if (reportCard) {
                 // Update the data attribute
@@ -321,7 +439,14 @@ function updateStatus(status) {
                 }
             }
             
-            // Reload timeline from backend
+            // ONLY update button visibility for cancelled status
+            // For all other statuses (pending, investigating, resolved), keep buttons visible
+            if (status === 'cancelled') {
+                updateButtonsForStatus(status);
+            }
+             
+            updateFlagButtons(false, '', false);
+                     
             loadTimeline(reportId);
         } else {
             showNotification(data.message || 'Failed to update status', 'error');
@@ -449,7 +574,6 @@ function loadNearbyShelters(reportId) {
         });
 }
 
-
 function displayShelters(shelters) {
     const container = document.getElementById('sheltersContainer');
     
@@ -458,13 +582,13 @@ function displayShelters(shelters) {
         return;
     }
 
-    // Separate shelters into priority (same area) and other areas since merong view details button
+    // Separate shelters into priority (same area) and other areas
     const priorityShelters = shelters.filter(shelter => shelter.match_score > 0);
     const otherShelters = shelters.filter(shelter => shelter.match_score === 0);
     
     let html = '<div class="shelters-list">';
     
-    // Priority Shelters dito
+    // Priority Shelters
     if (priorityShelters.length > 0) {
         html += `
             <div class="priority-section">
@@ -481,7 +605,6 @@ function displayShelters(shelters) {
             </div>
         `;
     }
-    
     
     if (otherShelters.length > 0) {
         html += `
@@ -564,9 +687,8 @@ function toggleShelter(shelterId) {
         submitBtn.textContent = 'Submit to Shelters';
     }
     
-    console.log('Selected shelters:', selectedShelters); // For debugging
+    console.log('Selected shelters:', selectedShelters);
 }
-
 
 function toggleOtherShelters() {
     const otherShelters = document.getElementById('otherShelters');
@@ -593,7 +715,7 @@ function submitToShelters() {
     
     const notificationMessage = document.getElementById('notificationMessage').value;
     
-    // Disable button to prevent double submission since dapat isang investigating button click lng
+    // Disable button to prevent double submission
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
@@ -615,7 +737,7 @@ function submitToShelters() {
             showNotification(data.message, 'success');
             closeInvestigatingModal();
             closeReportModal();
-            setTimeout(() => location.reload(), 1000); //  delay to show notification pwede ko to iedit
+            setTimeout(() => location.reload(), 1000);
         } else {
             showNotification(data.message || 'Failed to submit to shelters', 'error');
             submitBtn.disabled = false;
@@ -630,6 +752,198 @@ function submitToShelters() {
     });
 }
 
+function showFlagModal() {
+    document.getElementById('flagModal').style.display = 'flex';
+    document.getElementById('flagReason').value = '';
+}
+
+function closeFlagModal() {
+    document.getElementById('flagModal').style.display = 'none';
+}
+
+function markAsDuplicate() {
+    const reportId = document.getElementById('reportId').textContent;
+    const duplicateBtn = document.getElementById('duplicateBtn');
+    const originalText = duplicateBtn.textContent;
+    
+    duplicateBtn.disabled = true;
+    duplicateBtn.textContent = 'Marking as Duplicate...';
+    
+    fetch(`/admin/stray-reports/${reportId}/flag`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            flag_reason: 'Marked as duplicate report',
+            is_duplicate: true
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report marked as duplicate and cancelled successfully', 'success');
+            
+            // Update the main status badge in modal to show cancelled
+            const statusBadge = document.getElementById('reportStatus');
+            statusBadge.className = 'status-badge status-cancelled';
+            statusBadge.textContent = 'Cancelled';
+            
+            // Update the report card appearance - NO VISUAL FLAG INDICATORS
+            const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
+            if (reportCard) {
+                // Just update the data attributes and status - no visual changes
+                reportCard.dataset.status = 'cancelled';
+                reportCard.dataset.isFlagged = 'true';
+                reportCard.dataset.flagReason = 'Marked as duplicate report';
+                reportCard.dataset.isDuplicate = 'true';
+                
+                // Update the main status badge in the card to show cancelled
+                const cardStatusBadge = reportCard.querySelector('.status-badge');
+                if (cardStatusBadge) {
+                    cardStatusBadge.className = 'status-badge status-cancelled';
+                    cardStatusBadge.textContent = 'Cancelled';
+                }
+            }
+            
+            // Update flag buttons and reload timeline
+            updateFlagButtons(true, 'Marked as duplicate report', true);
+            loadTimeline(reportId);
+        } else {
+            showNotification(data.message || 'Failed to mark as duplicate', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error. Please try again.', 'error');
+    })
+    .finally(() => {
+        duplicateBtn.disabled = false;
+        duplicateBtn.textContent = originalText;
+    });
+}
+
+function submitFlag(isDuplicate) {
+    const reportId = document.getElementById('reportId').textContent;
+    const flagReason = document.getElementById('flagReason').value.trim();
+    
+    if (!flagReason) {
+        showNotification('Please provide a reason for flagging this report', 'warning');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submitFlagBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Flagging...';
+    
+    fetch(`/admin/stray-reports/${reportId}/flag`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            flag_reason: flagReason,
+            is_duplicate: false
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report flagged and cancelled successfully', 'success');
+            closeFlagModal();
+            
+            // Update the main status badge in modal to show cancelled
+            const statusBadge = document.getElementById('reportStatus');
+            statusBadge.className = 'status-badge status-cancelled';
+            statusBadge.textContent = 'Cancelled';
+            
+            // Update the report card appearance - NO VISUAL FLAG INDICATORS
+            const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
+            if (reportCard) {
+                // Just update the data attributes and status - no visual changes
+                reportCard.dataset.status = 'cancelled';
+                reportCard.dataset.isFlagged = 'true';
+                reportCard.dataset.flagReason = flagReason;
+                reportCard.dataset.isDuplicate = 'false';
+                
+                // Update the main status badge in the card to show cancelled
+                const cardStatusBadge = reportCard.querySelector('.status-badge');
+                if (cardStatusBadge) {
+                    cardStatusBadge.className = 'status-badge status-cancelled';
+                    cardStatusBadge.textContent = 'Cancelled';
+                }
+            }
+            
+            // Update flag buttons and reload timeline
+            updateFlagButtons(true, flagReason, false);
+            loadTimeline(reportId);
+        } else {
+            showNotification(data.message || 'Failed to flag report', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error. Please try again.', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+}
+
+function unflagReport() {
+    const reportId = document.getElementById('reportId').textContent;
+    
+    fetch(`/admin/stray-reports/${reportId}/unflag`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report unflagged and reactivated successfully', 'success');
+            
+            // Update the main status badge in modal
+            const statusBadge = document.getElementById('reportStatus');
+            statusBadge.className = 'status-badge status-pending';
+            statusBadge.textContent = 'Pending';
+            
+            // Update the report card appearance
+            const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
+            if (reportCard) {
+                // Just update the data attributes and status
+                reportCard.dataset.status = 'pending';
+                reportCard.dataset.isFlagged = 'false';
+                reportCard.dataset.flagReason = '';
+                reportCard.dataset.isDuplicate = 'false';
+                
+                // Update the main status badge in the card
+                const cardStatusBadge = reportCard.querySelector('.status-badge');
+                if (cardStatusBadge) {
+                    cardStatusBadge.className = 'status-badge status-pending';
+                    cardStatusBadge.textContent = 'Pending';
+                }
+            }
+            
+            // Go back to pending status - show main action buttons
+            updateButtonsForStatus('pending');
+            updateFlagButtons(false, '', false);
+            loadTimeline(reportId);
+        } else {
+            showNotification(data.message || 'Failed to unflag report', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error. Please try again.', 'error');
+    });
+}
 
 function closeInvestigatingModal() {
     document.getElementById('investigatingModal').style.display = 'none';
