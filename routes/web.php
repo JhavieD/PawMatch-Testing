@@ -140,6 +140,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
     // -------- MESSAGES (FOR ALL POT) --------
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
     Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
+    Route::post('/messages/mark-as-read', [MessageController::class, 'markAsRead'])->name('messages.markAsRead');
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {

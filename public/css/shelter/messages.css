@@ -353,6 +353,7 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 4rem);
+  position: relative;
 }
 
 .chat-header {
@@ -408,6 +409,14 @@ body {
   margin-top: 0.3rem;
 }
 
+.message-seen {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666666 !important;
+  margin-top: 2px;
+  text-align: right;
+}
+
 .chat-input {
   padding: 1rem;
   border-top: 1px solid #eee;
@@ -436,6 +445,40 @@ body {
 
 .send-btn:hover {
   background: #357abd;
+}
+
+#seen-indicator {
+  color: #414141 !important;
+  font-size: 0.97em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  min-height: 1.2em;
+  text-align: right;
+  margin: 2px 0 0 0;
+  display: block;
+  position: static;
+  background: transparent;
+  padding: 0 16px 0 0;
+  border: none;
+  box-shadow: none;
+  max-width: 70%;
+  align-self: flex-end;
+}
+
+@media (max-width: 768px) {
+  #seen-indicator {
+    margin: 0 8px 0 0;
+    font-size: 0.93em;
+  }
+}
+
+/* Align seen-indicator to the right edge of the last sent chat bubble */
+.chat-messages {
+  position: relative;
+}
+
+.chat-area {
+  position: relative;
 }
 
 @media (max-width: 768px) {

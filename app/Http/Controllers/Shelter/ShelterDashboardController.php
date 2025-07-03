@@ -16,7 +16,7 @@ class ShelterDashboardController extends Controller
 {
     public function index()
     {
-       $shelter = auth()->user()->shelter;
+        $shelter = auth()->user()->shelter;
 
         // Add null check for shelter
         if (!$shelter) {
@@ -72,14 +72,13 @@ class ShelterDashboardController extends Controller
     public function pets()
     {
         $shelter = auth()->user()->shelter;
-    
+
         if (!$shelter) {
             abort(404, 'Shelter not found');
         }
-        
+
         $pets = $shelter->pets()->with('images')->latest()->get();
         return view('shelter.pets', compact('pets'));
-     
     }
 
     public function getPetImages($petId)
@@ -99,7 +98,7 @@ class ShelterDashboardController extends Controller
     public function createPetListing(Request $request)
     {
         $shelter = auth()->user()->shelter;
-    
+
         if (!$shelter) {
             return response()->json(['success' => false, 'error' => 'Shelter not found'], 404);
         }
@@ -175,7 +174,7 @@ class ShelterDashboardController extends Controller
             'eating_habits' => 'nullable|string',
             'suitable_for' => 'nullable|string',
         ]);
-        
+
         $pet->update($request->only([
             'name',
             'species',
@@ -205,7 +204,7 @@ class ShelterDashboardController extends Controller
                 ]);
             }
         }
-        
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true]);
         }
@@ -215,8 +214,21 @@ class ShelterDashboardController extends Controller
 
     public function destroy($petId)
     {
+        $user = auth()->user();
+        $shelter = $user->shelter;
         $pet = \App\Models\Shared\Pet::findOrFail($petId);
+
+        // Ensure the pet belongs to the current shelter
+        if ($pet->shelter_id !== $shelter->shelter_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $pet->delete();
+
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Pet deleted successfully!']);
+        }
+
         return redirect()->route('shelter.pets')->with('success', 'Pet deleted successfully!');
     }
 
@@ -241,13 +253,13 @@ class ShelterDashboardController extends Controller
         $receiver = $partners->first();
 
         return view('shelter.messages', compact('partners', 'receiver'));
-    } 
+    }
 
     public function profile()
     {
         $user = auth()->user();
         $shelter = $user->shelter;
-        
+
         // Add null check for shelter
         if (!$shelter) {
             // If no shelter exists, create a basic one or redirect to setup
@@ -256,7 +268,7 @@ class ShelterDashboardController extends Controller
                 'verification' => null
             ]);
         }
-        
+
         $verification = $shelter->verifications()->latest()->first();
         return view('shelter.profile', compact('user', 'shelter', 'verification'));
     }
@@ -320,15 +332,15 @@ class ShelterDashboardController extends Controller
             'current_password' => 'required',
             'new_password' => 'required|confirmed|min:8',
         ]);
-        
+
         $user = auth()->user();
         if (!\Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
-        
+
         $user->password = \Hash::make($request->new_password);
         $user->save();
-        
+
         return back()->with('success', 'Password updated!');
     }
 
@@ -369,9 +381,9 @@ class ShelterDashboardController extends Controller
         $query = \DB::table('stray_reports')
             ->join('adopters', 'stray_reports.adopter_id', '=', 'adopters.adopter_id')
             ->join('users', 'adopters.user_id', '=', 'users.user_id')
-            ->leftJoin('stray_report_notifications', function($join) use ($shelter) {
+            ->leftJoin('stray_report_notifications', function ($join) use ($shelter) {
                 $join->on('stray_reports.report_id', '=', 'stray_report_notifications.report_id')
-                     ->where('stray_report_notifications.shelter_id', '=', $shelter->shelter_id);
+                    ->where('stray_report_notifications.shelter_id', '=', $shelter->shelter_id);
             })
             ->whereNotNull('stray_report_notifications.id')
             ->select([
@@ -385,11 +397,11 @@ class ShelterDashboardController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->get('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('stray_reports.location', 'LIKE', "%{$search}%")
-                  ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
-                  ->orWhere('stray_reports.animal_type', 'LIKE', "%{$search}%")
-                  ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
+                    ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
+                    ->orWhere('stray_reports.animal_type', 'LIKE', "%{$search}%")
+                    ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
             });
         }
 
@@ -408,7 +420,7 @@ class ShelterDashboardController extends Controller
     public function acceptStrayReport($reportId)
     {
         $shelter = auth()->user()->shelter;
-        
+
         try {
             // Update the main stray report status to 'accepted'
             \DB::table('stray_reports')
@@ -429,7 +441,6 @@ class ShelterDashboardController extends Controller
                 'success' => true,
                 'message' => 'Report accepted successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -441,13 +452,13 @@ class ShelterDashboardController extends Controller
     public function markStrayReportRead($reportId)
     {
         $shelter = auth()->user()->shelter;
-        
+
         try {
             \DB::table('stray_report_notifications')
                 ->where('report_id', $reportId)
                 ->where('shelter_id', $shelter->shelter_id)
                 ->update([
-                    'is_read' => true,  
+                    'is_read' => true,
                     'read_at' => now()
                 ]);
 
