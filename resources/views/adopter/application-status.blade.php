@@ -15,7 +15,7 @@
         <div id="activeTab" class="tab-content active">
             @forelse ($applications as $application)
             @if($application->status !== 'completed')
-            <div class="application-card">
+            <div class="application-card" data-application-id="{{ $application->id }}">
                 <div class="application-header">
                     <div class="pet-info">
                         <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image" />
@@ -93,7 +93,7 @@
         <div id="completedTab" class="tab-content">
             @foreach ($applications as $application)
             @if($application->status == 'completed')
-            <div class="application-card">
+            <div class="application-card" data-application-id="{{ $application->id }}">
                 <div class="application-header">
                     <div class="pet-info">
                         <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image" />
@@ -137,6 +137,24 @@ function switchTab(tabName) {
 // Star rating functionality
 // (You can keep the JS from the HTML file for star rating)
 document.addEventListener('DOMContentLoaded', function() {
+    // Highlight application if application_id is in query
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+    const appId = getQueryParam('application_id');
+    if (appId) {
+        // Try to find the application card
+        const appCard = document.querySelector(`.application-card[data-application-id='${appId}']`);
+        if (appCard) {
+            appCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            appCard.style.boxShadow = '0 0 0 4px #2563eb';
+            appCard.style.transition = 'box-shadow 0.3s';
+            setTimeout(() => {
+                appCard.style.boxShadow = '';
+            }, 2000);
+        }
+    }
     const starContainers = document.querySelectorAll('.star-rating');
     starContainers.forEach(starContainer => {
         const stars = starContainer.querySelectorAll('.star');

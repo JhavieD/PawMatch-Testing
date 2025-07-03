@@ -133,6 +133,10 @@ class AdopterPetListingsController extends Controller
         } else {
             $adopter->savedPets()->attach($petId);
         }
+        // Clear dashboard cache for this user
+        $userId = $user->user_id;
+        \Cache::forget("adopter_dashboard_{$userId}");
+        \Cache::forget("user_profile_image_{$userId}");
         return response()->json(['is_favorite' => !$isFavorite]);
     }
 
