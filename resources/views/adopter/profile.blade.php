@@ -42,6 +42,14 @@
                             <label for="address" class="form-label">Address</label>
                             <input type="text" id="address" name="address" class="form-input" value="{{ $adopter->address ?? '' }}" />
                         </div>
+                        <div class="form-group">
+                            <label for="purpose" class="form-label">Adoption Purpose</label>
+                            <select id="purpose" name="purpose" class="form-input">
+                                <option value="Family Companion" {{ $adopter->purpose == 'Family Companion' ? 'selected' : '' }}>Family Companion</option>
+                                <option value="Emotional Support / Mental Health" {{ $adopter->purpose == 'Emotional Support / Mental Health' ? 'selected' : '' }}>Emotional Support / Mental Health</option>
+                                <option value="Senior Citizen Companion" {{ $adopter->purpose == 'Senior Citizen Companion' ? 'selected' : '' }}>Senior Citizen Companion</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
                 </div>

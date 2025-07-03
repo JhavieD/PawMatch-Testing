@@ -206,6 +206,7 @@ class RescuerDashboardController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
             'eating_habits' => 'nullable|string',
             'adoption_status' => 'required|string',
+            'suitable_for' => 'nullable|string',
         ]);
         $data['rescuer_id'] = $rescuer->rescuer_id;
         $pet = \App\Models\Shared\Pet::create($data);
@@ -244,6 +245,7 @@ class RescuerDashboardController extends Controller
             'compatibility' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'eating_habits' => 'nullable|string',
+            'suitable_for' => 'nullable|string',
         ]);
         $pet->update($data);
         if ($request->hasFile('images')) {

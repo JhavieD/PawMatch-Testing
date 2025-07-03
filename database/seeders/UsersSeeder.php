@@ -25,7 +25,6 @@ class UsersSeeder extends Seeder
             'first_name' => 'Jan Vincent',
             'last_name' => 'Dominguez',
             'email' => 'adopter@gmail.com',
-            'password' => '$2y$12$6VLuIaKZk5uaAN9b0skrseKw3GdJaPQZQ5McBzRP8O8OlFfBwwlKW',
             'password' => bcrypt('password'),
             'phone_number' => '09760792254',
             'role' => 'adopter',
@@ -37,23 +36,12 @@ class UsersSeeder extends Seeder
             'first_name' => 'Shelter',
             'last_name' => 'Manager',
             'email' => 'shelter@gmail.com',
-            'password' => '$2y$12$sfdZ1NHAvifX2FYEnzFn8er5cqIyQgpFrj7r29iCFJfGaQ45fwy92',
             'password' => bcrypt('password'),
             'phone_number' => '09760792254',
             'role' => 'shelter',
             'usertype' => 'user',
         ]);
 
-        DB::table('users')->insert([
-            'user_id' => 6,
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@gmail.com',
-            'password' => '$2y$12$8j35qrjp7qnoOO4A0HdEeeK2c9QtA90Q5HcSIoGV.VO3/m8d/BfJS',
-            'phone_number' => '09123456789',
-            'role' => 'admin',
-            'created_at' => '2025-06-19 09:40:37',
-            'updated_at' => '2025-06-19 09:40:37',
         // Create rescuer user
         User::create([
             'first_name' => 'Rescuer',
