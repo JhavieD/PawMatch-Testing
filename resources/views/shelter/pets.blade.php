@@ -180,7 +180,7 @@
                             </label>
                         </div>
                     </div>
-                    <div class="thumbnail-grid" data-images='@json($pet->images)'></div>
+                    <div class="thumbnail-grid" data-images='@json($pets->images)'></div>
                     <div class="modal-actions">
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                         <button type="button" class="btn btn-outline" onclick="closeModal(editModal)">Cancel</button>
