@@ -63,7 +63,6 @@ class ShelterDashboardController extends Controller
             'verification'
         ));
     }
-
     public function applications()
     {
         return view('shelter.pet_applications');
@@ -261,8 +260,14 @@ class ShelterDashboardController extends Controller
         return view('shelter.profile', compact('user', 'shelter', 'verification'));
     }
 
-    public function updateProfile(Request $request)
+    protected function clearDashboardCache($userId)
     {
+        \Cache::forget("user_profile_image_{$userId}");
+    }
+    
+    public function updateProfile(Request $request)
+    {   
+        \Log::info('Shelter profile update called');
         \Log::info('updateProfile called');
 
         $user = auth()->user();
@@ -272,7 +277,7 @@ class ShelterDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -286,9 +291,11 @@ class ShelterDashboardController extends Controller
         ]);
 
         $shelter->update([
-            'address' => $request->address,
+            'location' => $request->address,
+            'purpose' => $request->purpose,
         ]);
 
+        
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $profileImagePath = $file->store('profileimage', 's3');
@@ -303,13 +310,20 @@ class ShelterDashboardController extends Controller
                     'is_displayed' => true,
                 ]
             );
+            $user->update([
+                'profile_image' => $profileImagePath,
+            ]);
         }
 
         if ($request->has('remove_photo')) {
+            // Mark all as not displayed
             \DB::table('user_profile_pic')
                 ->where('user_id', $user->user_id)
                 ->update(['is_displayed' => false]);
+            // Optionally set user's profile_image to null
+            $user->update(['profile_image' => null]);
         }
+        $this->clearDashboardCache($user->user_id);
 
         return back()->with('success', 'Profile updated!');
     }
