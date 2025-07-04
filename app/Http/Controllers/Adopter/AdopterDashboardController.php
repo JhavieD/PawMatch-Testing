@@ -119,7 +119,6 @@ class AdopterDashboardController extends Controller
                 ->update(['is_displayed' => false]); // hide image
         }
 
-        // Clear cache after profile update
         $this->clearDashboardCache($user->user_id);
 
         return back()->with('success', 'Profile updated!');

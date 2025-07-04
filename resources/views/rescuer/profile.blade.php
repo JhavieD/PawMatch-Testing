@@ -19,8 +19,9 @@
                     <form method="POST" action="{{ route('rescuer.profile.update') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="profile-upload">
-                            <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
+                            <img id="profileImagePreview" src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
                             <div class="upload-buttons">
+                                <input type="file" name="profile_image" id="profile_image" class="profile-image-input" style="display:none;" />
                                 <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
                                 <button type="submit" name="remove_photo" value="1" class="btn btn-outline">Remove</button>
                             </div>
@@ -39,7 +40,7 @@
                         </div>
                         <div class="form-group">
                             <label for="address" class="form-label">Address</label>
-                            <input type="text" id="address" name="address" class="form-input" value="{{ $rescuer->address ?? '' }}" />
+                            <input type="text" id="address" name="address" class="form-input" value="{{ $rescuer->location ?? '' }}" />
                         </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
@@ -88,4 +89,20 @@
         </div>
     </div>
 </main>
+
+<script>
+    function logout() {
+        // Here you would typically clear session/local storage
+        window.location.href = 'login.html';
+    }
+
+    document.getElementById('profile_image').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const preview = document.querySelector('.profile-image');
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+
+</script>
 @endsection

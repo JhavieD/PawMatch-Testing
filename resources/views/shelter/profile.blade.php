@@ -16,12 +16,23 @@
                 <h2>Profile Information</h2>
             </div>
             <div class="card-content">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <form method="POST" action="{{ route('shelter.profile.update') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="profile-upload">
-                        <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" />
+                        <!-- <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" /> -->
+                        <img src="{{ $user->profile_image }}" alt="Profile" class="profile-image" />
                         <div class="upload-buttons">
-                            {{-- <input type="file" name="profile_image" id="profile_image" class="btn btn-outline"> --}}
+                            <!-- <input type="file" name="profile_image" id="profile_image" class="btn btn-outline"> -->
+                            <input type="file" name="profile_image" id="profile_image" class="profile-image-input">
                             <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
                             <button type="submit" name="remove_photo" value="1" class="btn btn-outline">Remove</button>
                         </div>
@@ -40,7 +51,7 @@
                     </div>
                     <div class="form-group">
                         <label for="address" class="form-label">Address</label>
-                        <input type="text" id="address" name="address" class="form-input" value="{{ $shelter->address ?? '' }}" />
+                        <input type="text" id="address" name="address" class="form-input" value="{{ $shelter->location ?? '' }}" />
                     </div>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </form>
@@ -180,6 +191,15 @@
         // Here you would typically clear session/local storage
         window.location.href = 'login.html';
     }
+
+    document.getElementById('profile_image').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const preview = document.querySelector('.profile-image');
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+
 </script>
 
 <style>
