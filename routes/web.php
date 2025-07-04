@@ -155,7 +155,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/rescuer/pets', [RescuerDashboardController::class, 'AddPetListing'])->name('rescuer.pets.create');
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
-        Route::post('/rescuer/prof  ile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
+        Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
 
         // RESCUER PET APPLICATIONS CRUD ROUTES
         Route::get('/rescuer/pet_applications', [RescuerApplicationController::class, 'index'])->name('rescuer.pet_applications');

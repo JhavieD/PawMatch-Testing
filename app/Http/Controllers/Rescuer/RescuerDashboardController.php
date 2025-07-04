@@ -104,6 +104,11 @@ class RescuerDashboardController extends Controller
         return view('rescuer.profile', compact('user', 'rescuer'));
     }
 
+    protected function clearDashboardCache($userId)
+    {
+        \Cache::forget("user_profile_image_{$userId}");
+    }
+
     public function updateProfile(Request $request)
     {
         \Log::info('updateProfile called');
@@ -146,12 +151,20 @@ class RescuerDashboardController extends Controller
                     'is_displayed' => true,
                 ]
             );
+            $user->update([
+                'profile_image' => $profileImagePath,
+            ]);
         }
+
         if ($request->has('remove_photo')) {
+            // Mark all as not displayed
             \DB::table('user_profile_pic')
                 ->where('user_id', $user->user_id)
-                ->update(['is_displayed' => false]); // hide image
+                ->update(['is_displayed' => false]);
+            // Optionally set user's profile_image to null
+            $user->update(['profile_image' => null]);
         }
+        $this->clearDashboardCache($user->user_id);
 
         return back()->with('success', 'Profile updated!');
     }
