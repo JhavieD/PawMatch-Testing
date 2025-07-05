@@ -24,7 +24,6 @@
                     data-shelter-name="{{ $pet->shelter->name ?? '' }}"
                     data-shelter-address="{{ $pet->shelter->address ?? $pet->shelter->city ?? '' }}"
                     data-shelter-phone="{{ $pet->shelter->phone ?? '' }}">
-                    <span style="position:absolute;top:6px;left:6px;background:#eaf3fb;color:#4a90e2;font-size:0.8em;padding:2px 7px;border-radius:6px;z-index:10;">ID: {{ $pet->pet_id ?? $pet->id }}</span>
                     @if($pet->images->isNotEmpty())
                         <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
                     @else
