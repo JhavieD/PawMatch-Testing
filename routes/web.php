@@ -185,6 +185,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/adopter/pet-swipe', [PetSwipeController::class, 'index'])->name('adopter.pet-swipe');
         Route::get('/adopter/pet-listings', [AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
         Route::post('/api/pets/{pet}/favorite', [AdopterPetListingsController::class, 'toggleFavorite']);
+        Route::get('/api/pets/{pet}', [AdopterPetListingsController::class, 'getPetDetails']);
+        Route::get('/api/pets/{pet}/images', [AdopterPetListingsController::class, 'getPetImages']);
         Route::get('/adopter/pet-details', fn() => view('adopter.pet-details'))->name('adopter.pet-details');
         Route::get('/adopter/pet-personality-quiz', fn() => view('adopter.pet-personality-quiz'))->name('adopter.pet-personality-quiz');
         // Application routes
@@ -199,6 +201,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         // Report status routes
         Route::get('/my-reports', [App\Http\Controllers\Adopter\AdopterReportController::class, 'myReports'])->name('adopter.my-reports');
         Route::get('/reports/{reportId}', [App\Http\Controllers\Adopter\AdopterReportController::class, 'show'])->name('adopter.reports.show');
+        // Schedule meet route
+        Route::post('/adopter/schedule-meet', [App\Http\Controllers\Adopter\MessageController::class, 'scheduleMeet'])->name('adopter.schedule-meet');
     });
 
     // -------- PROFILE & DASHBOARD REDIRECTS --------
