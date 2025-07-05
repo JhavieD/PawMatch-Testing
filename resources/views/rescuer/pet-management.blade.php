@@ -5,14 +5,31 @@
 @section('rescuer-content')
     <div class="main-content">
         <div class="content-wrapper">
-            <div class="header">
-                <h1>Pet Management</h1>
-                <button class="btn add-pet-btn">+ Add New Pet</button>
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Pet Management</h1>
+                    <p>Manage all pets currently in your shelter</p>
+                </div>
+                <div class="profile-section">
+                    <button class="btn add-pet-btn">
+                        <span class="add-icon">&#43;</span>
+                        Add New Pet
+                    </button>
+                </div>
             </div>
-
             <div class="search-bar">
-                <input type="text" id="petSearchInput" class="search-input"
-                    placeholder="Search pets by name, breed, or ID...">
+                <div>
+                    <span class="search-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                            <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </span>
+                    <input type="text" id="petSearchInput" class="search-input"
+                        placeholder="Search pets by name, breed, or ID...">
+                </div>
                 <select class="filter-dropdown">
                     <option value="all">All Status</option>
                     <option value="available">Available</option>
@@ -55,9 +72,7 @@
                                     style="display: contents;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn"
-                                        onclick="return confirm('Are you sure you want to delete this pet?')"
-                                        style="justify-content: center;">Delete</button>
+                                    <button type="submit" class="btn" style="justify-content: center;">Delete</button>
                                 </form>
                             </div>
                         </div>
@@ -68,6 +83,34 @@
             </div>
         </div>
 
+        {{-- added pet success alert --}}
+        <div id="addSuccessAlert" class="success-alert">
+            <span class="success-icon">&#10003;</span>
+            <div>
+                <div class="success-title">Success</div>
+                <div>Added pet successfully</div>
+            </div>
+            <button id="closeAddSuccessAlert" class="success-close" type="button">&times;</button>
+        </div>
+        {{-- edit pet successfully --}}
+        <div id="editSuccessAlert" class="success-alert edit-success-alert">
+            <span class="success-icon">&#9998;</span>
+            <div>
+                <div class="success-title">Success!</div>
+                <div>Pet updated successfully</div>
+            </div>
+            <button id="closeEditSuccessAlert" class="success-close" type="button">&times;</button>
+        </div>
+        {{-- Deleted pet --}}
+        <div id="deleteSuccessAlert" class="success-alert">
+            <span class="success-icon">&#10003;</span>
+            <div>
+                <div class="success-title">Success</div>
+                <div>Pet deleted successfully</div>
+            </div>
+            <button id="closeDeleteSuccessAlert" class="success-close" type="button">&times;</button>
+        </div>
+
         <!-- Edit Pet Modal -->
         <div id="editPetModal" class="modal">
             <div class="modal-content">
@@ -76,7 +119,8 @@
                     <button class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="editPetForm" method="POST" enctype="multipart/form-data" action="/rescuer/pets/__PET_ID__">
+                    <form id="editPetForm" method="POST" enctype="multipart/form-data"
+                        action="/rescuer/pets/__PET_ID__">
                         @csrf
                         @method('PUT')
                         <div class="form-grid">
@@ -180,7 +224,8 @@
                             <select name="suitable_for" id="edit-suitable_for">
                                 <option value="">Select Purpose (Optional)</option>
                                 <option value="Family Companion">Family Companion</option>
-                                <option value="Emotional Support / Mental Health">Emotional Support / Mental Health</option>
+                                <option value="Emotional Support / Mental Health">Emotional Support / Mental Health
+                                </option>
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
@@ -309,7 +354,8 @@
                             <select name="suitable_for" id="suitable_for">
                                 <option value="">Select Purpose (Optional)</option>
                                 <option value="Family Companion">Family Companion</option>
-                                <option value="Emotional Support / Mental Health">Emotional Support / Mental Health</option>
+                                <option value="Emotional Support / Mental Health">Emotional Support / Mental Health
+                                </option>
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
@@ -479,7 +525,11 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success) {
-                            location.reload();
+                            document.getElementById('editSuccessAlert').classList.add('active');
+                            setTimeout(() => {
+                                closeModal(editModal);
+                                location.reload();
+                            }, 2000);
                         } else {
                             alert('Error saving changes. Please try again.');
                         }
@@ -518,7 +568,11 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success) {
-                            location.reload();
+                            document.getElementById('addSuccessAlert').classList.add('active');
+                            setTimeout(() => {
+                                closeModal(addModal);
+                                location.reload();
+                            }, 1000); // Shorter delay (1 second)
                         } else {
                             alert('Error adding pet. Please try again.');
                         }
@@ -581,11 +635,17 @@
                         applicationsList.innerHTML = '';
                         if (data.applications && data.applications.length > 0) {
                             data.applications.forEach(app => {
-                                const applicantName = app.adopter && app.adopter.user ? app.adopter.user.name : 'Unknown';
-                                const phone = app.adopter && app.adopter.user ? app.adopter.user.phone || '' : '';
-                                const submittedAt = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : '';
-                                const status = app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : '';
-                                const statusClass = app.status ? `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` : '';
+                                const applicantName = app.adopter && app.adopter.user ? app
+                                    .adopter.user.name : 'Unknown';
+                                const phone = app.adopter && app.adopter.user ? app.adopter.user
+                                    .phone || '' : '';
+                                const submittedAt = app.submitted_at ? new Date(app
+                                    .submitted_at).toLocaleDateString() : '';
+                                const status = app.status ? app.status.charAt(0).toUpperCase() +
+                                    app.status.slice(1) : '';
+                                const statusClass = app.status ?
+                                    `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` :
+                                    '';
                                 applicationsList.innerHTML += `
                                     <div class="application-item" style="display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;">
                                         <div class="application-info">
@@ -603,12 +663,14 @@
                                 `;
                             });
                         } else {
-                            applicationsList.innerHTML = '<div>No applications found for this pet.</div>';
+                            applicationsList.innerHTML =
+                                '<div>No applications found for this pet.</div>';
                         }
                     })
                     .catch(error => {
                         const applicationsList = document.querySelector('.applications-list');
-                        applicationsList.innerHTML = '<div style="color:red;">Failed to load applications.</div>';
+                        applicationsList.innerHTML =
+                            '<div style="color:red;">Failed to load applications.</div>';
                         console.error('Error fetching applications:', error);
                     });
             });
@@ -649,6 +711,52 @@
 
             searchInput.addEventListener('input', filterPets);
             statusFilter.addEventListener('change', filterPets);
+        });
+
+        // Success alert close buttons
+        const closeAdd = document.getElementById('closeAddSuccessAlert');
+        if (closeAdd) closeAdd.onclick = function() {
+            document.getElementById('addSuccessAlert').classList.remove('active');
+        };
+        const closeEdit = document.getElementById('closeEditSuccessAlert');
+        if (closeEdit) closeEdit.onclick = function() {
+            document.getElementById('editSuccessAlert').classList.remove('active');
+        };
+        const closeDelete = document.getElementById('closeDeleteSuccessAlert');
+        if (closeDelete) closeDelete.onclick = function() {
+            document.getElementById('deleteSuccessAlert').classList.remove('active');
+        };
+
+        // Intercept delete pet form submit for AJAX delete
+        // Use event delegation for dynamic content
+
+        document.addEventListener('submit', function(e) {
+            if (e.target.matches('form[action*="rescuer/pets/"][method="POST"]') && e.target.querySelector(
+                    'input[name="_method"][value="DELETE"]')) {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
+                fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(async response => {
+                        if (response.ok) {
+                            document.getElementById('deleteSuccessAlert').classList.add('active');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000); // Shorter delay (1 second)
+                        } else {
+                            alert('Failed to delete pet.');
+                        }
+                    })
+                    .catch(() => {
+                        alert('An error occurred. Please try again.');
+                    });
+            }
         });
     </script>
 @endsection

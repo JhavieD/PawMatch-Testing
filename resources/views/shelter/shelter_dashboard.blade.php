@@ -8,7 +8,8 @@
         <div class="shelter-content-wrapper">
             <!-- Profile and Add Pet Button at Top Right -->
             <div class="dashboard-profile-actions">
-                <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}" alt="Profile Picture" class="profile-img" />
+                <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}" alt="Profile Picture"
+                    class="profile-img" />
                 <button class="btn btn-primary add-pet-btn">+ Add New Pet</button>
             </div>
             <!-- Top Row: Welcome (left) and Available Pets (right) -->
@@ -17,18 +18,23 @@
                     <div class="flex items-center space-x-2">
                         <h1 class="text-2xl font-bold">Hi, {{ $shelter->shelter_name ?? 'Shelter' }}!</h1>
                         {{-- working in progress --}}
-                        @if($verification && $verification->status === 'approved')
-                        <div class="verification-badge approved" title="Verified shelter">
-                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
+                        @if ($verification && $verification->status === 'approved')
+                            <div class="verification-badge approved" title="Verified shelter">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         @else
-                        <a href="{{ route('shelter.verification.form') }}" class="verification-badge unverified" title="Click to verify your shelter">
-                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clip-rule="evenodd"/>
-                            </svg>
-                        </a>
+                            <a href="{{ route('shelter.verification.form') }}" class="verification-badge unverified"
+                                title="Click to verify your shelter">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </a>
                         @endif
                     </div>
                     <p>Welcome back! Here's what's happening at your shelter</p>
@@ -36,34 +42,42 @@
                 <div class="available-pets-card">
                     <div class="stat-number">{{ $availablePets }}</div>
                     <div class="stat-label">Available Pets</div>
-                    <div class="stat-icon">🐾</div>
+                    <div class="stat-icon" style="color: #f472b6;"><i class="fa-solid fa-paw"></i></div>
                 </div>
             </div>
             <!-- Stats Grid (other stats) -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-header"><div class="stat-icon">📝</div></div>
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: #3b82f6;"><i class="fa-solid fa-pen-to-square"></i></div>
+                    </div>
                     <div class="stat-number">{{ $pendingApplications }}</div>
                     <div class="stat-label">Pending Applications</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><div class="stat-icon">✨</div></div>
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: #10b981;"><i class="fa-solid fa-thumbs-up"></i></div>
+                    </div>
                     <div class="stat-number">{{ $successfulAdoptions }}</div>
                     <div class="stat-label">Successful Adoptions</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><div class="stat-icon">💌</div></div>
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: #6366f1;"><i class="fa-solid fa-message"></i></div>
+                    </div>
                     <div class="stat-number">{{ $newMessages }}</div>
                     <div class="stat-label">New Messages</div>
                 </div>
                 <div class="stat-card rating-card">
-                    <div class="stat-header"><div class="stat-icon">⭐</div></div>
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: #fbbf24;"><i class="fa-solid fa-star"></i></div>
+                    </div>
                     <div class="rating-display">
                         <div class="rating-number">
-                            @if($averageRating == 0)
-                            0
+                            @if ($averageRating == 0)
+                                0
                             @else
-                            {{ number_format($averageRating, 1) }}
+                                {{ number_format($averageRating, 1) }}
                             @endif
                         </div>
                         <div class="star-display">
@@ -119,7 +133,8 @@
                                 </div>
                                 <div class="pet-details">{{ $app->created_at->diffForHumans() }}</div>
                                 <div class="btn-group" style="margin-top: 0.5rem;">
-                                    <button class="btn btn-primary review-application-btn" data-app-id="{{ $app->application_id }}">Review Application</button>
+                                    <button class="btn btn-primary review-application-btn"
+                                        data-app-id="{{ $app->application_id }}">Review Application</button>
                                     <button
                                         onclick="window.location.href= '{{ route('shelter.messages', ['receiver_id' => $app->adopter->user->user_id]) }}'"
                                         class="btn btn-outline">Message</button>
@@ -150,9 +165,8 @@
                                 <div class="pet-details">
                                     {{ Str::limit($msg->content, 60) }}
                                 </div>
-                                <button
-                                    onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id]) }}'"
-                                    class="btn btn-outline" style="margin-top: 0.5rem;">
+                                <button class="btn btn-outline- reply-btn"
+                                    onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id]) }}'">
                                     Reply
                                 </button>
                             </li>
@@ -166,28 +180,6 @@
             <div class="content-card" style="margin-top: 2rem;">
                 <div class="card-header">
                     <h2>Recent Reviews</h2>
-                    <!-- <div class="rating-breakdown">
-                                        <div class="rating-bar">
-                                            <span>5 ★</span>
-                                            <span>35</span>
-                                        </div>
-                                        <div class="rating-bar">
-                                            <span>4 ★</span>
-                                            <span>7</span>
-                                        </div>
-                                        <div class="rating-bar">
-                                            <span>3 ★</span>
-                                            <span>2</span>
-                                        </div>
-                                        <div class="rating-bar">
-                                            <span>2 ★</span>
-                                            <span>1</span>
-                                        </div>
-                                        <div class="rating-bar">
-                                            <span>1 ★</span>
-                                            <span>0</span>
-                                        </div>
-                                    </div> -->
                 </div>
                 <div class="reviews-list">
                     @forelse($recentReviews as $review)
@@ -217,10 +209,10 @@
                 <div>no recent reviews</div>
             </div>
             @endforelse
-            </div><!-- .shelter-content-wrapper -->
+        </div>
     </main>
 
-    <!-- Add New Pet Modal (FROM PET.BLADE.PHP SAME FUNCTIONALITY) -->
+    <!-- Add Pet Modal -->
     <div id="addPetModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -420,242 +412,244 @@
     </div>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- Modal functions that must be global ---
-        function showApplicationModal(id) {
-            fetch(`/shelter/applications/${id}/review`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('applicationModalBody').innerHTML = html;
-                    const modal = document.getElementById('applicationModal');
-                    modal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                    attachActionHandlers(id);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Modal functions that must be global ---
+            function showApplicationModal(id) {
+                fetch(`/shelter/applications/${id}/review`)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('applicationModalBody').innerHTML = html;
+                        const modal = document.getElementById('applicationModal');
+                        modal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                        attachActionHandlers(id);
+                    });
+            }
+            window.showApplicationModal = showApplicationModal;
+
+            // Select modals
+            const addPetModal = document.getElementById('addPetModal');
+            const closeBtns = document.querySelectorAll('.close-btn');
+            const modal = document.getElementById('applicationModal');
+            const rejectionModal = document.getElementById('rejectionModal');
+            const closeBtn = document.querySelector('.close-btn');
+            const closeRejectionBtn = document.querySelector('.close-rejection-btn');
+            const cancelRejectionBtn = document.getElementById('cancelRejectionBtn');
+            const confirmRejectionBtn = document.getElementById('confirmRejectionBtn');
+
+            // Function to open a modal
+            function openModal(modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Function to close a modal
+            function closeModal(modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            window.closeModal = closeModal;
+
+            // Open "Add New Pet" modal
+            document.querySelectorAll('.add-pet-btn').forEach(btn => {
+                btn.addEventListener('click', () => openModal(addPetModal));
+            });
+            // Close modals when clicking close buttons
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modal = btn.closest('.modal');
+                    closeModal(modal);
                 });
-        }
-        window.showApplicationModal = showApplicationModal;
-
-        // Select modals
-        const addPetModal = document.getElementById('addPetModal');
-        const closeBtns = document.querySelectorAll('.close-btn');
-        const modal = document.getElementById('applicationModal');
-        const rejectionModal = document.getElementById('rejectionModal');
-        const closeBtn = document.querySelector('.close-btn');
-        const closeRejectionBtn = document.querySelector('.close-rejection-btn');
-        const cancelRejectionBtn = document.getElementById('cancelRejectionBtn');
-        const confirmRejectionBtn = document.getElementById('confirmRejectionBtn');
-
-        // Function to open a modal
-        function openModal(modal) {
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Function to close a modal
-        function closeModal(modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        window.closeModal = closeModal;
-
-        // Open "Add New Pet" modal
-        document.querySelectorAll('.add-pet-btn').forEach(btn => {
-            btn.addEventListener('click', () => openModal(addPetModal));
-        });
-        // Close modals when clicking close buttons
-        closeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const modal = btn.closest('.modal');
-                closeModal(modal);
             });
-        });
 
-        // Close modal when clicking outside of it
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                closeModal(e.target);
-            }
-        });
+            // Close modal when clicking outside of it
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    closeModal(e.target);
+                }
+            });
 
-        // Add Pet AJAX submission
-        if (document.getElementById('addPetForm')) {
-            document.getElementById('addPetForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(async response => {
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success) {
-                                window.location.href = "{{ route('shelter.pets') }}";
+            // Add Pet AJAX submission
+            if (document.getElementById('addPetForm')) {
+                document.getElementById('addPetForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(async response => {
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.success) {
+                                    window.location.href = "{{ route('shelter.pets') }}";
+                                } else {
+                                    alert('Error adding pet. Please try again.');
+                                }
+                            } else if (response.status === 422) {
+                                const errorData = await response.json();
+                                let messages = [];
+                                for (const key in errorData.errors) {
+                                    messages.push(errorData.errors[key].join(' '));
+                                }
+                                alert('Validation error:\n' + messages.join('\n'));
                             } else {
-                                alert('Error adding pet. Please try again.');
+                                alert('An error occurred. Please try again.');
                             }
-                        } else if (response.status === 422) {
-                            const errorData = await response.json();
-                            let messages = [];
-                            for (const key in errorData.errors) {
-                                messages.push(errorData.errors[key].join(' '));
-                            }
-                            alert('Validation error:\n' + messages.join('\n'));
-                        } else {
+                        })
+                        .catch(error => {
                             alert('An error occurred. Please try again.');
-                        }
-                    })
-                    .catch(error => {
-                        alert('An error occurred. Please try again.');
-                    });
-                closeModal(addPetModal);
+                        });
+                    closeModal(addPetModal);
+                });
+            }
+
+            // Add event listener for review application buttons
+            document.querySelectorAll('.review-application-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const appId = this.getAttribute('data-app-id');
+                    showApplicationModal(appId);
+                });
             });
-        }
 
-        // Add event listener for review application buttons
-        document.querySelectorAll('.review-application-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appId = this.getAttribute('data-app-id');
-                showApplicationModal(appId);
-            });
-        });
-
-        // Application modal close
-        document.querySelector('#applicationModal .close-btn')?.addEventListener('click', () => {
-            closeModal(modal);
-        });
-
-        // Rejection modal close
-        closeRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
-        cancelRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
-
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal(modal);
-            if (e.target === rejectionModal) closeModal(rejectionModal);
-        });
-
-        // action handlers for application
-        let currentApplicationId = null;
-        function attachActionHandlers(id) {
-            const approveBtn = document.getElementById('approveBtn');
-            const rejectBtn = document.getElementById('rejectBtn');
-            const requestInfoBtn = document.getElementById('requestInfoBtn');
-
-            if (approveBtn) {
-                approveBtn.onclick = () => {
-                    fetch(`/shelter/applications/${id}/approve`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({})
-                    })
-                    .then(res => res.json())
-                    .then(() => {
-                        updateStatusBadge(id, 'approved');
-                        closeModal(modal);
-                    })
-                    .catch(err => alert('Approval failed.'));
-                };
-            }
-
-            if (rejectBtn) {
-                rejectBtn.onclick = () => {
-                    currentApplicationId = id;
-                    rejectionModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                };
-            }
-
-            if (requestInfoBtn) {
-                requestInfoBtn.onclick = () => {
-                    fetch(`/shelter/applications/${id}/request-info`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(() => {
-                        updateStatusBadge(id, 'info-requested');
-                        closeModal(modal);
-                    });
-                };
-            }
-        }
-
-        confirmRejectionBtn?.addEventListener('click', () => {
-            const reason = document.getElementById('rejectionReason').value.trim();
-            if (!reason) return alert("Please enter a reason for rejection.");
-
-            fetch(`/shelter/applications/${currentApplicationId}/reject`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    rejection_reason: reason
-                })
-            }).then(res => res.json()).then(() => {
-                updateStatusBadge(currentApplicationId, 'rejected');
-                closeModal(rejectionModal);
+            // Application modal close
+            document.querySelector('#applicationModal .close-btn')?.addEventListener('click', () => {
                 closeModal(modal);
             });
-        });
 
-        function updateStatusBadge(id, newStatus) {
-            const badge = document.querySelector(`.status-badge[data-id="${id}"]`);
-            if (badge) {
-                badge.innerText = newStatus.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
-                badge.className = `status-badge status-${newStatus}`;
+            // Rejection modal close
+            closeRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
+            cancelRejectionBtn?.addEventListener('click', () => closeModal(rejectionModal));
+
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal);
+                if (e.target === rejectionModal) closeModal(rejectionModal);
+            });
+
+            // action handlers for application
+            let currentApplicationId = null;
+
+            function attachActionHandlers(id) {
+                const approveBtn = document.getElementById('approveBtn');
+                const rejectBtn = document.getElementById('rejectBtn');
+                const requestInfoBtn = document.getElementById('requestInfoBtn');
+
+                if (approveBtn) {
+                    approveBtn.onclick = () => {
+                        fetch(`/shelter/applications/${id}/approve`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({})
+                            })
+                            .then(res => res.json())
+                            .then(() => {
+                                updateStatusBadge(id, 'approved');
+                                closeModal(modal);
+                            })
+                            .catch(err => alert('Approval failed.'));
+                    };
+                }
+
+                if (rejectBtn) {
+                    rejectBtn.onclick = () => {
+                        currentApplicationId = id;
+                        rejectionModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    };
+                }
+
+                if (requestInfoBtn) {
+                    requestInfoBtn.onclick = () => {
+                        fetch(`/shelter/applications/${id}/request-info`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(() => {
+                                updateStatusBadge(id, 'info-requested');
+                                closeModal(modal);
+                            });
+                    };
+                }
             }
-        }
 
-        // Shelter modal logic (optional, for completeness)
-        function openShelterModal(shelterId) {
-            const modal = document.getElementById('shelterModal');
-            modal.style.display = 'block';
-            fetchShelterData(shelterId);
-        }
-        function closeShelterModal() {
-            const modal = document.getElementById('shelterModal');
-            modal.style.display = 'none';
-        }
-        async function fetchShelterData(shelterId) {
-            // Example data structure:
-            const shelterData = {
-                name: "Strays Worth Saving",
-                rating: 4.8,
-                totalReviews: 45,
-                location: "Los Angeles, CA",
-                adoptions: 120,
-                experience: "5 years",
-                reviews: [{
+            confirmRejectionBtn?.addEventListener('click', () => {
+                const reason = document.getElementById('rejectionReason').value.trim();
+                if (!reason) return alert("Please enter a reason for rejection.");
+
+                fetch(`/shelter/applications/${currentApplicationId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rejection_reason: reason
+                    })
+                }).then(res => res.json()).then(() => {
+                    updateStatusBadge(currentApplicationId, 'rejected');
+                    closeModal(rejectionModal);
+                    closeModal(modal);
+                });
+            });
+
+            function updateStatusBadge(id, newStatus) {
+                const badge = document.querySelector(`.status-badge[data-id="${id}"]`);
+                if (badge) {
+                    badge.innerText = newStatus.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    badge.className = `status-badge status-${newStatus}`;
+                }
+            }
+
+            // Shelter modal logic (optional, for completeness)
+            function openShelterModal(shelterId) {
+                const modal = document.getElementById('shelterModal');
+                modal.style.display = 'block';
+                fetchShelterData(shelterId);
+            }
+
+            function closeShelterModal() {
+                const modal = document.getElementById('shelterModal');
+                modal.style.display = 'none';
+            }
+            async function fetchShelterData(shelterId) {
+                // Example data structure:
+                const shelterData = {
+                    name: "Strays Worth Saving",
+                    rating: 4.8,
+                    totalReviews: 45,
+                    location: "Los Angeles, CA",
+                    adoptions: 120,
+                    experience: "5 years",
+                    reviews: [{
                         name: "John Doe",
                         rating: 5,
                         date: "March 15, 2024",
                         content: "Amazing experience adopting from this shelter."
                     }]
-            };
-            updateModalContent(shelterData);
-        }
-        document.querySelector('.close')?.addEventListener('click', closeShelterModal);
-        window.addEventListener('click', (event) => {
-            const modal = document.getElementById('shelterModal');
-            if (event.target === modal) {
-                closeShelterModal();
+                };
+                updateModalContent(shelterData);
             }
-        });
-    }); // End of DOMContentLoaded
-</script>
+            document.querySelector('.close')?.addEventListener('click', closeShelterModal);
+            window.addEventListener('click', (event) => {
+                const modal = document.getElementById('shelterModal');
+                if (event.target === modal) {
+                    closeShelterModal();
+                }
+            });
+        }); // End of DOMContentLoaded
+    </script>
 @endsection

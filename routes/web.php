@@ -148,17 +148,17 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/rescuer/dashboard', [RescuerDashboardController::class, 'index'])->name('rescuer.dashboard');
         Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
         Route::get('/rescuer/pets', [RescuerDashboardController::class, 'petManagement'])->name('rescuer.pet-management');
-        Route::get('/rescuer/pet_applications', [RescuerDashboardController::class, 'petApplications'])->name('rescuer.pet_applications');
-        Route::get('/rescuer/rescuer-messages', [RescuerDashboardController::class, 'rescuerMessages'])->name('rescuer.messages');
-        Route::get('/rescuer/messages', [MessageController::class, 'rescuerMessages'])->name('rescuer.messages');
+        Route::get('/rescuer/messages', [App\Http\Controllers\Shared\MessageController::class, 'rescuerMessages'])->name('rescuer.messages');
         Route::post('/rescuer/pets', [RescuerDashboardController::class, 'AddPetListing'])->name('rescuer.pets.create');
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
         Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
 
+
         // RESCUER PET APPLICATIONS CRUD ROUTES
         Route::get('/rescuer/pet_applications', [RescuerApplicationController::class, 'index'])->name('rescuer.pet_applications');
         Route::get('/rescuer/applications/{id}', [RescuerApplicationController::class, 'show'])->name('rescuer.pet_applications.show');
+        Route::get('/rescuer/applications/{id}/review', [RescuerApplicationController::class, 'reviewApplication'])->name('rescuer.pet_applications.review');
         Route::post('/rescuer/applications/{id}/approve', [RescuerApplicationController::class, 'approve'])->name('rescuer.pet_applications.approve');
         Route::post('/rescuer/applications/{id}/reject', [RescuerApplicationController::class, 'reject'])->name('rescuer.pet_applications.reject');
         Route::post('/rescuer/applications/{id}/request-info', [RescuerApplicationController::class, 'requestInfo'])->name('rescuer.pet_applications.requestInfo');

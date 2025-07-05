@@ -3,16 +3,34 @@
 @section('title', 'Pet Management')
 
 @section('shelter-content')
+    <!-- Top Bar (like Stray Reports) -->
     <div class="main-content">
         <div class="content-wrapper">
-            <div class="header">
-                <h1>Pet Management</h1>
-                <button class="btn add-pet-btn">+ Add New Pet</button>
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Pet Management</h1>
+                    <p>Manage all pets currently in your shelter</p>
+                </div>
+                <div class="profile-section">
+                    <button class="btn add-pet-btn">
+                        <span class="add-icon">&#43;</span>
+                        Add New Pet
+                    </button>
+                </div>
             </div>
-
             <div class="search-bar">
-                <input type="text" id="petSearchInput" class="search-input"
-                    placeholder="Search pets by name, breed, or ID...">
+                <div>
+                    <span class="search-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                            <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </span>
+                    <input type="text" id="petSearchInput" class="search-input"
+                        placeholder="Search pets by name, breed, or ID...">
+                </div>
                 <select class="filter-dropdown">
                     <option value="all">All Status</option>
                     <option value="available">Available</option>
@@ -54,7 +72,8 @@
                                     class="delete-pet-form" style="display: contents;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn" style="justify-content: center;">Delete</button>
+                                    <button type="submit" class="delete-btn"
+                                        style="justify-content: center;">Delete</button>
                                 </form>
                             </div>
                         </div>
@@ -187,9 +206,9 @@
                                     <input type="file" name="images[]" id="edit-images" multiple accept="image/*">
                                     <span>+ Add Photos</span>
                                 </label>
+                                <!-- Add this for JS image preview -->
+                                <div class="thumbnail-grid" id="edit-thumbnail-grid"></div>
                             </div>
-                            <!-- Add this for JS image preview -->
-                            <div class="thumbnail-grid" id="edit-thumbnail-grid"></div>
                         </div>
 
                         <div class="modal-actions">
@@ -474,7 +493,7 @@
                                 <form action="/shelter/pet-images/${image.id}" method="POST" class="delete-image-form">
                                     <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
                                     <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="delete-image-btn">Delete Image</button>
+                                    <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
                                 </form>
                             `;
                         thumbnailGrid.appendChild(wrapper);
@@ -805,29 +824,29 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 fetch(form.action, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async response => {
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            sessionStorage.setItem('showDeleteSuccess', '1');
-                            location.reload();
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(async response => {
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success) {
+                                sessionStorage.setItem('showDeleteSuccess', '1');
+                                location.reload();
+                            } else {
+                                alert('Error deleting pet. Please try again.');
+                            }
                         } else {
                             alert('Error deleting pet. Please try again.');
                         }
-                    } else {
+                    })
+                    .catch(error => {
+                        console.error('Delete error:', error);
                         alert('Error deleting pet. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Delete error:', error);
-                    alert('Error deleting pet. Please try again.');
-                });
+                    });
             });
         });
     </script>
