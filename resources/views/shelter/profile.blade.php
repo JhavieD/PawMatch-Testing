@@ -18,43 +18,6 @@
                 <div class="card-header">
                     <h2>Profile Information</h2>
                 </div>
-                <div class="card-content">
-                    <form method="POST" action="{{ route('shelter.profile.update') }}" enctype="multipart/form-data">
-                        @csrf
-                        <div class="profile-upload">
-                            <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile"
-                                class="profile-image" />
-                            <div class="upload-buttons">
-                                {{-- <input type="file" name="profile_image" id="profile_image" class="btn btn-outline"> --}}
-                                <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
-                                <button type="submit" name="remove_photo" value="1"
-                                    class="btn btn-outline">Remove</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" id="name" name="name" class="form-input"
-                                value="{{ $user->first_name }} {{ $user->last_name }}" />
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" id="email" name="email" class="form-input"
-                                value="{{ $user->email }}" />
-                        </div>
-                        <div class="form-group">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel" id="phone" name="phone_number" class="form-input"
-                                value="{{ $user->phone_number }}" />
-                        </div>
-                        <div class="form-group">
-                            <label for="address" class="form-label">Address</label>
-                            <input type="text" id="address" name="address" class="form-input"
-                                value="{{ $shelter->address ?? '' }}" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
-                </div>
-                
             <div class="card-content">
                 @if ($errors->any())
                     <div class="alert alert-danger">
