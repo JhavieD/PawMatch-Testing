@@ -93,6 +93,18 @@
                             renderMessage(msg, idx === lastSentIndex);
                         });
                         if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+                        // Mark messages as read after loading
+                        fetch('/messages/mark-as-read', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                            },
+                            body: JSON.stringify({
+                                sender_id: receiverId
+                            })
+                        });
                     });
 
                 // Send message

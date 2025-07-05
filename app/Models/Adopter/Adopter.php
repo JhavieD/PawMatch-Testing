@@ -37,7 +37,8 @@ class Adopter extends Model
         return $this->hasMany(AdoptionApplication::class, 'adopter_id', 'adopter_id');
     }
 
-    public function adopterReviews() {
+    public function adopterReviews()
+    {
         return $this->hasMany(\App\Models\Adopter\AdopterReview::class, 'adopter_id', 'adopter_id');
     }
-} 
+}
