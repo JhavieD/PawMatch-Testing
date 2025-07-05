@@ -35,8 +35,14 @@ class RegisterController extends Controller
         }
         // Combine address for rescuer
         if ($request->role === 'rescuer') {
-            $address = trim($request->street_address) . ', ' . trim($request->city) . ', ' . trim($request->zip_code);
-            $request->merge(['address' => $address]);
+            $useRescuerPersonal = $request->input('useRescuerPersonalAddress', 'off') === 'on';
+            if ($useRescuerPersonal) {
+                $address = trim($request->street_address) . ', ' . trim($request->city) . ', ' . trim($request->zip_code);
+                $request->merge(['address' => $address, 'rescuer_location' => $address]);
+            } else {
+                $address = trim($request->rescuer_street_address) . ', ' . trim($request->rescuer_city) . ', ' . trim($request->rescuer_zip_code);
+                $request->merge(['address' => $address, 'rescuer_location' => $address]);
+            }
         }
         $isGoogle = $request->has('is_google_registration');
         $validationRules = [
@@ -70,10 +76,18 @@ class RegisterController extends Controller
 
         // Additional validation for rescuer role
         if ($request->role === 'rescuer') {
+            $useRescuerPersonal = $request->input('useRescuerPersonalAddress', 'off') === 'on';
             $request->validate([
                 'organization_name' => ['required', 'string', 'max:255'],
                 'rescuer_location' => ['required', 'string', 'max:255'],
             ]);
+            if (!$useRescuerPersonal) {
+                $request->validate([
+                    'rescuer_street_address' => ['required', 'string', 'max:255'],
+                    'rescuer_city' => ['required', 'string', 'max:255'],
+                    'rescuer_zip_code' => ['required', 'string', 'max:20'],
+                ]);
+            }
         }
 
         $user = User::create([
@@ -101,7 +115,7 @@ class RegisterController extends Controller
             }
             $user->shelter()->create([
                 'shelter_name' => $request->shelter_name,
-                'location' => $address,
+                'location' => $validated['address'],
                 'contact_info' => $validated['phone_number'],
                 'verified' => false,
                 'user_id' => $user->user_id,

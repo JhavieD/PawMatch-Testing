@@ -9,6 +9,7 @@
                 <h1>Profile Settings</h1>
                 <p>Update your personal information and manage your account settings here.</p>
             </div>
+
         </div>
 
         <div class="settings-grid">
@@ -53,6 +54,48 @@
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
                 </div>
+                
+            <div class="card-content">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                <form method="POST" action="{{ route('shelter.profile.update') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="profile-upload">
+                        <!-- <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile" class="profile-image" /> -->
+                        <img src="{{ $user->profile_image }}" alt="Profile" class="profile-image" />
+                        <div class="upload-buttons">
+                            <!-- <input type="file" name="profile_image" id="profile_image" class="btn btn-outline"> -->
+                            <input type="file" name="profile_image" id="profile_image" class="profile-image-input">
+                            <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
+                            <button type="submit" name="remove_photo" value="1" class="btn btn-outline">Remove</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-input" value="{{ $user->first_name }} {{ $user->last_name }}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" value="{{ $user->email }}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="phone" name="phone_number" class="form-input" value="{{ $user->phone_number }}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" id="address" name="address" class="form-input" value="{{ $shelter->location ?? '' }}" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+
             </div>
 
             <!-- Verification Settings -->
@@ -189,13 +232,6 @@
         </div>
     </div>
 
-    <script>
-        function logout() {
-            // Here you would typically clear session/local storage
-            window.location.href = 'login.html';
-        }
-    </script>
-
     <style>
         .verification-status {
             padding: 1rem;
@@ -253,6 +289,78 @@
             font-size: 0.875rem;
             margin-top: 0.25rem;
         }
-    </style>
+        
+.verification-status {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
 
+.verification-status.pending {
+    background-color: #fff7ed;
+    border: 1px solid #fdba74;
+}
+
+.verification-status.approved {
+    background-color: #f0fdf4;
+    border: 1px solid #86efac;
+}
+
+.verification-status.rejected {
+    background-color: #fef2f2;
+    border: 1px solid #fca5a5;
+}
+
+.status-text {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.submission-date, .review-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.remarks {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.file-upload {
+    border: 2px dashed #e5e7eb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.file-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.error-text {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+</style>
+
+<script>
+    function logout() {
+        // Here you would typically clear session/local storage
+        window.location.href = 'login.html';
+    }
+
+    document.getElementById('profile_image').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const preview = document.querySelector('.profile-image');
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+
+</script>
 @endsection
+

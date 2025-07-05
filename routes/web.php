@@ -91,9 +91,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/admin/stray-reports/{id}/comments', [AdminDashboardController::class, 'strayReportComments']);
         Route::post('/admin/stray-reports/{reportId}/mark-investigating', [AdminDashboardController::class, 'markAsInvestigating']);
         Route::get('/admin/stray-reports/{reportId}/nearby-shelters', [AdminDashboardController::class, 'findNearbyShelters'])->name('admin.stray-reports.nearby-shelters');
-        // FLAGGING andrea
-        Route::post('/admin/stray-reports/{id}/flag', [AdminDashboardController::class, 'flagReport'])->name('admin.stray-reports.flag');
-        Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport'])->name('admin.stray-reports.unflag');
+
         // User Management
         Route::get('/admin/users/{user}', [AdminDashboardController::class, 'showUser'])->name('admin.users.show');
         Route::post('/admin/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
@@ -142,7 +140,6 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
     // -------- MESSAGES (FOR ALL POT) --------
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
     Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
-    Route::post('/messages/mark-as-read', [MessageController::class, 'markAsRead'])->name('messages.markAsRead');
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {
@@ -155,7 +152,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::post('/rescuer/pets', [RescuerDashboardController::class, 'AddPetListing'])->name('rescuer.pets.create');
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
-        Route::post('/rescuer/prof  ile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
+        Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
 
 
         // RESCUER PET APPLICATIONS CRUD ROUTES
@@ -188,6 +185,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/adopter/pet-swipe', [PetSwipeController::class, 'index'])->name('adopter.pet-swipe');
         Route::get('/adopter/pet-listings', [AdopterPetListingsController::class, 'index'])->name('adopter.pet-listings');
         Route::post('/api/pets/{pet}/favorite', [AdopterPetListingsController::class, 'toggleFavorite']);
+        Route::get('/api/pets/{pet}', [AdopterPetListingsController::class, 'getPetDetails']);
+        Route::get('/api/pets/{pet}/images', [AdopterPetListingsController::class, 'getPetImages']);
         Route::get('/adopter/pet-details', fn() => view('adopter.pet-details'))->name('adopter.pet-details');
         Route::get('/adopter/pet-personality-quiz', fn() => view('adopter.pet-personality-quiz'))->name('adopter.pet-personality-quiz');
         // Application routes
@@ -202,6 +201,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         // Report status routes
         Route::get('/my-reports', [App\Http\Controllers\Adopter\AdopterReportController::class, 'myReports'])->name('adopter.my-reports');
         Route::get('/reports/{reportId}', [App\Http\Controllers\Adopter\AdopterReportController::class, 'show'])->name('adopter.reports.show');
+        // Schedule meet route
+        Route::post('/adopter/schedule-meet', [App\Http\Controllers\Adopter\MessageController::class, 'scheduleMeet'])->name('adopter.schedule-meet');
     });
 
     // -------- PROFILE & DASHBOARD REDIRECTS --------
@@ -250,38 +251,6 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         }
         return 'No file uploaded.';
     });
-    // API route for fetching pet details by ID
-    Route::get('/api/pets/{id}', function ($id) {
-        $pet = \App\Models\Shared\Pet::with('shelter')->find($id);
-        if (!$pet) {
-            return response()->json(['error' => 'Pet not found'], 404);
-        }
-        $isFavorite = false;
-        $user = auth()->user();
-        if ($user && $user->adopter) {
-            $isFavorite = $user->adopter->savedPets()->where('saved_pets.pet_id', $pet->pet_id)->exists();
-        }
-        return response()->json([
-            'pet_id' => $pet->pet_id,
-            'name' => $pet->name,
-            'breed' => $pet->breed,
-            'age' => $pet->age,
-            'gender' => $pet->gender,
-            'size' => $pet->size,
-            'weight' => $pet->weight ?? 0,
-            'status' => $pet->adoption_status ?? $pet->status ?? 'available',
-            'description' => $pet->description,
-            'images' => [$pet->image_url ?? 'https://placehold.co/400x300'],
-            'is_favorite' => $isFavorite,
-            'shelter_id' => $pet->shelter->shelter_id ?? null,
-            'user_id' => $pet->shelter->user_id ?? null,
-            'shelter' => [
-                'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
-                'address' => $pet->shelter->location ?? 'Unknown Address',
-                'phone' => $pet->shelter->contact_info ?? 'Unknown Phone',
-            ],
-        ]);
-    });
     Route::get('/api/pets/{pet}/images', [ShelterDashboardController::class, 'getPetImages']);
 });
 
@@ -322,13 +291,30 @@ Route::get('/debug-session', function () {
     ];
 });
 
-// Notification: Mark as read
-Route::post('/notifications/{id}/read', function ($id) {
-    $notification = \App\Models\Notification::where('id', $id)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-    $notification->is_read = true;
-    $notification->read_at = now();
-    $notification->save();
-    return response()->json(['success' => true]);
-})->middleware('auth');
+// API route for fetching pet details by ID (must be public and at the top)
+Route::get('/api/pets/{id}', function ($id) {
+    $pet = \App\Models\Shared\Pet::with('shelter')->find($id);
+    if (!$pet) {
+        return response()->json(['error' => 'Pet not found'], 404);
+    }
+    return response()->json([
+        'pet_id' => $pet->pet_id,
+        'name' => $pet->name,
+        'breed' => $pet->breed,
+        'age' => $pet->age,
+        'gender' => $pet->gender,
+        'size' => $pet->size,
+        'weight' => $pet->weight ?? 0,
+        'status' => $pet->adoption_status ?? $pet->status ?? 'available',
+        'description' => $pet->description,
+        'images' => [$pet->image_url ?? 'https://placehold.co/400x300'],
+        'is_favorite' => false, // Placeholder, implement favorite logic if needed
+        'shelter_id' => $pet->shelter->shelter_id ?? null,
+        'user_id' => $pet->shelter->user_id ?? null,
+        'shelter' => [
+            'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
+            'address' => $pet->shelter->location ?? 'Unknown Address',
+            'phone' => $pet->shelter->contact_info ?? 'Unknown Phone',
+        ],
+    ]);
+});

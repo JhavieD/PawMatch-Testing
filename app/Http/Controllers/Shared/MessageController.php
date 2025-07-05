@@ -240,4 +240,47 @@ class MessageController extends Controller
             ->update(['is_read' => 1]);
         return response()->json(['success' => true]);
     }
+
+    public function scheduleMeet(Request $request)
+    {
+        try {
+            $request->validate([
+                'application_id' => 'required|exists:adoption_applications,application_id',
+                'meet_date' => 'required|date',
+                'meet_time' => 'required',
+                'meet_message' => 'nullable|string|max:1000',
+            ]);
+
+            $application = \App\Models\Shared\AdoptionApplication::with('pet')->findOrFail($request->application_id);
+            if (!$application->pet || !$application->pet->shelter || !$application->pet->shelter->user_id) {
+                \Log::error('ScheduleMeet: Missing pet or shelter relationship', ['application_id' => $request->application_id]);
+                return response()->json(['success' => false, 'error' => 'Pet or shelter not found for this application.'], 422);
+            }
+
+            // Compose the message
+            $content = "I'd like to schedule a meet & greet on " .
+                date('F j, Y', strtotime($request->meet_date)) .
+                " at " . date('g:i A', strtotime($request->meet_time)) . ".";
+            if ($request->meet_message) {
+                $content .= "\nMessage: " . $request->meet_message;
+            }
+
+            $message = \App\Models\Shared\Message::create([
+                'sender_id' => auth()->id(),
+                'receiver_id' => $application->pet->shelter->user_id,
+                'message_content' => $content,
+                'sent_at' => now(),
+            ]);
+
+            \Log::info('ScheduleMeet: Message created', ['message_id' => $message->message_id, 'content' => $message->message_content]);
+            return response()->json([
+                'success' => true,
+                'message_id' => $message->message_id,
+                'message_content' => $message->message_content
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('ScheduleMeet Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
 }
