@@ -108,7 +108,7 @@
     </div>
     <div class="navigation-buttons">
         <button class="btn btn-secondary" id="prevBtn" disabled onclick="prevQuestion()">Previous</button>
-        <button class="btn" id="nextBtn" onclick="nextQuestion()">Next</button>
+        <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
     </div>
 </div>
 
@@ -118,21 +118,32 @@
     const progressBar = document.getElementById('progressBar');
     const resultContainer = document.getElementById('result');
     const resultDescription = document.getElementById('resultDescription');
+    const nextBtn = document.getElementById('nextBtn');
     let currentQuestion = 0;
     let answers = {};
 
-    function initQuiz() {
-        questions.forEach((q, idx) => {
-            if (idx === 0) {
-                q.classList.add('active');
-                q.style.visibility = 'visible';
+    function showQuestion(idx) {
+        questions.forEach((q, i) => {
+            if (i === idx) {
+                q.classList.add('active', 'fade');
                 q.style.display = 'flex';
+                setTimeout(() => q.classList.add('fade-in'), 10);
             } else {
-                q.classList.remove('active', 'prev', 'next');
-                q.style.visibility = 'hidden';
+                q.classList.remove('active', 'fade', 'fade-in');
                 q.style.display = 'none';
             }
         });
+        // Enable/disable Next button based on answer presence
+        const questionId = questions[idx].id;
+        if (answers[questionId]) {
+            nextBtn.disabled = false;
+        } else {
+            nextBtn.disabled = true;
+        }
+    }
+
+    function initQuiz() {
+        showQuestion(0);
         updateProgressBar();
         updateNavigationButtons();
     }
@@ -144,7 +155,6 @@
 
     function updateNavigationButtons() {
         const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
         prevBtn.disabled = currentQuestion === 0;
         nextBtn.textContent = (currentQuestion === questions.length - 1) ? 'Get Results' : 'Next';
     }
@@ -159,6 +169,10 @@
             });
             option.classList.add('selected');
             answers[questionId] = value;
+            // Enable Next button when an option is selected for current question
+            if (questions[currentQuestion].id === questionId) {
+                nextBtn.disabled = false;
+            }
         });
     });
 
@@ -167,39 +181,18 @@
             showResults();
             return;
         }
-        const currentContainer = questions[currentQuestion];
-        const nextContainer = questions[currentQuestion + 1];
-        nextContainer.style.visibility = 'visible';
-        nextContainer.style.display = 'flex';
-        currentContainer.classList.add('prev');
-        currentContainer.classList.remove('active');
-        nextContainer.classList.add('active');
-        nextContainer.classList.remove('next');
+        showQuestion(currentQuestion + 1);
         currentQuestion++;
         updateProgressBar();
         updateNavigationButtons();
-        setTimeout(() => {
-            currentContainer.style.visibility = 'hidden';
-            currentContainer.style.display = 'none';
-        }, 300);
     }
 
     function prevQuestion() {
-        const currentContainer = questions[currentQuestion];
-        const prevContainer = questions[currentQuestion - 1];
-        prevContainer.style.visibility = 'visible';
-        prevContainer.style.display = 'flex';
-        currentContainer.classList.add('next');
-        currentContainer.classList.remove('active');
-        prevContainer.classList.add('active');
-        prevContainer.classList.remove('prev');
+        if (currentQuestion === 0) return;
+        showQuestion(currentQuestion - 1);
         currentQuestion--;
         updateProgressBar();
         updateNavigationButtons();
-        setTimeout(() => {
-            currentContainer.style.visibility = 'hidden';
-            currentContainer.style.display = 'none';
-        }, 300);
     }
 
     function showResults() {
@@ -210,21 +203,12 @@
     function restartQuiz() {
         currentQuestion = 0;
         answers = {};
-        questions.forEach((q, idx) => {
-            q.classList.remove('active', 'prev', 'next');
-            if (idx === 0) {
-                q.classList.add('active');
-                q.style.visibility = 'visible';
-                q.style.display = 'flex';
-            } else {
-                q.style.visibility = 'hidden';
-                q.style.display = 'none';
-            }
-        });
+        showQuestion(0);
         resultContainer.classList.remove('active');
         updateProgressBar();
         updateNavigationButtons();
         options.forEach(opt => opt.classList.remove('selected'));
+        nextBtn.disabled = true;
     }
 
     initQuiz();

@@ -62,6 +62,15 @@
         </div>
     </div>
 
+    {{-- @include('components.schedule-meet-modal') --}}
+    {{-- @if(request('open_schedule_meet'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                openScheduleMeetModal({{ request('open_schedule_meet') }});
+            });
+        </script>
+    @endif --}}
+
     <input type="hidden" id="receiver-id" value="{{ optional($receiver)->user_id }}">
     <input type="hidden" id="current-user-id" value="{{ auth()->id() }}">
 

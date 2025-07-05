@@ -110,10 +110,11 @@ class AdopterPetListingsController extends Controller
 
         return view('adopter.pet-listings', compact('petTypes', 'ageGroups', 'sizes', 'pets'));
     }
+
     public function show(Pet $pet)
     {
-    $pet->load(['images', 'shelter']);
-    return view('adopter.pet-details', compact('pet'));
+        $pet->load(['images', 'shelter']);
+        return view('adopter.pet-details', compact('pet'));
     }
 
     /**
@@ -140,6 +141,45 @@ class AdopterPetListingsController extends Controller
         return response()->json(['is_favorite' => !$isFavorite]);
     }
 
+    /**
+     * Get pet details including favorite status for the current user.
+     */
+    public function getPetDetails(Pet $pet)
+    {
+        // Force a fresh load of relationships to avoid stale data
+        $pet = Pet::with(['images', 'shelter'])->find($pet->pet_id);
+        $user = auth()->user();
+        $isFavorite = false;
+        
+        if ($user && $user->adopter) {
+            // Force a fresh check of favorite status
+            $isFavorite = $user->adopter->savedPets()
+                ->where('saved_pets.pet_id', $pet->pet_id)
+                ->exists();
+        }
+        
+        $petData = $pet->toArray();
+        $petData['is_favorite'] = $isFavorite;
+        
+        return response()->json($petData);
+    }
+
+    /**
+     * Get all images for a specific pet.
+     */
+    public function getPetImages(Pet $pet)
+    {
+        $pet->load('images');
+        return response()->json([
+            'images' => $pet->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'image_url' => $image->image_url
+                ];
+            })
+        ]);
+    }
+
     public function publicIndex(Request $request)
     {
         $pets = \App\Models\Shared\Pet::where('adoption_status', 'available')
@@ -153,4 +193,5 @@ class AdopterPetListingsController extends Controller
         $pet->load(['images', 'shelter']);
         return view('public.pet-details', compact('pet'));
     }
-} 
+}
+
