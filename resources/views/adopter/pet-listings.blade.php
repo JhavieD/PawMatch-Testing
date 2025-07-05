@@ -9,6 +9,7 @@
 @section('adopter-content')
 <div class="main-container">
     <!-- Filters Panel -->
+    <button class="show-filters-btn" onclick="document.querySelector('.filters').classList.toggle('show');" style="display:none; margin-bottom:1rem;">Show Filters</button>
     <aside class="filters">
         <form action="{{ route('adopter.pet-listings') }}" method="GET" id="filterForm">
             <div class="filter-group">
@@ -67,25 +68,24 @@
         <div class="pet-grid">
         @forelse($pets as $pet)
             @if($pet->status === 'available' || $pet->adoption_status === 'available')
-                    <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
-                        @if($pet->images->isNotEmpty())
-                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
-                        @else
-                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available for {{ $pet->name }}" class="pet-image" style="font-family: 'Inter', sans-serif;">
-                        @endif
-                        <div class="pet-info">
-                            <h3 class="pet-name">{{ $pet->name }}</h3>
-                            <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p>
-                            <span class="pet-status">{{ $pet->status }}</span>
-                        </div>
+                <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
+                    @if($pet->images->isNotEmpty())
+                        <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
+                    @else
+                        <img src="{{ asset('images/default-pet.png') }}" alt="No image available for {{ $pet->name }}" class="pet-image" style="font-family: 'Inter', sans-serif; background: #f3f4f6;">
+                    @endif
+                    <div class="pet-info">
+                        <h3 class="pet-name">{{ $pet->name }}</h3>
+                        <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p>
+                        <a href="{{ route('adopter.pet-listings') }}?pet_id={{ $pet->pet_id }}" class="btn btn-outline view-details-btn" style="margin-top:0.5rem;">View Details</a>
                     </div>
-                </a>
+                </div>
             @endif
-            @empty
+        @empty
             <div class="no-pets-message">
                 <p>No pets found matching your criteria.</p>
             </div>
-            @endforelse
+        @endforelse
         </div>
 
         {{ $pets->links() }}
@@ -443,6 +443,13 @@
             });
             const data = await response.json();
             favoriteButton.textContent = data.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+            
+            // Refresh the pet details to ensure we have the latest data
+            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+            const petDetails = await petDetailsResponse.json();
+            favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+            
+            // Refresh the favorites section if it exists
             if (typeof refreshFavoritePetsSection === 'function') {
                 refreshFavoritePetsSection();
             }
@@ -515,5 +522,43 @@
         })
         .catch(() => alert('Error submitting application.'));
     });
+
+    // Responsive filter sidebar toggle
+    function handleFilterSidebar() {
+        const btn = document.querySelector('.show-filters-btn');
+        const sidebar = document.querySelector('.filters');
+        if(window.innerWidth <= 900) {
+            btn.style.display = 'block';
+            sidebar.classList.remove('show');
+        } else {
+            btn.style.display = 'none';
+            sidebar.classList.add('show');
+        }
+    }
+    window.addEventListener('resize', handleFilterSidebar);
+    document.addEventListener('DOMContentLoaded', handleFilterSidebar);
 </script>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the selected pet ID from the URL
+    const params = new URLSearchParams(window.location.search);
+    const selectedId = params.get('selected');
+    if (selectedId) {
+        // Find the pet card with a data-pet-id attribute matching the selected ID
+        const card = document.querySelector(`[data-pet-id='${selectedId}']`);
+        if (card) {
+            // Automatically click the "View Details" button
+            const viewBtn = card.querySelector('.view-details-btn');
+            if (viewBtn) {
+                setTimeout(() => {
+                    viewBtn.click();
+                }, 600); // Wait a bit for scroll/highlight
+            }
+        }
+    }
+});
+</script>
+@endpush
 @endsection

@@ -169,13 +169,13 @@ body {
 }
 
 .status-approved {
-    background: #d1fae5;
-    color: #065f46;
+    background: #dcfce7;
+    color: #15803d;
 }
 
 .status-rejected {
     background: #fee2e2;
-    color: #991b1b;
+    color: #ef4444;
 }
 
 .status-completed {
@@ -194,22 +194,39 @@ body {
     margin-bottom: 2rem;
 }
 
+/* Background line */
 .progress-track::before {
     content: "";
     position: absolute;
-    top: 15px;
-    left: 0;
-    width: 100%;
+    top: 16px;
+    left: 32px;
+    right: 32px;
     height: 2px;
     background: #e5e7eb;
     z-index: 1;
 }
 
+/* Progress line */
+.progress-line {
+    position: absolute;
+    top: 16px;
+    height: 2px;
+    background: #4a90e2;
+    z-index: 2;
+    transition: width 0.3s ease;
+}
+
+/* Red progress line for rejected applications */
+.application-rejected .progress-line {
+    background: #ef4444;
+}
+
 .progress-step {
     position: relative;
     z-index: 2;
-    background: white;
-    padding: 0 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .step-icon {
@@ -221,17 +238,52 @@ body {
     align-items: center;
     justify-content: center;
     margin-bottom: 0.5rem;
+    color: #6b7280;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: 2px solid #e5e7eb;
+    position: relative;
+    z-index: 3;
 }
 
 .step-icon.completed {
     background: #4a90e2;
+    border-color: #4a90e2;
     color: white;
+}
+
+.step-icon.current {
+    border-color: #4a90e2;
+    color: #4a90e2;
+    background: white;
+}
+
+.step-icon.rejected {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+/* Make number 2 red in rejected state */
+.application-rejected .progress-step:nth-child(2) .step-icon {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+/* Progress line color for rejected state */
+.application-rejected .progress-line {
+    background: #ef4444;
 }
 
 .step-label {
     font-size: 0.875rem;
     color: #6b7280;
     text-align: center;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    position: relative;
+    z-index: 3;
 }
 
 .timeline {
@@ -274,8 +326,8 @@ body {
 }
 
 .timeline-date {
-    font-size: 0.875rem;
     color: #6b7280;
+    font-size: 0.875rem;
     margin-bottom: 0.25rem;
 }
 
@@ -311,7 +363,16 @@ body {
     }
 
     .progress-track {
-        display: none;
+        padding: 0 1rem;
+    }
+
+    .progress-track::before {
+        left: calc(20px + 16px);
+        right: calc(20px + 16px);
+    }
+
+    .progress-line {
+        left: calc(20px + 16px);
     }
 }
 
@@ -416,4 +477,156 @@ body {
 
 .submit-review:hover {
     background: #357abd;
+}
+
+/* Add styles for the rejection message */
+.rejection-reason {
+    color: #ef4444;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    position: relative;
+}
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #6b7280;
+    cursor: pointer;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.modal-header img {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+.status-badge.approved { background: #dcfce7; color: #15803d; }
+.status-badge.rejected { background: #fee2e2; color: #ef4444; }
+.status-badge.pending { background: #fef3c7; color: #92400e; }
+.modal-body { margin-bottom: 1.5rem; }
+.modal-footer { display: flex; gap: 1rem; justify-content: flex-end; }
+
+.modal-clean {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 520px;
+    width: 98vw;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+    position: relative;
+}
+.modal-header-clean {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+.modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.clean-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 1rem;
+}
+.modal-header-clean img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.modal-header-clean h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+.modal-header-clean p {
+    color: #6b7280;
+    margin: 0.2rem 0 0 0;
+    font-size: 0.95rem;
+}
+.status-badge {
+    margin-top: 0.5rem;
+}
+.modal-body-clean {
+    padding: 0;
+}
+.modal-section {
+    margin-bottom: 1.5rem;
+}
+.adopter-answers p, .pet-details p {
+    margin: 0.2rem 0;
+    font-size: 1rem;
+}
+.adopter-answers p strong, .pet-details p strong {
+    font-weight: 600;
+}
+.btn-block {
+    width: 100%;
+    display: block;
+    margin-top: 1.5rem;
+}
+.modal-footer-clean {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.modal-bigger {
+    max-width: 600px;
+    width: 99vw;
+}
+.modal-section-header {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 1.2rem 0 0.5rem 0;
+    color: #222;
+    letter-spacing: 0.01em;
 }
