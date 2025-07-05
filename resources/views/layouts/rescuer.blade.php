@@ -6,14 +6,14 @@
 @endsection
 
 @section('navbar')
-{{-- Hide navbar on rescuer pages --}}
+    {{-- Hide navbar on rescuer pages --}}
 @overwrite
 
 @section('content')
     <div class="rescuer-layout">
         @include('components.rescuer-sidebar')
-        
-        <main class="rescuer-content">
+
+        <main class="rescuer-main-content">
             @yield('rescuer-content')
         </main>
     </div>

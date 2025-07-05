@@ -89,7 +89,6 @@ body {
   font-weight: 500;
 }
 
-/* Sidebar Mobile Controls */
 .sidebar-hamburger {
   display: none;
   position: fixed;
@@ -185,21 +184,6 @@ body {
   }
 }
 
-@media (max-width: 640px) {
-  .profile-upload {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .upload-buttons {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .btn {
-    width: 100%;
-    padding: 0.75rem 1rem;
-  }
-}
-
 @media (max-width: 600px) {
   .content-card,
   .card-header {
@@ -242,6 +226,17 @@ body {
     MAIN CONTENT STYLES
    ========================= */
 
+.main-content {
+  padding-left: 250px;
+  width: 100%;
+  padding-top: 2rem;
+  padding-right: 1rem;
+  padding-bottom: 2rem;
+  display: flex;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
 @media (min-width: 901px) {
   .container {
     margin-left: 250px !important;
@@ -254,22 +249,63 @@ body {
 }
 
 @media (max-width: 900px) {
+  .main-content {
+    padding-left: 0;
+    padding-right: 0.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
   .container {
-    margin-left: 70px !important;
-    max-width: calc(150vw - 70px);
+    max-width: 100vw;
     width: 100%;
-    padding: 1rem 0.5rem 1rem 1.2rem;
+    padding: 1rem 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
     display: flex;
-    justify-content: flex-start;
   }
 }
 
+@media (max-width: 640px) {
+  .main-content {
+    padding: 0.5rem 0.2rem 0.5rem 0.2rem;
+  }
+  .container {
+    padding: 0.5rem 0.2rem;
+    gap: 1rem;
+  }
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 1rem;
+  align-items: center;
+  background: white;
+  padding: 1.5rem 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-section h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
 .container {
+  margin-left: 250px;
   width: 100%;
   max-width: 700px;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
+  box-sizing: border-box;
 }
 
 .header {
@@ -289,12 +325,13 @@ body {
 
 .settings-grid {
   display: grid;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 .settings-card {
   background: white;
   border-radius: 12px;
+  margin: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
@@ -484,17 +521,34 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 640px) {
+  .profile-image {
+    width: 80px;
+    height: 80px;
+  }
+
   .profile-upload {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row !important; /* Keep row direction */
+    align-items: center !important; /* Center vertically */
+    gap: 1.5rem !important;
   }
 
   .upload-buttons {
-    width: 100%;
+    flex-direction: row !important; /* Keep buttons in a row */
+    gap: 1rem !important;
+    width: auto !important;
   }
 
   .btn {
-    width: 100%;
+    width: auto !important; /* Prevent stretching */
     text-align: center;
+    min-width: 120px;
+    padding: 0.6rem 0.6rem !important; /* Adjust padding for smaller screens */
+  }
+
+  .btn-primary {
+    width: 100% !important; /* Make primary button full width */
+  }
+  .btn-danger {
+    width: 100% !important;
   }
 }

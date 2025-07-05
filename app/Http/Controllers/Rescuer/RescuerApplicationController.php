@@ -24,9 +24,9 @@ class RescuerApplicationController extends Controller
     {
         $application = AdoptionApplication::with(['adopter.user', 'pet'])->findOrFail($id);
         if (request()->ajax()) {
-            return response()->view('rescuer.application_modal', compact('application'));
+            return response()->view('rescuer.rescuer-application_modal', compact('application'));
         }
-        return view('rescuer.application_modal', compact('application'));
+        return view('rescuer.rescuer-application_modal', compact('application'));
     }
 
     public function approve($id)

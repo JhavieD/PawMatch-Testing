@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rescuer;
 use Illuminate\Http\Request;
 use App\Models\Rescuer\RescuerVerification;
 use App\Http\Controllers\Shared\Controller;
+use App\Models\Shared\AdoptionApplication;
 
 class RescuerDashboardController extends Controller
 {
@@ -20,8 +21,19 @@ class RescuerDashboardController extends Controller
         $totalReviews = $rescuer->reviews()->count();
 
         $recentPets = $rescuer->pets()->latest()->take(5)->get();
-        $recentApplications = $rescuer->applications()->latest()->take(5)->get();
-        $recentMessages = $rescuer->messages()->latest()->take(5)->get();
+        $recentApplications = $rescuer->applications()
+            ->with(['adopter.user', 'pet'])
+            ->latest()
+            ->take(5)
+            ->get();
+        // Fetch all recent messages, order by newest, keep only one per sender
+        $recentMessages = $rescuer->messages()
+            ->with('sender')
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique('sender_id')
+            ->take(5)
+            ->values();
         $recentReviews = $rescuer->reviews()->latest()->take(5)->get();
         $verification = $rescuer->verifications()->latest()->first();
 
@@ -283,5 +295,14 @@ class RescuerDashboardController extends Controller
             return response()->json(['success' => true]);
         }
         return back()->with('success', 'Image deleted successfully!');
+    }
+
+    public function reviewApplication($id)
+    {
+        $application = AdoptionApplication::with(['adopter.user', 'pet'])->findOrFail($id);
+        if (request()->ajax()) {
+            return response()->view('rescuer.rescuer-application_modal', compact('application'));
+        }
+        return view('rescuer.rescuer-application_modal', compact('application'));
     }
 }
