@@ -5,18 +5,15 @@
 @section('adopter-content')
 <div class="swipe-container"></div>
 
-<div class="action-buttons">
-    <button class="action-btn dislike" aria-label="Dislike" title="Dislike" type="button" style="font-family: 'Inter', sans-serif;">❌</button>
-    <button class="action-btn like" aria-label="Like" title="Like" type="button" style="font-family: 'Inter', sans-serif;">❤️</button>
-</div>
-
 <div class="match-modal" id="matchModal" style="display:none; font-family: 'Inter', sans-serif;">
     <div class="match-content">
         <div class="match-icon" aria-hidden="true">🎉</div>
         <h2 class="match-title">It's a Match!</h2>
         <p class="match-text">You've found a potential furry friend! Would you like to learn more about this pet?</p>
-        <button class="action-btn like" aria-label="View Details" title="View Details" type="button" style="font-family: 'Inter', sans-serif;">View Details</button>
-        <button class="action-btn dislike" aria-label="Keep Swiping" title="Keep Swiping" type="button" style="font-family: 'Inter', sans-serif;">Keep Swiping</button>
+        <div class="modal-buttons">
+            <button class="action-btn like" aria-label="View Details" title="View Details" type="button" style="font-family: 'Inter', sans-serif;" onclick="viewPetDetails()">View Details</button>
+            <button class="action-btn dislike" aria-label="Keep Swiping" title="Keep Swiping" type="button" style="font-family: 'Inter', sans-serif;" onclick="closeMatchModal()">Keep Swiping</button>
+        </div>
     </div>
 </div>
 
@@ -30,7 +27,12 @@ $petsArray = $pets->map(function($pet) {
         'image' => $pet->image_url ?? 'https://source.unsplash.com/random/800x1200/?dog',
         'description' => $pet->description,
         'tags' => isset($pet->traits) ? array_map('trim', explode(',', $pet->traits)) : [],
-        'location' => $pet->location ?? '',
+        'shelter' => $pet->shelter->shelter_name ?? '',
+        'location' => $pet->shelter->location ?? 'Unknown',
+        'rescuer' => $pet->rescuer->name ?? '',
+        'gender' => $pet->gender ?? '',
+        'size' => $pet->size ?? '',
+        'color' => $pet->color ?? '',
     ];
 });
 @endphp
@@ -43,6 +45,40 @@ $petsArray = $pets->map(function($pet) {
     let currentX = 0;
     let isDragging = false;
 
+    function createPetCard(pet) {
+        const card = document.createElement('div');
+        card.className = 'pet-card';
+        card.innerHTML = `
+            <img src="${pet.image}" alt="${pet.name}" class="pet-image">
+            <div class="pet-info">
+                <h2 class="pet-name">${pet.name ?? 'Unknown Pet'}, ${pet.age ?? '?'} years</h2>
+                <div class="pet-details">
+                    <span class="pet-detail-item">${pet.breed ?? 'Unknown Breed'}</span>
+                    ${pet.gender ? `<span class="pet-detail-item">${pet.gender.charAt(0).toUpperCase() + pet.gender.slice(1)}</span>` : ''}
+                </div>
+                <p class="pet-description">${pet.description ?? 'No description available.'}</p>
+                <div class="pet-tags">
+                    ${pet.tags && pet.tags.length ? pet.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                </div>
+                <div class="shelter-info" style="margin-top:1.2rem; text-align:center;">
+                    ${pet.shelter ? `<div><strong>Shelter:</strong> ${pet.shelter}</div>` : ''}
+                    ${pet.location ? `<div><strong>Location:</strong> ${pet.location}</div>` : ''}
+                </div>
+            </div>
+        `;
+        return card;
+    }
+
+    function createActionButtons() {
+        const actions = document.createElement('div');
+        actions.className = 'action-buttons';
+        actions.innerHTML = `
+            <button class="action-btn dislike" aria-label="Dislike" title="Dislike" type="button" style="font-family: 'Inter', sans-serif;" onclick="swipeLeft()">&#10060;</button>
+            <button class="action-btn like" aria-label="Like" title="Like" type="button" style="font-family: 'Inter', sans-serif;" onclick="swipeRight()">&#10084;&#65039;</button>
+        `;
+        return actions;
+    }
+
     function initSwipe() {
         const container = document.querySelector('.swipe-container');
         container.innerHTML = '';
@@ -50,7 +86,9 @@ $petsArray = $pets->map(function($pet) {
         if (currentPetIndex < pets.length) {
             const pet = pets[currentPetIndex];
             const card = createPetCard(pet);
+            const actions = createActionButtons();
             container.appendChild(card);
+            container.appendChild(actions);
 
             // Add touch and mouse event listeners
             card.addEventListener('touchstart', handleDragStart);
@@ -61,28 +99,14 @@ $petsArray = $pets->map(function($pet) {
             card.addEventListener('mousemove', handleDragMove);
             card.addEventListener('mouseup', handleDragEnd);
         } else {
-            container.innerHTML = '<div class="pet-info"><h2>No more pets to show!</h2></div>';
+            container.innerHTML = `
+                <div class="pet-info-message">
+                    <div style="font-size:3.5rem;">🐾</div>
+                    <div>No more pets to show!</div>
+                    <div style="font-size:1.1rem; color:#6b7280; font-weight:400;">Check back later for new arrivals or adjust your filters.</div>
+                </div>
+            `;
         }
-    }
-
-    function createPetCard(pet) {
-        const card = document.createElement('div');
-        card.className = 'pet-card';
-        card.innerHTML = `
-            <img src="${pet.image}" alt="${pet.name}" class="pet-image">
-            <div class="pet-info">
-                <h2 class="pet-name">${pet.name ?? 'Unknown Pet'}, ${pet.age ?? '?'} years</h2>
-                <div class="pet-details">
-                    <span class="pet-detail-item">${pet.breed ?? 'Unknown Breed'}</span>
-                    ${pet.location ? `<span class="pet-detail-item">📍 ${pet.location}</span>` : ''}
-                </div>
-                <p class="pet-description">${pet.description ?? 'No description available.'}</p>
-                <div class="pet-tags">
-                    ${pet.tags && pet.tags.length ? pet.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
-                </div>
-            </div>
-        `;
-        return card;
     }
 
     function handleDragStart(e) {
@@ -128,11 +152,11 @@ $petsArray = $pets->map(function($pet) {
     }
 
     function swipeRight() {
-    if (currentPetIndex < pets.length) {
-        showMatchModal();
-        currentPetIndex++;
-        initSwipe();
-    }
+        if (currentPetIndex < pets.length) {
+            showMatchModal();
+            currentPetIndex++;
+            initSwipe();
+        }
     }
 
     function showMatchModal() {
@@ -146,8 +170,9 @@ $petsArray = $pets->map(function($pet) {
     }
 
     function viewPetDetails() {
-        closeMatchModal();
-        window.location.href = `/pet-details/${pets[currentPetIndex - 1].id}`;
+        // Redirect to browse pets with selected pet id as query param
+        const petId = pets[currentPetIndex - 1].id;
+        window.location.href = `/adopter/pet-listings?selected=${petId}`;
     }
 
     document.addEventListener('DOMContentLoaded', initSwipe);

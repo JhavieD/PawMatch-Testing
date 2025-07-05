@@ -22,90 +22,103 @@
         </div>
 
         <!-- Filter Section -->
-        <div class="content-card">
-            <form method="GET" action="{{ route('adopter.my-reports') }}" class="search-filter">
-                <input type="text" 
-                       name="search" 
-                       class="search-input" 
-                       placeholder="Search by report ID, location, or animal type..." 
-                       value="{{ request('search') }}">
-                
-                <select name="status" class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="investigating" {{ request('status') == 'investigating' ? 'selected' : '' }}>Investigating</option>
-                    <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
-                
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    Search
-                </button>
-                
-                @if(request('search') || request('status'))
-                    <a href="{{ route('adopter.my-reports') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        Clear
-                    </a>
-                @endif
-            </form>
-        </div>
+        <form method="GET" action="{{ route('adopter.my-reports') }}" class="search-filter wide-search-bar">
+            <input type="text" 
+                   name="search" 
+                   class="search-input wide-search-input" 
+                   placeholder="Search by report ID, location, or animal type..." 
+                   value="{{ request('search') }}">
+            <select name="status" class="filter-select">
+                <option value="">All Status</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="investigating" {{ request('status') == 'investigating' ? 'selected' : '' }}>Investigating</option>
+                <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Search
+            </button>
+            @if(request('search') || request('status'))
+                <a href="{{ route('adopter.my-reports') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Clear
+                </a>
+            @endif
+        </form>
 
         <!-- Reports List -->
-        <div class="reports-container">
-            @forelse($reports as $report)
-                <div class="report-card">
-                    <!-- Report Header -->
-                    <div class="report-header">
-                        <h3 class="report-title">Report #{{ $report->report_id }}</h3>
-                        <div class="report-badges">
-                            <span class="animal-badge">{{ ucfirst($report->animal_type) }}</span>
-                            <span class="status-badge status-{{ $report->status }}">{{ strtoupper($report->status) }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Report Details -->
-                    <div class="report-body">
-                        <div class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-map-marker-alt"></i>
+        <div class="reports-table-container">
+            @if($reports->count())
+            <table class="reports-table">
+                <thead>
+                    <tr>
+                        <th>Report ID</th>
+                        <th>Animal</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Date Reported</th>
+                        <th>Latest Update</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach($reports as $report)
+                    @php $rowId = 'report-row-' . $report->report_id; @endphp
+                    <tr class="report-row" id="{{ $rowId }}">
+                        <td>#{{ $report->report_id }}</td>
+                        <td><span class="animal-badge">{{ ucfirst($report->animal_type) }}</span></td>
+                        <td><span class="status-badge status-{{ $report->status }}">{{ strtoupper($report->status) }}</span></td>
+                        <td>{{ $report->location }}</td>
+                        <td>{{ \Carbon\Carbon::parse($report->reported_at)->format('M d, Y') }}</td>
+                        <td>
+                            @if($report->timeline->isNotEmpty())
+                                <div class="update-info">
+                                    <span class="detail-text">{{ $report->timeline->last()['content'] }}</span>
+                                    <small class="update-time">{{ $report->timeline->last()['date'] }}</small>
+                                </div>
+                            @else
+                                <span class="detail-text no-update">No updates yet</span>
+                            @endif
+                        </td>
+                        <td>
+                            <button type="button" class="expand-btn" onclick="toggleReportDetails('{{ $rowId }}')">
+                                <span class="expand-text">Details</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="report-details-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="report-details-panel">
+                                <div class="detail-block">
+                                    <span class="detail-label">Location</span>
+                                    <span class="detail-value">{{ $report->location }}</span>
+                                </div>
+                                <div class="detail-block">
+                                    <span class="detail-label">Date Reported</span>
+                                    <span class="detail-value">{{ \Carbon\Carbon::parse($report->reported_at)->format('M d, Y g:i A') }}</span>
+                                </div>
+                                <div class="detail-block">
+                                    <span class="detail-label">Latest Update</span>
+                                    <span class="detail-value">
+                                        @if($report->timeline->isNotEmpty())
+                                            <div class="update-info">
+                                                <span class="detail-text">{{ $report->timeline->last()['content'] }}</span>
+                                                <small class="update-time">{{ $report->timeline->last()['date'] }}</small>
+                                            </div>
+                                        @else
+                                            <span class="detail-text no-update">No updates yet</span>
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
-                            <div class="detail-content">
-                                <span class="detail-label">Location:</span>
-                                <span class="detail-text">{{ $report->location }}</span>
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <div class="detail-content">
-                                <span class="detail-label">Date Reported:</span>
-                                <span class="detail-text">{{ \Carbon\Carbon::parse($report->reported_at)->format('M d, Y') }} {{ \Carbon\Carbon::parse($report->reported_at)->format('g:i A') }}</span>
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="detail-content">
-                                <span class="detail-label">Latest Update:</span>
-                                @if($report->timeline->isNotEmpty())
-                                    <div class="update-info">
-                                        <span class="detail-text">{{ $report->timeline->last()['content'] }}</span>
-                                        <small class="update-time">{{ $report->timeline->last()['date'] }}</small>
-                                    </div>
-                                @else
-                                    <span class="detail-text no-update">No updates yet</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+            @else
                 <div class="empty-state">
                     <div class="empty-icon">
                         <i class="fas fa-clipboard-list"></i>
@@ -123,7 +136,7 @@
                         </a>
                     @endif
                 </div>
-            @endforelse
+            @endif
         </div>
 
         @if($reports->hasPages())
@@ -133,4 +146,25 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+function toggleReportDetails(rowId) {
+    const row = document.getElementById(rowId);
+    const detailsRow = row.nextElementSibling;
+    const btn = row.querySelector('.expand-btn');
+    if (detailsRow.style.display === 'none' || detailsRow.style.display === '') {
+        detailsRow.style.display = 'table-row';
+        btn.querySelector('i').classList.remove('fa-chevron-down');
+        btn.querySelector('i').classList.add('fa-chevron-up');
+        btn.classList.add('expanded');
+    } else {
+        detailsRow.style.display = 'none';
+        btn.querySelector('i').classList.remove('fa-chevron-up');
+        btn.querySelector('i').classList.add('fa-chevron-down');
+        btn.classList.remove('expanded');
+    }
+}
+</script>
+@endpush
 @endsection

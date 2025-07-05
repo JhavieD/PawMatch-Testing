@@ -97,4 +97,19 @@
             </div>
         </div>
     </main>
+<script>
+    function logout() {
+        // Here you would typically clear session/local storage
+        window.location.href = 'login.html';
+    }
+
+    document.getElementById('profile_image').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const preview = document.querySelector('.profile-image');
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+
+</script>
 @endsection

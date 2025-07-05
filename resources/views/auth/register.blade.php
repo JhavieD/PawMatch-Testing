@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         updateShelterLocation();
     }
-    // Rescuer address logic
+    // Rescuer address logic (mirror shelter logic)
     const useRescuerPersonalAddress = document.getElementById('useRescuerPersonalAddress');
     const rescuerLocation = document.getElementById('rescuer_location');
     const customRescuerAddress = document.getElementById('customRescuerAddress');
@@ -558,8 +558,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 rescuerLocationGroup.style.display = '';
                 customRescuerAddress.style.display = 'none';
             } else {
-                rescuerLocation.value = '';
-                rescuerLocation.readOnly = false;
                 rescuerLocationGroup.style.display = 'none';
                 customRescuerAddress.style.display = '';
             }
@@ -567,13 +565,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (useRescuerPersonalAddress) {
         useRescuerPersonalAddress.addEventListener('change', updateRescuerLocation);
-        ['street_address', 'city', 'zip_code'].forEach(function(id) {
+        ['street_address', 'city', 'zip_code', 'rescuer_street_address', 'rescuer_city', 'rescuer_zip_code'].forEach(function(id) {
             const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('input', function() {
-                    if (useRescuerPersonalAddress.checked) {
-                        updateRescuerLocation();
-                    }
+                    updateRescuerLocation();
                 });
             }
         });
@@ -727,10 +723,10 @@ function validateCurrentStep() {
             break;
         case 4:
             const roleValue = document.getElementById('role').value;
-            if (roleValue === 'shelter') {
-                const usePersonal = document.getElementById('usePersonalAddress');
-                if (usePersonal && !usePersonal.checked) {
-                    const customFields = ['shelter_street_address', 'shelter_city', 'shelter_zip_code'];
+            if (roleValue === 'rescuer') {
+                const useRescuer = document.getElementById('useRescuerPersonalAddress');
+                if (useRescuer && !useRescuer.checked) {
+                    const customFields = ['rescuer_street_address', 'rescuer_city', 'rescuer_zip_code'];
                     customFields.forEach(field => {
                         const value = document.getElementById(field).value.trim();
                         if (!value) {
@@ -740,31 +736,18 @@ function validateCurrentStep() {
                             hideError(field + 'Error');
                         }
                     });
-                } else {
-                    const shelterLocation = document.getElementById('shelter_location').value.trim();
-                    if (!shelterLocation) {
-                        showError('shelter_locationError', 'This field is required');
+                }
+                // Always require organization_name, rescuer_location, rescuer_valid_id
+                const rescuerFields = ['organization_name', 'rescuer_location', 'rescuer_valid_id'];
+                rescuerFields.forEach(field => {
+                    const value = document.getElementById(field).value.trim();
+                    if (!value) {
+                        showError(field + 'Error', 'This field is required');
                         isValid = false;
                     } else {
-                        hideError('shelter_locationError');
+                        hideError(field + 'Error');
                     }
-                }
-                // Validate shelter_name as usual
-                const shelterName = document.getElementById('shelter_name').value.trim();
-                if (!shelterName) {
-                    showError('shelter_nameError', 'This field is required');
-                    isValid = false;
-                } else {
-                    hideError('shelter_nameError');
-                }
-                // Validate shelter_valid_id as usual
-                const shelterValidId = document.getElementById('shelter_valid_id');
-                if (!shelterValidId.value) {
-                    showError('shelter_valid_idError', 'This field is required');
-                    isValid = false;
-                } else {
-                    hideError('shelter_valid_idError');
-                }
+                });
                 break;
             }
             const roleFields = getRoleFields(roleValue);
@@ -892,6 +875,21 @@ function handleSubmit(e) {
         spinner.style.display = 'none';
         text.textContent = 'Create Account';
     }, 5000);
+
+    // Add debug for rescuer fields
+    const role = document.getElementById('role').value;
+    if (role === 'rescuer') {
+        const useRescuer = document.getElementById('useRescuerPersonalAddress');
+        const rescuerLoc = document.getElementById('rescuer_location').value;
+        const rescuerStreet = document.getElementById('rescuer_street_address').value;
+        const rescuerCity = document.getElementById('rescuer_city').value;
+        const rescuerZip = document.getElementById('rescuer_zip_code').value;
+        console.log('[DEBUG][SUBMIT] useRescuerPersonalAddress:', useRescuer ? useRescuer.checked : null);
+        console.log('[DEBUG][SUBMIT] rescuer_location:', rescuerLoc);
+        console.log('[DEBUG][SUBMIT] rescuer_street_address:', rescuerStreet);
+        console.log('[DEBUG][SUBMIT] rescuer_city:', rescuerCity);
+        console.log('[DEBUG][SUBMIT] rescuer_zip_code:', rescuerZip);
+    }
 }
 
 function showRoleFieldsForStep4() {
