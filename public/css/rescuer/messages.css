@@ -373,6 +373,14 @@ body {
   resize: none;
 }
 
+.message-seen {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666666 !important;
+  margin-top: 2px;
+  text-align: right;
+}
+
 .send-btn {
   padding: 0.8rem 1.5rem;
   background: #4a90e2;

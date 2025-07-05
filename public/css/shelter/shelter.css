@@ -1,6 +1,23 @@
+/* =========================
+   GENERAL RESET & BASE
+   ========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #f0f2f5;
+  min-height: 100vh;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 /* =====================
-   Sidebar Styles from jabi
-   ===================== */
+     Sidebar Styles from jabi
+     ===================== */
 .shelter-sidebar {
   background: white;
   border-right: 1px solid #e5e7eb;
@@ -173,96 +190,52 @@
   }
 }
 
-@media (max-width: 640px) {
-  .profile-upload {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .upload-buttons {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .btn {
-    width: 100%;
-    padding: 0.75rem 1rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .content-card,
-  .card-header {
-    padding: 1rem;
-  }
-  .card-header-row {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .card-header-btn {
-    min-width: 70px;
-    max-width: 100px;
-  }
-  .card-header h2 {
-    font-size: 1rem;
-  }
-  .btn,
-  .btn-outline,
-  .btn-primary {
-    font-size: 0.95rem;
-    padding: 0.5rem 1rem;
-  }
-  .profile-img {
-    width: 32px;
-    height: 32px;
-  }
-  .pet-name {
-    font-size: 1rem;
-  }
-  .pet-details {
-    font-size: 0.9rem;
-  }
-  .status {
-    font-size: 0.85rem;
-    padding: 0.2rem 0.5rem;
-  }
-}
-
 /* =========================
-   GENERAL RESET & BASE
-   ========================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
-}
-
-body {
-  background: #f0f2f5;
-  min-height: 100vh;
+     MAIN LAYOUT & CONTENT
+     ========================= */
+.shelter-layout {
+  display: block !important;
   margin: 0 !important;
   padding: 0 !important;
+  position: static !important;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.shelter-main-content {
+  margin-left: 250px;
+  margin-top: 0 !important;
+  padding: 3rem 0 0 !important;
+  margin-bottom: 4rem;
+  background: #f0f2f5;
+  min-height: 100vh;
+  width: auto;
+  position: relative;
+  display: block;
+}
+
+.shelter-sidebar.collapsed ~ .shelter-main-content,
+.shelter-sidebar.collapsed ~ .container {
+  margin-left: 70px;
+  transition: margin-left 0.2s;
+}
+
+@media (max-width: 900px) {
+  .shelter-main-content {
+    margin-left: 0 !important;
+    padding: 0.7rem 0.5rem 0 0.5rem !important;
+  }
 }
 
 /* =========================
-   DASHBOARD HEADER & TOP BAR
-   ========================= */
+     TOP BAR & HEADER
+     ========================= */
 .shelter-dashboard-header {
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 1rem;
   color: #18181b;
   letter-spacing: -1px;
-}
-
-.shelter-main-content {
-  margin-left: 260px;
-  margin-top: 0 !important;
-  padding: 1.2rem 0 0 0 !important;
-  background: #f0f2f5;
-  min-height: 100vh;
-  width: auto;
-  position: relative;
-  display: block;
 }
 
 @media (max-width: 900px) {
@@ -310,21 +283,9 @@ body {
   background: #357abd;
 }
 
-.pet-image-small {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 16px;
-  display: block;
-  margin: 0 auto 1rem auto;
-  background: #e5e7eb;
-  align-items: flex-start;
-  justify-content: fle;
-}
-
 /* =========================
-   WELCOME & STATS CARDS
-   ========================= */
+     DASHBOARD CARDS & GRIDS
+     ========================= */
 .dashboard-welcome-card {
   height: 250px;
   display: flex;
@@ -461,8 +422,6 @@ body {
   margin-top: 0.2rem;
 }
 
-/* --- Fix rating card alignment to match other stat cards --- */
-
 .stat-card .rating-display {
   text-align: center;
   display: flex;
@@ -475,17 +434,16 @@ body {
   padding-left: 0;
 }
 
-/* --- Push rating display content up vertically in the rating card --- */
 .stat-card.rating-card .rating-display {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Push content to the top */
+  justify-content: flex-start;
   width: 100%;
   text-align: center;
   padding: 0;
-  padding-top: 0.05rem; /* Move content even further up */
+  padding-top: 0.05rem;
 }
 
 .stat-card .rating-number {
@@ -591,13 +549,14 @@ body {
 }
 
 .card-header .btn-outline {
-  font-size: 1rem;
-  padding: 0.5rem 1.1rem;
-  border-radius: 8px;
-  border: 1px solid #4a90e2;
-  color: #4a90e2;
-  background: #fff;
-  transition: background 0.2s, color 0.2s;
+  width: 110px;
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-header .btn-outline:hover {
@@ -625,6 +584,9 @@ body {
   }
   .stats-grid {
     gap: 1.2rem;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    align-items: stretch;
   }
   .content-grid {
     gap: 1.2rem;
@@ -633,59 +595,141 @@ body {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
-}
-
-/* Reduce top space above dashboard content */
-.shelter-content-wrapper {
-  padding-top: 1.2rem !important;
-  /* keep left/right as before */
-}
-@media (max-width: 900px) {
-  .shelter-content-wrapper {
-    padding-top: 0.7rem !important;
+  .stat-card,
+  .stat-card.rating-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 120px;
+    max-height: none;
+    padding: 1rem 0.7rem !important;
+    align-items: center !important;
+    box-sizing: border-box;
+  }
+  .stat-card .stat-number,
+  .stat-card .rating-number {
+    font-size: 1.7rem !important;
+  }
+  .stat-card .stat-label,
+  .stat-card .total-reviews {
+    font-size: 0.98rem !important;
+  }
+  .stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+  .available-pets-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 }
-.dashboard-welcome-card {
-  padding-top: 1.2rem;
-  padding-bottom: 1.2rem;
-}
-.dashboard-welcome-card h1 {
-  padding-top: 0.3rem;
-  padding-bottom: 0.3rem;
-}
-.dashboard-top-row {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+
+@media (max-width: 700px) {
+  .dashboard-top-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .dashboard-welcome-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 1rem 0.7rem !important;
+    height: auto !important;
+    border-radius: 16px;
+  }
+  .dashboard-welcome-card h1 {
+    font-size: 1.2rem;
+    padding: 0.7rem 0.5rem 0.3rem 0.5rem;
+  }
+  .dashboard-welcome-card p {
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+  }
+  .stats-grid {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+  .stat-card,
+  .stat-card.rating-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 120px;
+    border-radius: 16px;
+    padding: 1rem 0.7rem !important;
+    margin: 0 auto 0.7rem auto;
+    align-items: flex-start;
+  }
+  .stat-card .stat-icon,
+  .stat-card.rating-card .stat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+  .stat-card .stat-number,
+  .stat-card.rating-card .rating-number {
+    font-size: 1.3rem;
+  }
+  .stat-card .stat-label,
+  .stat-card .total-reviews,
+  .stat-card.rating-card .total-reviews {
+    font-size: 0.95rem;
+  }
+  .stat-card .star-display,
+  .stat-card.rating-card .star-display {
+    font-size: 1rem;
+  }
 }
 
-.shelter-content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-left: 1.2rem;
-  padding-right: 1.2rem;
-  padding-top: 0.2rem;
-}
-@media (max-width: 1200px) {
-  .shelter-content-wrapper {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    padding-top: 0.1rem;
+@media (max-width: 480px) {
+  .dashboard-welcome-card {
+    padding: 0.7rem 0.3rem !important;
+    border-radius: 12px;
+  }
+  .dashboard-welcome-card h1 {
+    font-size: 1rem;
+    padding: 0.5rem 0.2rem 0.2rem 0.2rem;
+  }
+  .dashboard-welcome-card p {
+    font-size: 0.85rem;
+    padding: 0 0.2rem;
+  }
+  .stat-card,
+  .stat-card.rating-card {
+    padding: 0.7rem 0.3rem !important;
+    border-radius: 12px;
+  }
+  .stat-card .stat-number,
+  .stat-card.rating-card .rating-number {
+    font-size: 1.1rem;
+  }
+  .stat-card .stat-label,
+  .stat-card .total-reviews,
+  .stat-card.rating-card .total-reviews {
+    font-size: 0.85rem;
+  }
+  .stat-card .stat-icon,
+  .stat-card.rating-card .stat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+    border-radius: 6px;
   }
 }
 
 /* =========================
-   EMPTY STATE
-   ========================= */
-.empty-state {
-  color: #9ca3af;
-  font-size: 1rem;
-  text-align: left;
-  padding: 0.5rem 0;
-}
-
-/* =========================
-   BUTTONS
-   ========================= */
+       BUTTONS
+       ========================= */
 .btn {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -721,9 +765,16 @@ body {
   background: #e3f2fd;
 }
 
+.btn-primary,
+.review-application-btn {
+  background: linear-gradient(90deg, #4a90e2 0%, #357abd 100%);
+  color: #fff;
+  border: none;
+}
+
 /* =========================
-   MODAL STYLES
-   ========================= */
+       MODAL STYLES
+       ========================= */
 .modal {
   display: none;
   position: fixed;
@@ -848,8 +899,8 @@ body {
 }
 
 /* =========================
-   RATING DISPLAY STYLES
-   ========================= */
+       RATING DISPLAY STYLES
+       ========================= */
 .rating-display {
   text-align: center;
   padding: 1rem;
@@ -897,56 +948,9 @@ body {
   border-radius: 4px;
 }
 
-.recent-reviews-section {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.review-card {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.reviewer-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.reviewer-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.reviewer-name {
-  font-weight: 500;
-}
-
-.review-date {
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.review-rating {
-  color: #fbbf24;
-}
-
-.review-content {
-  color: #4b5563;
-  line-height: 1.5;
-}
-
+/* =========================
+       REPORTS & INSIGHTS
+       ========================= */
 .report-filters {
   display: flex;
   gap: 0.5rem;
@@ -998,8 +1002,8 @@ body {
 }
 
 /* =========================
-   PROFILE IMAGE UPLOAD STYLES
-   ========================= */
+     PROFILE IMAGE UPLOAD
+     ========================= */
 .profile-image-input {
   display: none;
 }
@@ -1024,20 +1028,164 @@ body {
   gap: 1rem;
 }
 
-/* =========================
-   REVIEW APPLICATION MODAL STYLES
-   ========================= */
-.modal-body textarea {
-  width: 100%;
-  height: 100px;
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #4b5563;
-  resize: vertical;
+@media (max-width: 640px) {
+  .profile-upload {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .upload-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+  .btn-primary,
+  .add-pet-btn {
+    width: 40%;
+    padding: 0.75rem 1rem;
+  }
+
+  .btn-primary,
+  .review-application-btn {
+    width: 50%;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-outline,
+  .message-btn {
+    width: 20%;
+    padding: 0.5rem 1rem;
+  }
 }
 
+/* =========================
+     PET LIST & STATUS BADGES
+     ========================= */
+.pet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pet-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s ease;
+}
+
+.pet-item:hover {
+  background: #f3f4f6;
+}
+
+.pet-item:last-child {
+  border-bottom: none;
+}
+
+.pet-image-small {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 1rem;
+  background: #e5e7eb;
+  display: block;
+}
+
+.pet-info {
+  flex: 1;
+}
+
+.pet-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
+}
+
+.pet-details {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+  text-transform: capitalize;
+}
+.status-adopted {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+.status-available {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-size: 13px;
+}
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border-radius: 9999px;
+  padding: 0.25rem 0.9rem;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+.status-approved {
+  background-color: #dcfce7;
+  color: #15803d;
+  border-radius: 9999px;
+  padding: 0.25rem 0.9rem;
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* =========================
+       EMPTY STATE
+       ========================= */
+.empty-state {
+  color: #9ca3af;
+  font-size: 1rem;
+  text-align: left;
+  padding: 0.5rem 0;
+}
+
+/* =========================
+     APPLICATION LIST
+     ========================= */
+.application-list .application-item {
+  transition: background 0.2s, box-shadow 0.2s;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.application-list .application-item:hover {
+  background: #f3f6fa;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
+}
+
+/* Fix and align buttons in recent applications */
+.application-list .application-item .btn,
+.application-list .application-item .btn-outline {
+  min-width: 120px;
+  max-width: 50%;
+  margin: 0.2rem 0.3rem;
+  text-align: center;
+  border-radius: 10px;
+  /* Remove width and display:block from base styles */
+}
+.application-list .application-item .btn + .btn-outline {
+  margin-top: 0.5rem;
+}
+
+/* =========================
+     INFO GRID
+     ========================= */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1076,6 +1224,9 @@ body {
   font-weight: 600;
 }
 
+/* =========================
+     STATUS BADGES (for applications)
+     ========================= */
 .status-badge {
   padding: 4px 12px;
   border-radius: 9999px;
@@ -1105,13 +1256,9 @@ body {
   color: #1d4ed8;
 }
 
-.modal-body label {
-  display: block;
-  font-size: 0.875rem;
-  color: #5b5b5b;
-  margin-bottom: 0.5rem;
-}
-
+/* =========================
+     QUESTIONNAIRE
+     ========================= */
 .questionnaire h4 {
   margin-bottom: 1rem;
   color: #1a1a1a;
@@ -1141,9 +1288,11 @@ body {
   font-weight: 700;
 }
 
+/* =========================
+     CONTAINER WRAPPER
+     ========================= */
 .shelter-content-wrapper {
   max-width: 1200px;
-  margin: 0 auto;
   padding-left: 5rem;
   padding-right: 5rem;
 }
@@ -1173,8 +1322,8 @@ body {
 .stat-card.rating-card .stat-header {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: flex-start; /* Left-align icon on desktop */
+  justify-content: flex-start; /* Left-align icon on desktop */
   margin-bottom: 0.2rem;
 }
 
@@ -1189,7 +1338,7 @@ body {
   align-items: center;
   justify-content: center;
   margin-bottom: 0;
-  margin-right: 0.5rem;
+  margin-right: 0;
 }
 
 .stat-card.rating-card .rating-display {
@@ -1226,7 +1375,33 @@ body {
   text-align: center;
 }
 
-/* --- Recent Pets List Styles (copied from rescuer.css) --- */
+@media (max-width: 900px) {
+  .stat-card.rating-card .stat-header {
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .stat-card.rating-card .stat-icon {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.1rem !important;
+    border-radius: 8px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .stat-card.rating-card .stat-header {
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .stat-card.rating-card .stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.1rem !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* --- Recent Pets List Styles (copied from shelter.css) --- */
 .pet-list {
   list-style: none;
   margin: 0;
@@ -1319,21 +1494,110 @@ body {
   min-height: 100vh;
 }
 
-.shelter-main-content {
-  margin-left: 260px;
-  margin-top: 0 !important;
-  padding: 3rem 0 0 !important;
-  margin-bottom: 4rem;
-  background: #f0f2f5;
-  min-height: 100vh;
-  width: auto;
-  position: relative;
-  display: block;
-}
-
 @media (max-width: 900px) {
   .shelter-main-content {
     margin-left: 0 !important;
     padding: 0.7rem 0.5rem 0 0.5rem !important;
+  }
+}
+
+.application-list .application-item {
+  transition: background 0.2s, box-shadow 0.2s;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.application-list .application-item:hover {
+  background: #f3f6fa;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
+}
+
+/* Fix and align buttons in recent applications */
+.application-list .application-item .btn,
+.application-list .application-item .btn-outline {
+  min-width: 120px;
+  max-width: 50%;
+  margin: 0.2rem 0.3rem;
+  text-align: center;
+  border-radius: 10px;
+  /* Remove width and display:block from base styles */
+}
+.application-list .application-item .btn + .btn-outline {
+  margin-top: 0.5rem;
+}
+
+/* =========================
+     RECENT MESSAGES LIST & REPLY BUTTON
+     ========================= */
+.recent-messages-list .message-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  padding: 0.7rem 0.5rem 0.7rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: none !important;
+  box-shadow: none !important;
+}
+.recent-messages-list .message-item:last-child {
+  border-bottom: none;
+}
+.recent-messages-list .message-username {
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: #18181b;
+  margin-right: 0.7rem;
+  flex-shrink: 0;
+  display: inline-block;
+  align-items: center;
+  height: 44px;
+  line-height: 44px;
+}
+.reply-btn {
+  min-width: 110px;
+  max-width: 160px;
+  width: 110px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4a90e2;
+  background: transparent;
+  border: 1px solid #4a90e2;
+  transition: background 0.2s, color 0.2s;
+  height: 44px;
+  margin-left: 0;
+}
+.reply-btn:hover {
+  background: #e3f2fd;
+  color: #357abd;
+}
+@media (max-width: 700px) {
+  .recent-messages-list .message-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.8rem 0.2rem 0.8rem 0.2rem;
+  }
+  .recent-messages-list .message-username {
+    margin-right: 0;
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+    text-align: left;
+    height: auto;
+    line-height: normal;
+    display: block;
+  }
+  .reply-btn {
+    width: 30%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+    margin-top: 0.2rem;
+    font-size: 0.98rem;
+    height: 40px;
   }
 }
