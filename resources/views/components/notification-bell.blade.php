@@ -22,10 +22,11 @@
         <div class="notification-dropdown-header">Notifications</div>
         @php $notifications = auth()->user()->notifications()->latest()->take(10)->get(); @endphp
         @forelse($notifications as $notification)
-            <a href="{{ $notification->url ?? '#' }}" class="notification-item" data-id="{{ $notification->id }}" style="{{ !$notification->is_read ? 'background:#eaf3fb;' : '' }}">
+            <a href="{{ $notification->action_url ?? '#' }}" class="notification-item" data-id="{{ $notification->id }}" style="{{ !$notification->is_read ? 'background:#eaf3fb;' : '' }}; position: relative;">
                 <div class="notification-title">{{ $notification->title }}</div>
                 <div class="notification-message">{{ $notification->message }}</div>
                 <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
+                <button class="remove-notification-btn" data-id="{{ $notification->id }}" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #e3342f; font-size: 1.1em; cursor: pointer;">&times;</button>
             </a>
         @empty
             <div class="notification-empty">No notifications</div>
@@ -35,22 +36,75 @@
 
 @push('scripts')
 <script>
+function attachNotificationEvents() {
+    const dropdown = document.getElementById('notificationDropdown');
+    // Mark notification as read when clicked
+    dropdown.querySelectorAll('.notification-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            // Prevent if remove button is clicked
+            if (e.target.classList.contains('remove-notification-btn')) return;
+            const notifId = this.getAttribute('data-id');
+            const url = this.getAttribute('href');
+            console.debug('Notification clicked:', { notifId, url }); // DEBUG
+            if (url && url !== '#') {
+                e.preventDefault();
+                fetch(`/notifications/${notifId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                }).then(() => {
+                    window.location.href = url;
+                }).catch(() => {
+                    // Always redirect even if AJAX fails
+                    window.location.href = url;
+                });
+            }
+        });
+    });
+    // Remove notification
+    dropdown.querySelectorAll('.remove-notification-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            const notifId = this.getAttribute('data-id');
+            fetch(`/notifications/${notifId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            }).then(() => {
+                // Remove the notification from the DOM
+                const notifItem = btn.closest('.notification-item');
+                if (notifItem) notifItem.remove();
+                // Optionally, update badge count
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    let count = parseInt(badge.textContent, 10);
+                    if (!isNaN(count) && count > 0) {
+                        badge.textContent = count - 1;
+                        if (count - 1 <= 0) badge.remove();
+                    }
+                }
+                // If no notifications left, show empty message
+                if (!dropdown.querySelector('.notification-item') && !dropdown.querySelector('.notification-empty')) {
+                    dropdown.innerHTML += '<div class="notification-empty">No notifications</div>';
+                }
+            });
+        });
+    });
+}
 document.addEventListener('DOMContentLoaded', function() {
     const bell = document.getElementById('notificationBell');
     const dropdown = document.getElementById('notificationDropdown');
     function positionDropdown() {
         if (!bell || !dropdown) return;
-        console.log('positionDropdown called');
         // Show dropdown but keep it hidden for measurement
         dropdown.style.visibility = 'hidden';
         dropdown.style.display = 'block';
         // Wait for layout to stabilize
         requestAnimationFrame(function() {
-            const bellRect = bell.getBoundingClientRect();
-            const dropdownWidth = dropdown.offsetWidth;
-            let left, width, maxWidth, borderRadius;
             if (window.innerWidth <= 900) {
-                // Mobile/tablet: fixed position, full width with side gaps, below header
                 dropdown.style.position = 'fixed';
                 dropdown.style.setProperty('left', '12px', 'important');
                 dropdown.style.setProperty('right', '12px', 'important');
@@ -63,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropdown.style.setProperty('border-radius', '14px', 'important');
                 dropdown.style.setProperty('transform', '', 'important');
             } else {
-                // Desktop: absolutely position below bell, centered
                 dropdown.style.position = 'absolute';
                 dropdown.style.setProperty('left', '50%', 'important');
                 dropdown.style.setProperty('top', '100%', 'important');
@@ -74,7 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             dropdown.style.visibility = '';
             dropdown.style.display = '';
-            console.log('Dropdown positioned at:', left, 'Dropdown width:', dropdownWidth);
         });
     }
     if (bell && dropdown) {
@@ -82,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             positionDropdown();
             dropdown.classList.toggle('show');
+            attachNotificationEvents();
         });
         document.addEventListener('click', function() {
             dropdown.classList.remove('show');
@@ -89,18 +142,8 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdown.addEventListener('click', function(e) {
             e.stopPropagation();
         });
-        // Mark notification as read when clicked
-        dropdown.querySelectorAll('.notification-item').forEach(function(item) {
-            item.addEventListener('click', function(e) {
-                const notifId = this.getAttribute('data-id');
-                const url = this.getAttribute('href');
-                if (url && url !== '#') {
-                    e.preventDefault();
-                    fetch(`/notifications/${notifId}/read`, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content } })
-                        .then(() => { window.location.href = url; });
-                }
-            });
-        });
+        // Attach events initially
+        attachNotificationEvents();
     }
     window.addEventListener('resize', function() {
         if (dropdown && dropdown.classList.contains('show')) {

@@ -255,6 +255,15 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
 });
 
 // =====================
+// NOTIFICATION ROUTES (SHARED)
+// =====================
+Route::middleware(['auth'])->group(function () {
+    Route::post('/notifications/{notification}/read', [App\Http\Controllers\Shared\NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{notification}', [App\Http\Controllers\Shared\NotificationController::class, 'destroy']);
+    Route::delete('/notifications', [App\Http\Controllers\Shared\NotificationController::class, 'clearAll']);
+});
+
+// =====================
 // PUBLIC API & PLACEHOLDER ROUTES
 // =====================
 Route::get('/application-status', fn() => view('adopter.application-status'))->name('application-status');
