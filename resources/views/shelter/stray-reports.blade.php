@@ -26,15 +26,33 @@
         <!-- Search and Filter -->
         <div class="content-card">
             <form method="GET" action="{{ route('shelter.stray-reports') }}" class="search-filter">
-                <input type="text" name="search" class="search-box" placeholder="Search reports..." value="{{ request('search') }}">
+                <input type="text" 
+                       name="search" 
+                       class="search-input" 
+                       placeholder="Search by report ID, location, or animal type..." 
+                       value="{{ request('search') }}">
+                
                 <select name="status" class="filter-select">
                     <option value="">All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="investigating" {{ request('status') == 'investigating' ? 'selected' : '' }}>Investigating</option>
-                    <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted</option>
+                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
-                <button type="submit" class="btn btn-primary">Filter</button>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+                
+                @if(request('search') || request('status'))
+                    <a href="{{ route('shelter.stray-reports') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </a>
+                @endif
             </form>
         </div>
+
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
@@ -82,11 +100,73 @@
         @endif
     </div>
 </main>
+
+<!-- Report Details Modal -->
+<div class="report-modal" id="reportModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Stray Report Details</h2>
+            <button class="close-modal" onclick="closeReportModal()">&times;</button>
+        </div>
+        
+        <div class="report-header">
+            <div class="report-images">
+                <img id="modalReportImage" src="" alt="Stray Animal" class="report-image">
+            </div>
+            <div class="report-header-info">
+                <div class="info-block">
+                    <div class="info-label">Report ID:</div>
+                    <div class="info-value" id="reportId"></div>
+                </div>
+                <div class="status-badge" id="reportStatus"></div>
+            </div>
+        </div>
+
+        <div class="report-info">
+            <div class="info-block">
+                <div class="info-label">📍 Location</div>
+                <div class="info-value" id="reportLocation"></div>
+            </div>
+            <div class="info-block">
+                <div class="info-label">🐕 Animal Type</div>
+                <div class="info-value" id="animalType"></div>
+            </div>
+            <div class="info-block">
+                <div class="info-label">👤 Reporter</div>
+                <div class="info-value" id="reporterName"></div>
+                <div class="info-value small-text" id="reporterContact"></div>
+            </div>
+            <div class="info-block">
+                <div class="info-label">📅 Date Reported</div>
+                <div class="info-value" id="reportDate"></div>
+            </div>
+            <div class="info-block">
+                <div class="info-label">📨 Sent to You</div>
+                <div class="info-value" id="sentAt"></div>
+            </div>
+        </div>
+
+        <div class="report-description">
+            <h3>Description</h3>
+            <p id="reportDescription"></p>
+        </div>
+
+        <div class="report-actions">
+            <button class="btn btn-primary" onclick="acceptReport()">
+                Mark as Accepted
+            </button>
+            <button class="btn btn-info" onclick="getDirections()">
+                Get Directions
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
-// Custom notification system - ADD THIS FUNCTION
+// notification system 
 function showNotification(message, type = 'info', duration = 4000) {
     // Remove existing notifications
     document.querySelectorAll('.notification').forEach(notif => notif.remove());
@@ -172,8 +252,12 @@ function markAsRead(reportId) {
 
 function acceptReport() {
     const reportId = document.getElementById('reportId').textContent;
+    const acceptBtn = document.querySelector('.btn-primary');
     
-    // Remove the confirm() - just proceed directly
+    // Disable the button immediately to prevent double clicks
+    acceptBtn.disabled = true;
+    acceptBtn.textContent = 'Processing...';
+    
     fetch(`/shelter/stray-reports/${reportId}/accept`, {
         method: 'POST',
         headers: {
@@ -184,7 +268,9 @@ function acceptReport() {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json().then(data => {
+                throw new Error(data.message || 'HTTP error!');
+            });
         }
         return response.json();
     })
@@ -202,17 +288,47 @@ function acceptReport() {
                     statusBadge.className = 'status-badge status-accepted';
                     statusBadge.textContent = 'Accepted';
                 }
+                
+                // Mark the card as handled to prevent future clicks
+                reportCard.classList.add('report-handled');
             }
             
             // Reload page after showing notification
             setTimeout(() => location.reload(), 2000);
         } else {
-            showNotification('Error: ' + (data.message || 'Failed to accept report'), 'error');
+            throw new Error(data.message || 'Failed to accept report');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Network error. Please check your connection and try again.', 'error');
+        
+        // Check if it's an "already accepted" error
+        if (error.message.includes('already accepted')) {
+            showNotification(error.message, 'warning');
+            
+            // Update button to show it's already accepted
+            acceptBtn.textContent = 'Already Accepted';
+            acceptBtn.classList.remove('btn-primary');
+            acceptBtn.classList.add('btn-success');
+            
+            // Update status in the grid
+            const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
+            if (reportCard) {
+                reportCard.dataset.status = 'accepted';
+                const statusBadge = reportCard.querySelector('.status-badge');
+                if (statusBadge) {
+                    statusBadge.className = 'status-badge status-accepted';
+                    statusBadge.textContent = 'Accepted';
+                }
+                reportCard.classList.add('report-handled');
+            }
+        } else {
+            showNotification('Error: ' + error.message, 'error');
+            
+            // Re-enable button on other errors
+            acceptBtn.disabled = false;
+            acceptBtn.textContent = 'Mark as Accepted';
+        }
     });
 }
 
