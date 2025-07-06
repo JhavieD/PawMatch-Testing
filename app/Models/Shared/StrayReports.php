@@ -29,6 +29,7 @@ class StrayReports extends Model
         'is_flagged' => 'boolean',
         'is_duplicate' => 'boolean',
         'flagged_at' => 'datetime',
+        'image_url' => 'json',
     ];
 
     public function adopter()
