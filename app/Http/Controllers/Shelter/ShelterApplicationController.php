@@ -47,6 +47,7 @@ class ShelterApplicationController extends Controller
                 'title' => 'Application Approved!',
                 'message' => 'Your adoption application for ' . ($application->pet->name ?? 'a pet') . ' has been approved. Please schedule your meet & greet!',
                 'is_read' => false,
+                'action_url' => url('/adopter/application-status'),
             ]);
         }
 

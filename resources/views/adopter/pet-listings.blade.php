@@ -70,9 +70,41 @@
             @if($pet->status === 'available' || $pet->adoption_status === 'available')
                 <div class="pet-card" data-pet-id="{{ $pet->pet_id }}">
                     @if($pet->images->isNotEmpty())
-                        <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
+                        <div style="position: relative;">
+                            <img src="{{ $pet->images->first()->image_url }}" alt="{{ $pet->name }} the {{ $pet->breed }}, {{ $pet->age }} years old" class="pet-image" style="font-family: 'Inter', sans-serif;">
+                            <span class="pet-status-badge status-{{ strtolower($pet->adoption_status ?? $pet->status ?? 'available') }}"
+                                style="position: absolute; top: 10px; right: 10px;
+                                    background:
+                                        {{ strtolower($pet->adoption_status ?? $pet->status ?? 'available') === 'available' ? '#22c55e' :
+                                           (strtolower($pet->adoption_status ?? $pet->status ?? 'available') === 'pending' ? '#f59e42' :
+                                           (strtolower($pet->adoption_status ?? $pet->status ?? 'available') === 'adopted' ? '#a855f7' : '#f3f4f6')) }};
+                                    color: #fff;
+                                    padding: 0.25em 0.75em;
+                                    border-radius: 12px;
+                                    font-size: 0.9em;
+                                    font-weight: 600;
+                                    text-transform: capitalize;">
+                                {{ $pet->adoption_status ?? $pet->status ?? 'available' }}
+                            </span>
+                        </div>
                     @else
-                        <img src="{{ asset('images/default-pet.png') }}" alt="No image available for {{ $pet->name }}" class="pet-image" style="font-family: 'Inter', sans-serif; background: #f3f4f6;">
+                        <div style="position: relative;">
+                            <img src="{{ asset('images/default-pet.png') }}" alt="No image available for {{ $pet->name }}" class="pet-image" style="font-family: 'Inter', sans-serif; background: #f3f4f6;">
+                            <span class="pet-status-badge status-{{ strtolower($pet->adoption_status ?? $pet->status ?? 'available') }}"
+                                style="position: absolute; top: 10px; right: 10px;
+                                    background:
+                                        {{ strtolower($pet->adoption_status ?? $pet->status ?? 'available') === 'available' ? '#22c55e' :
+                                           (strtolower($pet->adoption_status ?? $pet->status ?? 'available') === 'pending' ? '#f59e42' :
+                                           (strtolower($pet->adoption_status ?? $pet->status ?? 'available') === 'adopted' ? '#a855f7' : '#f3f4f6')) }};
+                                    color: #fff;
+                                    padding: 0.25em 0.75em;
+                                    border-radius: 12px;
+                                    font-size: 0.9em;
+                                    font-weight: 600;
+                                    text-transform: capitalize;">
+                                {{ $pet->adoption_status ?? $pet->status ?? 'available' }}
+                            </span>
+                        </div>
                     @endif
                     <div class="pet-info">
                         <h3 class="pet-name">{{ $pet->name }}</h3>
@@ -246,11 +278,11 @@
             document.getElementById('petAge').textContent = `${petDetails.age} years`;
             document.getElementById('petGender').textContent = petDetails.gender;
             document.getElementById('petSize').textContent = petDetails.size;
-            document.getElementById('petStatus').textContent = petDetails.status;
+            document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
             document.getElementById('petDescription').textContent = petDetails.description;
-            document.getElementById('shelterName').textContent = petDetails.shelter.name;
-            document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
-            document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
+            document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+            document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+            document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
 
             // Update images
             if (petImagesData.images.length > 0) {
@@ -345,11 +377,11 @@
             document.getElementById('petAge').textContent = `${petDetails.age} years`;
             document.getElementById('petGender').textContent = petDetails.gender;
             document.getElementById('petSize').textContent = petDetails.size;
-            document.getElementById('petStatus').textContent = petDetails.status;
+            document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
             document.getElementById('petDescription').textContent = petDetails.description;
-            document.getElementById('shelterName').textContent = petDetails.shelter.name;
-            document.getElementById('shelterAddress').textContent = petDetails.shelter.address;
-            document.getElementById('shelterPhone').textContent = petDetails.shelter.phone;
+            document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+            document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+            document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
 
             // Update images
             if (petImagesData.images.length > 0) {
