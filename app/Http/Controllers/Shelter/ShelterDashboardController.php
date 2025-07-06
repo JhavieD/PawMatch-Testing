@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shelter;
 
 use App\Models\Shelter;
+use App\Models\Adopter\AdopterReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,17 @@ class ShelterDashboardController extends Controller
             ->map(function ($id) {
                 return Message::with('sender')->find($id);
             });
+
+        // Get reviews for this shelter
+        $recentReviews = collect();
+        
+        // Get shelter reviews
+        $shelterReviews = \App\Models\Adopter\AdopterReview::where('shelter_id', $shelter->shelter_id)
+            ->with(['adopter.user'])
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get();
+            
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
         $verification = $shelter->verifications()->latest()->first();
 
