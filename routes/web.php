@@ -204,6 +204,9 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/reports/{reportId}', [App\Http\Controllers\Adopter\AdopterReportController::class, 'show'])->name('adopter.reports.show');
         // Schedule meet route
         Route::post('/adopter/schedule-meet', [App\Http\Controllers\Adopter\MessageController::class, 'scheduleMeet'])->name('adopter.schedule-meet');
+        // Review routes
+        Route::post('/adopter/review', [AdopterReviewController::class, 'store'])->name('adopter.review.store');
+        Route::get('/adopter/review/check', [AdopterReviewController::class, 'checkExistingReview'])->name('adopter.review.check');
     });
 
     // -------- PROFILE & DASHBOARD REDIRECTS --------
