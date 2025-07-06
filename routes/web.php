@@ -124,7 +124,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/shelter/applications/{id}/review', [ShelterApplicationController::class, 'reviewApplication'])->name('shelter.applications.review');
         Route::post('/shelter/applications/{id}/approve', [ShelterApplicationController::class, 'approve'])->name('shelter.applications.approve');
         Route::post('/shelter/applications/{id}/reject', [ShelterApplicationController::class, 'reject'])->name('shelter.applications.reject');
-        Route::post('/shelter/applications/{id}/request-info', [ShelterApplicationController::class, 'requestInfo'])->name('shelter.applications.requestInfo');
+        Route::post('/shelter/applications/{id}/complete', [ShelterAdoptionApplicationController::class, 'complete'])->name('shelter.applications.complete');
+        Route::post('/shelter/applications/{id}/cancel', [ShelterAdoptionApplicationController::class, 'cancel'])->name('shelter.applications.cancel');
         // PET MANAGEMENT CRUD ROUTES
         Route::match(['put', 'patch'], '/shelter/pets/{pet}', [ShelterDashboardController::class, 'update'])->name('shelter.pets.update');
         Route::get('/shelter/pets/{pet}/applications', [ShelterApplicationController::class, 'forPet'])->name('applications.forPet');
@@ -140,6 +141,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
     // -------- MESSAGES (FOR ALL POT) --------
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
     Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
+    Route::post('/messages/mark-as-read', [MessageController::class, 'markAsRead']);
+    Route::post('/messages/upload', [App\Http\Controllers\Shared\MessageController::class, 'upload'])->name('messages.upload');
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {
@@ -161,7 +164,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/rescuer/applications/{id}/review', [RescuerApplicationController::class, 'reviewApplication'])->name('rescuer.pet_applications.review');
         Route::post('/rescuer/applications/{id}/approve', [RescuerApplicationController::class, 'approve'])->name('rescuer.pet_applications.approve');
         Route::post('/rescuer/applications/{id}/reject', [RescuerApplicationController::class, 'reject'])->name('rescuer.pet_applications.reject');
-        Route::post('/rescuer/applications/{id}/request-info', [RescuerApplicationController::class, 'requestInfo'])->name('rescuer.pet_applications.requestInfo');
+        Route::post('/rescuer/applications/{id}/complete', [RescuerApplicationController::class, 'complete'])->name('rescuer.pet_applications.complete');
+        Route::post('/rescuer/applications/{id}/cancel', [RescuerApplicationController::class, 'cancel'])->name('rescuer.pet_applications.cancel');
 
         // RESCUER PET MANAGEMENT CRUD ROUTES
         Route::get('/rescuer/pets/{pet}/applications', [RescuerApplicationController::class, 'forPet'])->name('rescuer.pets.applications');
@@ -202,7 +206,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/my-reports', [App\Http\Controllers\Adopter\AdopterReportController::class, 'myReports'])->name('adopter.my-reports');
         Route::get('/reports/{reportId}', [App\Http\Controllers\Adopter\AdopterReportController::class, 'show'])->name('adopter.reports.show');
         // Schedule meet route
-        Route::post('/adopter/schedule-meet', [App\Http\Controllers\Adopter\MessageController::class, 'scheduleMeet'])->name('adopter.schedule-meet');
+        Route::post('/adopter/schedule-meet', [App\Http\Controllers\Shared\MessageController::class, 'scheduleMeet'])->name('adopter.schedule-meet');
     });
 
     // -------- PROFILE & DASHBOARD REDIRECTS --------
@@ -306,15 +310,12 @@ Route::get('/api/pets/{id}', function ($id) {
         'size' => $pet->size,
         'weight' => $pet->weight ?? 0,
         'status' => $pet->adoption_status ?? $pet->status ?? 'available',
+        'adoption_status' => $pet->adoption_status,
         'description' => $pet->description,
-        'images' => [$pet->image_url ?? 'https://placehold.co/400x300'],
-        'is_favorite' => false, // Placeholder, implement favorite logic if needed
+        'images' => $pet->images ?? [],
+        'is_favorite' => false,
         'shelter_id' => $pet->shelter->shelter_id ?? null,
         'user_id' => $pet->shelter->user_id ?? null,
-        'shelter' => [
-            'name' => $pet->shelter->shelter_name ?? 'Unknown Shelter',
-            'address' => $pet->shelter->location ?? 'Unknown Address',
-            'phone' => $pet->shelter->contact_info ?? 'Unknown Phone',
-        ],
+        'shelter' => $pet->shelter, // Return full shelter object
     ]);
 });
