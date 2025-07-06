@@ -44,6 +44,7 @@
             <div class="header-content">
                 <h1>Report a Stray Animal</h1>
                 <p>Help us locate and care for stray animals in your area. Your report could save a life.</p>
+                <span></span>
             </div>
         </div>
         <form method="POST" action="{{ route('stray.report.submit') }}" enctype="multipart/form-data" id="strayReportForm">
@@ -63,7 +64,7 @@
                     <label for="description">
                         Description
                     </label>
-                    <textarea id="description" name="description" placeholder="Describe the animal's appearance, behavior, and condition. Include details like breed, color, size, and any visible injuries or special needs..." required></textarea>
+                    <textarea id="description" name="description" placeholder="Describe the animal's appearance, behavior, and condition." required></textarea>
                     <div class="char-counter">
                         <span id="descriptionCount">0</span>/500 characters
                     </div>
@@ -98,7 +99,7 @@
                     <label for="landmarks">
                         Nearby Landmarks
                     </label>
-                    <textarea id="landmarks" name="landmarks" placeholder="Describe any nearby landmarks, businesses, or notable locations that could help locate the animal..."></textarea>
+                    <textarea id="landmarks" name="landmarks" placeholder="Describe any nearby landmarks, businesses, or notable locations."></textarea>
                 </div>
             </div>
             <div class="form-actions">

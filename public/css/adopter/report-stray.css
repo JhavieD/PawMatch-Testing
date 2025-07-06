@@ -57,6 +57,9 @@ h1 {
 .form-group {
     margin-bottom: 1.5rem;
 }
+.form-group label {
+    margin-top: 1rem;
+}
 
 label {
     display: block;
@@ -96,6 +99,8 @@ textarea {
     transition: border-color 0.3s;
     background: #f9fafb;
     margin-bottom: 1rem;
+    color: #9ca3af;
+    font-weight: 300; 
 }
 
 .image-upload:hover {
@@ -130,7 +135,16 @@ textarea {
 }
 
 .location-group input {
-    border-radius: 10px;
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #1a1a1a;
+    background: #fafbfc;
+    transition: border-color 0.2s;
+    
+    
 }
 
 .btn {
@@ -205,4 +219,113 @@ textarea {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+}
+/* Modern styled dropdown */
+.form-group select {
+    appearance: none; /* Remove default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem 3rem 1rem 1rem; /* Extra padding on right for arrow */
+    font-size: 1rem;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* Custom dropdown arrow */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2rem;
+    background-color: #fff;
+}
+
+.form-group select:hover {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.form-group select option {
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #374151;
+    background: #fff;
+}
+
+.form-group select option:hover,
+.form-group select option:focus {
+    background: #f3f4f6;
+    color: #4a90e2;
+}
+
+.form-group select option[value=""] {
+    color: #9ca3af;
+}
+
+.form-group select:focus option:checked {
+    background: #4a90e2;
+    color: #fff;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.form-group select option[value=""] {
+    color: #9ca3af !important; 
+    opacity: 1; 
+    font-weight: 400;
+
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+textarea::placeholder {
+    color: #9ca3af;
+    opacity: 0.8;
+    font-weight: 300;
+    
+}
+
+select option[value=""] {
+    color: #9ca3af;
+    font-weight: 300;
+}
+
+.form-group input:focus::placeholder,
+.form-group textarea:focus::placeholder {
+    color: #6b7280;
+    opacity: 0.6;
+}
+
+::-webkit-input-placeholder {
+    color: #9ca3af;
+    opacity: 0.8;
+    font-weight: 300;
+
+}
+
+::-moz-placeholder {
+    color: #9ca3af;
+    opacity: 0.8;
+    font-weight: 300;
+}
+
+:-ms-input-placeholder {
+    color: #9ca3af;
+    opacity: 0.8;
+    font-weight: 300;
+}
+
+:-moz-placeholder {
+    color: #9ca3af;
+    opacity: 0.8;
+    font-weight: 300;
 }
