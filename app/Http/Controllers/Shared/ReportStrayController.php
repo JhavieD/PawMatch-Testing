@@ -24,17 +24,26 @@ class ReportStrayController extends Controller
             'street' => 'nullable|string',
             'city' => 'nullable|string',          
             'zip' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024'
+            'photos' => 'nullable|array',
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024'
         ]);
 
         $adopter = Auth::user()->adopter;
         $location = trim("{$request->street}, {$request->city} {$request->zip}", ', ');
 
-        $imageUrl = null;
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('stray-reports', 's3');
-            Storage::disk('s3')->setVisibility($path, 'public');
-            $imageUrl = Storage::disk('s3')->url($path);
+        // $imageUrl = null;
+        // if ($request->hasFile('image')) {
+        //     $path = $request->file('image')->store('stray-reports', 's3');
+        //     Storage::disk('s3')->setVisibility($path, 'public');
+        //     $imageUrl = Storage::disk('s3')->url($path);
+        // }
+        $imageUrls = [];
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('strayreport', 's3');
+                Storage::disk('s3')->setVisibility($path, 'public');
+                $imageUrls[] = Storage::disk('s3')->url($path);
+            }
         }
 
         StrayReports::create([
@@ -42,7 +51,7 @@ class ReportStrayController extends Controller
             'animal_type' => $request->animalType,
             'location' => $location,
             'description' => $request->description,
-            'image_url' => $imageUrl,
+            'image_url' => !empty($imageUrls) ? json_encode($imageUrls) : null,
             'status' => 'pending',
             'reported_at' => now(),
         ]);
