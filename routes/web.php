@@ -85,12 +85,12 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/admin/stray-reports', [AdminDashboardController::class, 'strayReports'])->name('admin.stray-reports');
         Route::get('/admin/stray-reports/debug', [AdminDashboardController::class, 'debugStrayReports']); // Temporary debug route
         //added by A
-        Route::post('/admin/stray-reports/{id}/comment', [AdminDashboardController::class, 'addComment']);
         Route::post('/admin/stray-reports/{id}/status', [AdminDashboardController::class, 'updateStatus']);
         Route::get('/admin/stray-reports/{id}/timeline', [AdminDashboardController::class, 'strayReportTimeline']);
-        Route::get('/admin/stray-reports/{id}/comments', [AdminDashboardController::class, 'strayReportComments']);
         Route::post('/admin/stray-reports/{reportId}/mark-investigating', [AdminDashboardController::class, 'markAsInvestigating']);
         Route::get('/admin/stray-reports/{reportId}/nearby-shelters', [AdminDashboardController::class, 'findNearbyShelters'])->name('admin.stray-reports.nearby-shelters');
+        Route::post('/admin/stray-reports/{id}/flag', [AdminDashboardController::class, 'flagReport']);
+        Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport']);
         Route::post('/admin/stray-reports/{id}/flag', [AdminDashboardController::class, 'flagReport'])->name('admin.stray-reports.flag');
         Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport'])->name('admin.stray-reports.unflag');
         // User Management

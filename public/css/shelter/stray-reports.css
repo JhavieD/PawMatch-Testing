@@ -90,41 +90,30 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Search and Filter */
+/* Search & Filter Components */
 .search-filter {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .search-box {
-  flex: 1;
-  min-width: 250px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: #1a1a1a;
-  background: #fafbfc;
-  transition: border-color 0.2s;
-}
-
-.search-box:focus {
-  outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.08);
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
 }
 
 .filter-select {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: #1a1a1a;
-  background: #fafbfc;
-  min-width: 150px;
-  cursor: pointer;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    min-width: 150px;
+    color: #1a1a1a;
+    background: white;
+    cursor: pointer;
 }
 
 .filter-select:focus {
@@ -637,6 +626,7 @@ body {
   }
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
     width: 200px;
@@ -650,70 +640,44 @@ body {
   }
   .top-bar {
     padding: 1rem;
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .main-content {
-    padding: 1rem;
-  }
-
-  .top-bar {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
-    padding: 1.5rem;
   }
-
   .search-filter {
-    flex-direction: column;
-    gap: 1rem;
+        flex-direction: column;
   }
-
-  .search-box {
-    min-width: 100%;
-  }
-
   .report-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-
   .report-header {
     flex-direction: column;
     gap: 1rem;
   }
-
   .report-images img {
     width: 100%;
     height: 200px;
   }
-
   .report-info {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-
   .report-actions {
     flex-direction: column;
     gap: 0.75rem;
   }
-
   .btn {
     width: 100%;
     justify-content: center;
   }
-
   .modal-content {
     margin: 1rem;
     max-height: calc(100vh - 2rem);
   }
-
   .modal-header {
     padding: 1rem;
   }
-
   .report-header,
   .report-info,
   .report-description,
@@ -796,6 +760,7 @@ body {
     transform: scale(1) translateY(0);
   }
 }
+
 /* Notification System */
 .notification {
   position: fixed;
@@ -876,10 +841,4 @@ body {
 
 .notification-close:hover {
   background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Status badges for accepted reports */
-.status-accepted {
-  background: #d1fae5;
-  color: #065f46;
 }

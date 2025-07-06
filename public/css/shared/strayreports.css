@@ -317,7 +317,7 @@
     min-width: 140px;
 }
 
-/* Timeline & Comments */
+/* Timeline ONLUYU*/
 .report-timeline {
     border-left: 2px solid #e5e7eb;
     padding-left: 1.5rem;
@@ -357,56 +357,10 @@
     margin-top: 0.25rem;
 }
 
-.timeline-comment {
-    background: #f0fdf4;
-    border-left: 3px solid #10b981;
-    padding-left: 1rem;
-    margin-left: -1rem;
-    border-radius: 0 8px 8px 0;
-}
-
-.timeline-comment::before {
-    background: #10b981 !important;
-}
-
-.timeline-status::before {
-    background: #4a90e2 !important;
-}
-
 .status-update {
     margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid #e5e7eb;
-}
-
-.comment-section {
-    margin-top: 1.5rem;
-}
-
-.comment-list {
-    margin-bottom: 1rem;
-}
-
-.comment-item {
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-}
-
-.comment-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-}
-
-.comment-author {
-    font-weight: 500;
-}
-
-.comment-date {
-    color: #6b7280;
-    font-size: 0.875rem;
 }
 
 /* Investigating Modal */
@@ -637,7 +591,7 @@
 }
 
 .priority-shelter::before {
-    content: "⭐ PRIORITY";
+    content: "⭐";
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
