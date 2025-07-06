@@ -91,7 +91,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/admin/stray-reports/{reportId}/nearby-shelters', [AdminDashboardController::class, 'findNearbyShelters'])->name('admin.stray-reports.nearby-shelters');
         Route::post('/admin/stray-reports/{id}/flag', [AdminDashboardController::class, 'flagReport']);
         Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport']);
-        
+        Route::post('/admin/stray-reports/{id}/flag', [AdminDashboardController::class, 'flagReport'])->name('admin.stray-reports.flag');
+        Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport'])->name('admin.stray-reports.unflag');
         // User Management
         Route::get('/admin/users/{user}', [AdminDashboardController::class, 'showUser'])->name('admin.users.show');
         Route::post('/admin/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
@@ -252,6 +253,15 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         return 'No file uploaded.';
     });
     Route::get('/api/pets/{pet}/images', [ShelterDashboardController::class, 'getPetImages']);
+});
+
+// =====================
+// NOTIFICATION ROUTES (SHARED)
+// =====================
+Route::middleware(['auth'])->group(function () {
+    Route::post('/notifications/{notification}/read', [App\Http\Controllers\Shared\NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{notification}', [App\Http\Controllers\Shared\NotificationController::class, 'destroy']);
+    Route::delete('/notifications', [App\Http\Controllers\Shared\NotificationController::class, 'clearAll']);
 });
 
 // =====================

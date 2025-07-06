@@ -78,46 +78,6 @@
                     </form>
                 </div>
             </div>
-            <!-- Notification Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h2>Notification Preferences</h2>
-                </div>
-                <div class="card-content">
-                    <form method="POST" action="{{ route('adopter.profile.notifications') }}">
-                        @csrf
-                        <div class="switch-group">
-                            <span class="switch-label">Email Notifications</span>
-                            <label class="switch">
-                                <input type="checkbox" name="email_notifications" {{ $adopter->email_notifications ?? true ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">Application Updates</span>
-                            <label class="switch">
-                                <input type="checkbox" name="application_updates" {{ $adopter->application_updates ?? true ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">New Pet Alerts</span>
-                            <label class="switch">
-                                <input type="checkbox" name="new_pet_alerts" {{ $adopter->new_pet_alerts ?? false ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">Marketing Communications</span>
-                            <label class="switch">
-                                <input type="checkbox" name="marketing_communications" {{ $adopter->marketing_communications ?? false ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Preferences</button>
-                    </form>
-                </div>
-            </div>
             <!-- Account Deletion -->
             <div class="settings-card">
                 <div class="card-header">

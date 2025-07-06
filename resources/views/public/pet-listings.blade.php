@@ -95,8 +95,6 @@
                             </div>
                         </div>
                         <div class="pet-modal-actions" style="display:flex;gap:1.5em;justify-content:center;margin-top:2em;">
-                            <button class="btn btn-outline" style="min-width:140px;opacity:0.6;cursor:not-allowed;" disabled>Message Shelter</button>
-                            <button class="btn btn-primary" style="min-width:140px;opacity:0.6;cursor:not-allowed;" disabled>Apply for Adoption</button>
                         </div>
                     </div>
                 </div>
@@ -116,24 +114,26 @@
             console.log('Requesting petId:', petId);
             document.getElementById('petDetailsModal').style.display = 'block';
             showModalSpinner(true);
-            fetch(`/api/pets/${petId}`)
-                .then(res => res.json())
-                .then(data => {
-                    console.log('API response for petId', petId, ':', data);
-                    if (data.error) throw new Error(data.error);
-                    document.getElementById('modalPetName').textContent = data.name;
-                    document.getElementById('modalPetNameAbout').textContent = data.name;
-                    document.getElementById('modalPetDescription').textContent = data.description;
-                    document.getElementById('modalPetAge').textContent = data.age + ' years';
-                    document.getElementById('modalPetGender').textContent = data.gender;
-                    document.getElementById('modalPetSize').textContent = data.size;
-                    document.getElementById('modalPetBreed').textContent = data.breed;
-                    document.getElementById('modalPetStatus').textContent = data.status || 'available';
-                    document.getElementById('modalShelterName').textContent = data.shelter.name;
-                    document.getElementById('modalShelterAddress').textContent = data.shelter.address;
-                    document.getElementById('modalShelterPhone').textContent = data.shelter.phone;
+            fetch(`/public-pet-details/${petId}`)
+                .then(res => res.text())
+                .then(html => {
+                    // Parse the HTML response
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    // Extract details from the rendered HTML
+                    document.getElementById('modalPetName').textContent = doc.querySelector('.pet-name')?.textContent || 'Pet not found.';
+                    document.getElementById('modalPetNameAbout').textContent = doc.querySelector('.pet-name')?.textContent || '';
+                    document.getElementById('modalPetDescription').textContent = doc.querySelector('.pet-description')?.textContent || '';
+                    document.getElementById('modalPetAge').textContent = (doc.querySelector('.detail-item:nth-child(1)')?.textContent || '').replace('Age:', '').trim();
+                    document.getElementById('modalPetGender').textContent = (doc.querySelector('.detail-item:nth-child(2)')?.textContent || '').replace('Gender:', '').trim();
+                    document.getElementById('modalPetSize').textContent = (doc.querySelector('.detail-item:nth-child(3)')?.textContent || '').replace('Size:', '').trim();
+                    document.getElementById('modalPetBreed').textContent = (doc.querySelector('.detail-item:nth-child(4)')?.textContent || '').replace('Breed:', '').trim();
+                    // Shelter info
+                    document.getElementById('modalShelterName').textContent = doc.querySelector('.shelter-name')?.textContent || '';
+                    document.getElementById('modalShelterAddress').textContent = doc.querySelector('.shelter-address')?.textContent || '';
+                    document.getElementById('modalShelterPhone').textContent = doc.querySelector('.shelter-phone')?.textContent || '';
                     // Images
-                    const images = data.images || [];
+                    const images = Array.from(doc.querySelectorAll('.pet-detail-image')).map(img => img.src);
                     const mainImage = document.getElementById('modalMainImage');
                     const noImage = document.getElementById('modalNoImage');
                     const gallery = document.getElementById('modalImageGallery');
@@ -158,10 +158,11 @@
                             gallery.appendChild(thumb);
                         });
                     } else {
-                        mainImage.src = "{{ asset('images/default-pet.png') }}";
                         mainImage.style.display = 'none';
                         noImage.style.display = 'block';
                     }
+                    // Status
+                    document.getElementById('modalPetStatus').textContent = doc.querySelector('.pet-status-value')?.textContent || 'available';
                     showModalSpinner(false);
                 })
                 .catch(err => {
