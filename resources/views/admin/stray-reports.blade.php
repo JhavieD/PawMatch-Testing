@@ -57,9 +57,24 @@
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
+                @php
+                    // Handle all cases: array, JSON string, or null
+                    if (is_array($report->image_url)) {
+                        $imageUrls = $report->image_url;
+                    } elseif ($report->image_url) {
+                        $imageUrls = json_decode($report->image_url, true);
+                    } else {
+                        $imageUrls = [];
+                    }
+
+                    // Ensure we have a valid array
+                    $imageUrls = is_array($imageUrls) ? $imageUrls : [];
+                    $firstImage = !empty($imageUrls) ? $imageUrls[0] : null;
+                    $imageCount = count($imageUrls);
+                @endphp
                 <div class="report-card"
                     data-report-id="{{ $report->report_id }}"
-                    data-image="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}"
+                    data-image="{{ !empty($imageUrls) ? $imageUrls[0] : 'https://via.placeholder.com/150' }}"
                     data-description="{{ $report->description }}"
                     data-location="{{ $report->location }}"
                     data-status="{{ $report->status }}"
@@ -73,7 +88,18 @@
                     data-timeline='@json($report->timeline ?? [])'
                     data-comments='@json($report->comments ?? [])'
                 >
-                    <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image">
+                    <!-- <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image"> -->
+                    @if($firstImage)
+                        <div class="image-container">
+                            <img src="{{ $firstImage }}" alt="Stray Animal" class="report-image">
+                            @if($imageCount > 1)
+                                <div class="image-count-badge">{{ $imageCount }}</div>
+                            @endif
+                        </div>
+                    @else
+                        <img src="https://via.placeholder.com/150" alt="No Image" class="report-image">
+                    @endif
+
                     <div class="report-content">
                         <h3 class="report-title">{{ $report->description }}</h3>
                         <div class="report-location">
