@@ -107,7 +107,7 @@ window.addEventListener('click', function(e) {
             <div id="cardAnimator" class="card-animator">
                 <div class="auth-header">
                     <div class="auth-icon">
-                        <i class="fas fa-user-circle"></i>
+                        <img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo" style="height: 60px; width: auto; display: block; margin: 0 auto; background: #fff; box-shadow: 0 2px 8px rgba(74,144,226,0.08);">
                     </div>
                     <h1>Welcome Back</h1>
                     <p>Sign in to your PawMatch account</p>
