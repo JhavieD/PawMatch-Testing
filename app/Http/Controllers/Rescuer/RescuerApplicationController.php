@@ -66,4 +66,20 @@ class RescuerApplicationController extends Controller
             ->get();
         return response()->json(['applications' => $applications]);
     }
+
+    public function complete($id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'completed';
+        $application->save();
+        return response()->json(['success' => true]);
+    }
+
+    public function cancel($id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'cancelled';
+        $application->save();
+        return response()->json(['success' => true]);
+    }
 }

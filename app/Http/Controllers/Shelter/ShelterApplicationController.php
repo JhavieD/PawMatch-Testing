@@ -106,4 +106,20 @@ class ShelterApplicationController extends Controller
 
         return response()->json(['applications' => $formatted]);
     }
+
+    public function complete($id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'completed';
+        $application->save();
+        return response()->json(['success' => true]);
+    }
+
+    public function cancel($id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'cancelled';
+        $application->save();
+        return response()->json(['success' => true]);
+    }
 }
