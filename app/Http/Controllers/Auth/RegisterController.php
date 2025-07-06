@@ -169,6 +169,7 @@ class RegisterController extends Controller
         if ($request->role === 'adopter') {
             if ($request->role === 'adopter') {
             $request->validate([
+                'adopter_valid_id_type' => ['required', 'string', 'in:philid,passport,drivers_license,umid,sss_id,gsis_id,voters_id,prc_id,postal_id'],
                 'adopter_valid_id' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             ]);
 
@@ -183,6 +184,7 @@ class RegisterController extends Controller
                 'address' => $request->address,
                 'adoption_status' => 'pending',
                 'adopter_valid_id' => $validIdPath,
+                'valid_id_type' => $request->adopter_valid_id_type,
                 'purpose' => $request->purpose,
             ]);
 
