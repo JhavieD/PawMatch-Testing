@@ -33,8 +33,8 @@
         <div class="info-item">
             <label>Status</label>
             <p>
-                <span class="status-badge status-{{$application->status ?? 'pending'}}">
-                    {{ ucfirst($application->status ?? '')}}
+                <span class="status-badge status-{{ $application->status ?? 'pending' }}">
+                    {{ ucfirst($application->status ?? '') }}
                 </span>
             </p>
         </div>
@@ -65,26 +65,34 @@
             <label>Has Other Pets</label>
             <p>{{ $application->has_other_pets ? 'Yes' : 'No' }}</p>
         </div>
-        @if($application->has_other_pets)
-        <div class="question">
-            <label>Other Pets Details</label>
-            <p>{{ $application->other_pets_details ?? '' }}</p>
-        </div>
+        @if ($application->has_other_pets)
+            <div class="question">
+                <label>Other Pets Details</label>
+                <p>{{ $application->other_pets_details ?? '' }}</p>
+            </div>
         @endif
         <div class="question">
             <label>Can Provide Vet Care</label>
             <p>{{ $application->can_provide_vet_care ? 'Yes' : 'No' }}</p>
         </div>
-        @if($application->status == 'rejected')
-        <div class="question">
-            <label>Rejection Reason</label>
-            <p>{{ $application->rejection_reason ?? '' }}</p>
-        </div>
+        @if ($application->status == 'rejected')
+            <div class="question">
+                <label>Rejection Reason</label>
+                <p>{{ $application->rejection_reason ?? '' }}</p>
+            </div>
         @endif
     </div>
 </div>
 <div class="modal-actions">
-    <button class="btn btn-primary" id="approveBtn">Approve Application</button>
-    <button class="btn btn-outline" id="rejectBtn">Reject Application</button>
-    <button class="btn btn-outline" id="requestInfoBtn">Request More Info</button>
-</div> 
+    <button class="approve-btn" id="approveBtn"
+        style="background-color: #28a745; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;">
+        Approve Application
+    </button>
+    <button class="reject-btn" id="rejectBtn"
+        style="background-color: #dc3545; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;">
+        Reject Application
+    </button>
+    <button class="message-btn"
+        style="background-color: #f1f1f1; color: #333; border: none; padding: 8px 16px; border-radius: 8px; outline: black;"
+        onclick="messageApplicant({{ $application->adopter->user->user_id }})">Message</button>
+</div>

@@ -16,26 +16,33 @@
             <div class="dashboard-top-row">
                 <div class="dashboard-welcome-card">
                     <div class="flex items-center space-x-2">
-                        <h1 class="text-2xl font-bold">Hi, {{ $shelter->shelter_name ?? 'Shelter' }}!</h1>
-                        {{-- working in progress --}}
-                        @if ($verification && $verification->status === 'approved')
-                            <div class="verification-badge approved" title="Verified shelter">
-                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        @else
-                            <a href="{{ route('shelter.verification.form') }}" class="verification-badge unverified"
-                                title="Click to verify your shelter">
-                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </a>
-                        @endif
+                        <h1 class="text-2xl font-bold flex items-center">
+                            Hi, {{ $shelter->shelter_name ?? 'Shelter' }}!
+                            {{-- working in progress --}}
+                            @if ($verification && $verification->status === 'approved')
+                                <span class="verification-badge approved flex items-center ml-2" title="Verified shelter"
+                                    style="background: #22c55e; border-radius: 9999px; padding: 0.25rem;">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"
+                                        style="display: block;">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            @else
+                                <a href="{{ route('shelter.verification.form') }}"
+                                    class="verification-badge unverified flex items-center ml-2"
+                                    title="Click to verify your shelter"
+                                    style="background: #fbbf24; border-radius: 9999px; padding: 0.25rem;">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"
+                                        style="display: block;">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            @endif
+                        </h1>
                     </div>
                     <p>Welcome back! Here's what's happening at your shelter</p>
                 </div>
