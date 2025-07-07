@@ -1,3 +1,4 @@
+
 @extends('layouts.admin')
 
 @push('styles')
@@ -57,9 +58,24 @@
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
+                @php
+                    // Handle all cases: array, JSON string, or null
+                    if (is_array($report->image_url)) {
+                        $imageUrls = $report->image_url;
+                    } elseif ($report->image_url) {
+                        $imageUrls = json_decode($report->image_url, true);
+                    } else {
+                        $imageUrls = [];
+                    }
+
+                    // Ensure we have a valid array
+                    $imageUrls = is_array($imageUrls) ? $imageUrls : [];
+                    $firstImage = !empty($imageUrls) ? $imageUrls[0] : null;
+                    $imageCount = count($imageUrls);
+                @endphp
                 <div class="report-card"
                     data-report-id="{{ $report->report_id }}"
-                    data-image="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}"
+                    data-image="{{ !empty($imageUrls) ? $imageUrls[0] : 'https://via.placeholder.com/150' }}"
                     data-description="{{ $report->description }}"
                     data-location="{{ $report->location }}"
                     data-status="{{ $report->status }}"
@@ -71,9 +87,20 @@
                     data-flag-reason="{{ $report->flag_reason ?? '' }}"
                     data-is-duplicate="{{ $report->is_duplicate ? 'true' : 'false' }}"
                     data-timeline='@json($report->timeline ?? [])'
-                    data-comments='@json($report->comments ?? [])'
+                  
                 >
-                    <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image">
+                    <!-- <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image"> -->
+                    @if($firstImage)
+                        <div class="image-container">
+                            <img src="{{ $firstImage }}" alt="Stray Animal" class="report-image">
+                            @if($imageCount > 1)
+                                <div class="image-count-badge">{{ $imageCount }}</div>
+                            @endif
+                        </div>
+                    @else
+                        <img src="https://via.placeholder.com/150" alt="No Image" class="report-image">
+                    @endif
+
                     <div class="report-content">
                         <h3 class="report-title">{{ $report->description }}</h3>
                         <div class="report-location">
@@ -147,21 +174,10 @@
             <button class="btn btn-danger" onclick="event.stopPropagation(); markAsDuplicate()" id="duplicateBtn">
                 Mark as Duplicate
             </button>
-            <button class="btn btn-success" onclick="event.stopPropagation(); unflagReport()" id="unflagBtn" style="display: none;">
-                Unflag Report
-            </button>
         </div>
         <div class="status-update">
             <h3>Status Updates</h3>
             <div class="report-timeline"></div>
-        </div>
-        <div class="comment-section">
-            <h3>Comments</h3>
-            <div class="comment-list"></div>
-            <div class="form-group">
-                <textarea id="newComment" rows="3" placeholder="Add a comment..." style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1rem;"></textarea>
-                <button class="btn btn-primary" onclick="event.stopPropagation(); addComment()">Add Comment</button>
-            </div>
         </div>
     </div>
 </div>
@@ -191,24 +207,17 @@
 <div class="investigating-modal" id="investigatingModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>🔍 Mark as Investigating - Notify Shelters</h3>
+            <h3>Mark as Investigating - Notify Shelters</h3>
             <button class="close-modal" onclick="closeInvestigatingModal()">&times;</button>
         </div>
         <div class="modal-body">
             <div class="location-info">
-                <p><strong>📍 Report Location:</strong> <span id="reportLocationText"></span></p>
+                <p><strong> Report Location:</strong> <span id="reportLocationText"></span></p>
                 <p>Select shelters to notify about this stray report:</p>
-            </div>
-            
+            </div>            
             <div class="shelters-container" id="sheltersContainer">
                 <div class="loading-message">🔄 Finding nearby shelters...</div>
-            </div>
-            
-            <div class="notification-message">
-                <label for="notificationMessage">Additional Message (Optional):</label>
-                <textarea id="notificationMessage" placeholder="Add any specific instructions for the shelters..." rows="3"></textarea>
-            </div>
-            
+            </div>        
             <div class="modal-actions">
                 <button class="btn btn-primary" onclick="submitToShelters()" id="submitBtn" disabled>📨 Submit to Shelters</button>
                 <button class="btn btn-outline" onclick="closeInvestigatingModal()">Cancel</button>
@@ -220,9 +229,41 @@
 
 @push('scripts')
 <script>
-// Custom notification system
+window.addEventListener('click', (e) => {
+    const reportModal = document.getElementById('reportModal');
+    const flagModal = document.getElementById('flagModal');
+    const investigatingModal = document.getElementById('investigatingModal');
+    
+    if (e.target === reportModal) {
+        closeReportModal();
+    }
+    
+    if (e.target === flagModal) {
+        closeFlagModal();
+    }
+    
+    if (e.target === investigatingModal) {
+        closeInvestigatingModal();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const reportModal = document.getElementById('reportModal');
+        const flagModal = document.getElementById('flagModal');
+        const investigatingModal = document.getElementById('investigatingModal');
+        
+        if (reportModal.style.display === 'flex') {
+            closeReportModal();
+        } else if (flagModal.style.display === 'flex') {
+            closeFlagModal();
+        } else if (investigatingModal.style.display === 'flex') {
+            closeInvestigatingModal();
+        }
+    }
+});
+
 function showNotification(message, type = 'info', duration = 4000) {
-    // Remove existing notifications
     document.querySelectorAll('.notification').forEach(notif => notif.remove());
     
     const notification = document.createElement('div');
@@ -245,10 +286,8 @@ function showNotification(message, type = 'info', duration = 4000) {
     
     document.body.appendChild(notification);
     
-    // Show notification
     setTimeout(() => notification.classList.add('show'), 100);
     
-    // Auto remove after duration
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
@@ -259,45 +298,36 @@ function updateButtonsForStatus(status) {
     const reportActions = document.querySelector('.report-actions');
     const flagActions = document.querySelector('.flag-actions');
     
-    // Get all action buttons
     const investigatingBtn = reportActions.querySelector('.btn-primary');
     const resolvedBtn = reportActions.querySelector('.btn-outline');
     const cancelBtn = reportActions.querySelector('.btn-danger');
     
-    // Get flag buttons
     const flagBtn = document.getElementById('flagBtn');
     const duplicateBtn = document.getElementById('duplicateBtn');
-    const unflagBtn = document.getElementById('unflagBtn');
     
     if (status === 'cancelled') {
-        // ONLY when cancelled: hide main actions and show flag buttons
         investigatingBtn.style.display = 'none';
         resolvedBtn.style.display = 'none';
         cancelBtn.style.display = 'none';
         
-        // Show flag buttons for cancelled reports
         flagBtn.style.display = 'inline-flex';
         duplicateBtn.style.display = 'inline-flex';
-        unflagBtn.style.display = 'none'; // Will be shown later if report is flagged
         
     } else {
-        // For ALL other statuses (pending, investigating, resolved): ALWAYS show main action buttons
         investigatingBtn.style.display = 'inline-flex';
         resolvedBtn.style.display = 'inline-flex';
         cancelBtn.style.display = 'inline-flex';
-        
-        // Hide flag buttons for all non-cancelled reports
+              
         flagBtn.style.display = 'none';
         duplicateBtn.style.display = 'none';
-        unflagBtn.style.display = 'none';
     }
 }
 
 function openReportModal(card) {
     const modal = document.getElementById('reportModal');
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 
-    // Fill modal fields
     document.getElementById('modalReportImage').src = card.dataset.image;
     document.getElementById('reportId').textContent = card.dataset.reportId;
     document.getElementById('reportStatus').className = `status-badge status-${card.dataset.status}`;
@@ -309,10 +339,8 @@ function openReportModal(card) {
     document.getElementById('animalType').textContent = card.dataset.animalType;
     document.getElementById('reportDescription').textContent = card.dataset.description;
 
-    // Set initial button visibility based on current status
     updateButtonsForStatus(card.dataset.status);
     
-    // Check if report is flagged and update flag buttons accordingly
     const isFlagged = card.dataset.isFlagged === 'true';
     const isDuplicate = card.dataset.isDuplicate === 'true';
     const flagReason = card.dataset.flagReason || '';
@@ -323,14 +351,9 @@ function openReportModal(card) {
         updateFlagButtons(false, '', false);
     }
 
-    // Always load timeline from backend for persistence
     loadTimeline(card.dataset.reportId);
-
-    // Always load comments from backend for persistence
-    loadComments(card.dataset.reportId);
 }
 
-// Attach click handler to each report card
 document.querySelectorAll('.report-card').forEach(card => {
     card.addEventListener('click', function() {
         openReportModal(this);
@@ -339,70 +362,24 @@ document.querySelectorAll('.report-card').forEach(card => {
 
 function closeReportModal() {
     document.getElementById('reportModal').style.display = 'none';
-}
-
-function addComment() {
-    const commentText = document.getElementById('newComment').value;
-    if (!commentText.trim()) {
-        showNotification('Please enter a comment before submitting', 'warning');
-        return;
-    }
-
-    const reportId = document.getElementById('reportId').textContent;
-    
-    // Save comment to backend
-    fetch(`/admin/stray-reports/${reportId}/comment`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ comment: commentText })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('Comment added successfully', 'success');
-            document.getElementById('newComment').value = '';
-            loadComments(reportId);
-        } else {
-            showNotification(data.message || 'Failed to add comment', 'error');
-        }
-    })
-    .catch(() => showNotification('Failed to add comment. Please try again.', 'error'));
+    document.body.style.overflow = 'auto';
 }
 
 function updateFlagButtons(isFlagged, flagReason, isDuplicate) {
     const flagBtn = document.getElementById('flagBtn');
     const duplicateBtn = document.getElementById('duplicateBtn');
-    const unflagBtn = document.getElementById('unflagBtn');
     
-    // Get current status
     const currentStatus = document.getElementById('reportStatus').textContent.toLowerCase();
     
-    // Only show flag buttons for cancelled reports
     if (currentStatus !== 'cancelled') {
         flagBtn.style.display = 'none';
         duplicateBtn.style.display = 'none';
-        unflagBtn.style.display = 'none';
         return;
     }
-    
-    if (isFlagged) {
-        flagBtn.style.display = 'none';
-        duplicateBtn.style.display = 'none';
-        unflagBtn.style.display = 'inline-flex';
-        if (isDuplicate) {
-            unflagBtn.innerHTML = 'Unflag Duplicate';
-        } else {
-            unflagBtn.innerHTML = 'Unflag Report';
-        }
-    } else {
-        // Show flag buttons only for cancelled reports
+
         flagBtn.style.display = 'inline-flex';
         duplicateBtn.style.display = 'inline-flex';
-        unflagBtn.style.display = 'none';
-    }
+    
 }
 
 function updateStatus(status) {
@@ -420,18 +397,14 @@ function updateStatus(status) {
         if (data.success) {
             showNotification(`Report status updated to ${status}`, 'success');
             
-            // Update the modal status badge
             const statusBadge = document.getElementById('reportStatus');
             statusBadge.className = `status-badge status-${status}`;
             statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
             
-            // Update the report card in the grid
             const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
             if (reportCard) {
-                // Update the data attribute
                 reportCard.dataset.status = status;
                 
-                // Update the visual status badge in the card
                 const cardStatusBadge = reportCard.querySelector('.status-badge');
                 if (cardStatusBadge) {
                     cardStatusBadge.className = `status-badge status-${status}`;
@@ -439,8 +412,6 @@ function updateStatus(status) {
                 }
             }
             
-            // ONLY update button visibility for cancelled status
-            // For all other statuses (pending, investigating, resolved), keep buttons visible
             if (status === 'cancelled') {
                 updateButtonsForStatus(status);
             }
@@ -465,7 +436,7 @@ function loadTimeline(reportId) {
                 data.timeline.forEach(item => {
                     timeline.innerHTML += `
                         <div class="timeline-item">
-                            <div class="timeline-date">📝 ${item.date}</div>
+                            <div class="timeline-date"> ${item.date}</div>
                             <div class="timeline-content">${item.content}</div>
                             ${item.author ? `<div class="timeline-author">by ${item.author}</div>` : ''}
                         </div>
@@ -477,34 +448,6 @@ function loadTimeline(reportId) {
         });
 }
 
-function loadComments(reportId) {
-    fetch(`/admin/stray-reports/${reportId}/comments`)
-        .then(res => res.json())
-        .then(data => {
-            const commentList = document.querySelector('.comment-list');
-            commentList.innerHTML = '';
-            if (data.comments && data.comments.length) {
-                data.comments.forEach(comment => {
-                    commentList.innerHTML += `
-                        <div class="comment-item">
-                            <div class="comment-header">
-                                <span class="comment-author">${comment.author}</span>
-                                <span class="comment-date">${comment.date}</span>
-                            </div>
-                            <p>${comment.content}</p>
-                        </div>
-                    `;
-                });
-            } else {
-                commentList.innerHTML = '<div class="comment-item"><p>No comments yet.</p></div>';
-            }
-        })
-        .catch(() => {
-            const commentList = document.querySelector('.comment-list');
-            commentList.innerHTML = '<div class="comment-item"><p>Error loading comments.</p></div>';
-        });
-}
-
 let selectedShelters = [];
 let currentReportId = null;
 
@@ -512,7 +455,6 @@ function showInvestigatingModal() {
     const reportId = document.getElementById('reportId').textContent;
     const reportLocation = document.getElementById('reportLocation').textContent;
     
-    // Get the current report's actual status from the database/card data
     const reportCards = document.querySelectorAll('.report-card');
     let reportCard = null;
     
@@ -529,18 +471,15 @@ function showInvestigatingModal() {
     
     const currentStatus = reportCard.dataset.status.toLowerCase();
     
-    // Only check for investigating status
     if (currentStatus === 'investigating') {
         showNotification('This report is already being investigated!', 'warning');
         return;
     }
     
-    // Proceed with opening the modal
     currentReportId = reportId;
     document.getElementById('reportLocationText').textContent = reportLocation;
     document.getElementById('investigatingModal').style.display = 'flex';
     
-    // Reset selections
     selectedShelters = [];
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
@@ -548,7 +487,6 @@ function showInvestigatingModal() {
         submitBtn.textContent = 'Submit to Shelters';
     }
     
-    // Load nearby shelters
     loadNearbyShelters(reportId);
 }
 
@@ -564,13 +502,13 @@ function loadNearbyShelters(reportId) {
                 displayShelters(data.shelters);
             } else {
                 document.getElementById('sheltersContainer').innerHTML = 
-                    '<div class="error-message">❌ Error loading shelters: ' + (data.message || 'Unknown error') + '</div>';
+                    '<div class="error-message"> Error loading shelters: ' + (data.message || 'Unknown error') + '</div>';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             document.getElementById('sheltersContainer').innerHTML = 
-                '<div class="error-message">❌ Network error loading shelters</div>';
+                '<div class="error-message"> Network error loading shelters</div>';
         });
 }
 
@@ -578,21 +516,19 @@ function displayShelters(shelters) {
     const container = document.getElementById('sheltersContainer');
     
     if (shelters.length === 0) {
-        container.innerHTML = '<div class="no-shelters">⚠️ No verified shelters found in the database.</div>';
+        container.innerHTML = '<div class="no-shelters"> No verified shelters found in the database.</div>';
         return;
     }
 
-    // Separate shelters into priority (same area) and other areas
     const priorityShelters = shelters.filter(shelter => shelter.match_score > 0);
     const otherShelters = shelters.filter(shelter => shelter.match_score === 0);
     
     let html = '<div class="shelters-list">';
     
-    // Priority Shelters
     if (priorityShelters.length > 0) {
         html += `
             <div class="priority-section">
-                <h4 class="section-title">🎯 Priority Shelters (Same Area)</h4>
+                <h4 class="section-title"> Priority Shelters (Same Area)</h4>
                 <div class="priority-shelters">
         `;
         
@@ -616,7 +552,7 @@ function displayShelters(shelters) {
                     </button>
                 </div>
                 <div class="other-shelters" id="otherShelters" style="display: none;">
-                    <h4 class="section-title">📍 Other Available Shelters</h4>
+                    <h4 class="section-title"> Other Available Shelters</h4>
         `;
         
         otherShelters.forEach(shelter => {
@@ -654,7 +590,7 @@ function generateShelterCard(shelter, isPriority) {
                 </div>
                 <div class="shelter-compact-details">
                     <span>📍 ${shelter.location}</span>
-                    <span>📧 ${shelter.email}</span>
+                    <span> ✉️ ${shelter.email}</span>
                 </div>
             </div>
         </div>
@@ -665,19 +601,16 @@ function toggleShelter(shelterId) {
     const checkbox = document.getElementById(`shelter_${shelterId}`);
     
     if (checkbox.checked) {
-        // Add shelter to selected list
         if (!selectedShelters.includes(shelterId)) {
             selectedShelters.push(shelterId);
         }
     } else {
-        // Remove shelter from selected list
         const index = selectedShelters.indexOf(shelterId);
         if (index > -1) {
             selectedShelters.splice(index, 1);
         }
     }
     
-    // Enable/disable submit button based on selection
     const submitBtn = document.getElementById('submitBtn');
     if (selectedShelters.length > 0) {
         submitBtn.disabled = false;
@@ -712,10 +645,7 @@ function submitToShelters() {
         showNotification('Please select at least one shelter before submitting', 'warning');
         return;
     }
-    
-    const notificationMessage = document.getElementById('notificationMessage').value;
-    
-    // Disable button to prevent double submission
+        
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
@@ -728,7 +658,6 @@ function submitToShelters() {
         },
         body: JSON.stringify({
             selected_shelters: selectedShelters,
-            notification_message: notificationMessage
         })
     })
     .then(res => res.json())
@@ -755,10 +684,12 @@ function submitToShelters() {
 function showFlagModal() {
     document.getElementById('flagModal').style.display = 'flex';
     document.getElementById('flagReason').value = '';
+    document.body.style.overflow = 'hidden'; 
 }
 
 function closeFlagModal() {
     document.getElementById('flagModal').style.display = 'none';
+    document.body.style.overflow = 'auto'; 
 }
 
 function markAsDuplicate() {
@@ -785,21 +716,17 @@ function markAsDuplicate() {
         if (data.success) {
             showNotification('Report marked as duplicate and cancelled successfully', 'success');
             
-            // Update the main status badge in modal to show cancelled
             const statusBadge = document.getElementById('reportStatus');
             statusBadge.className = 'status-badge status-cancelled';
             statusBadge.textContent = 'Cancelled';
             
-            // Update the report card appearance - NO VISUAL FLAG INDICATORS
             const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
             if (reportCard) {
-                // Just update the data attributes and status - no visual changes
                 reportCard.dataset.status = 'cancelled';
                 reportCard.dataset.isFlagged = 'true';
                 reportCard.dataset.flagReason = 'Marked as duplicate report';
                 reportCard.dataset.isDuplicate = 'true';
                 
-                // Update the main status badge in the card to show cancelled
                 const cardStatusBadge = reportCard.querySelector('.status-badge');
                 if (cardStatusBadge) {
                     cardStatusBadge.className = 'status-badge status-cancelled';
@@ -807,7 +734,6 @@ function markAsDuplicate() {
                 }
             }
             
-            // Update flag buttons and reload timeline
             updateFlagButtons(true, 'Marked as duplicate report', true);
             loadTimeline(reportId);
         } else {
@@ -855,21 +781,18 @@ function submitFlag(isDuplicate) {
             showNotification('Report flagged and cancelled successfully', 'success');
             closeFlagModal();
             
-            // Update the main status badge in modal to show cancelled
             const statusBadge = document.getElementById('reportStatus');
             statusBadge.className = 'status-badge status-cancelled';
             statusBadge.textContent = 'Cancelled';
-            
-            // Update the report card appearance - NO VISUAL FLAG INDICATORS
+                       
             const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
             if (reportCard) {
-                // Just update the data attributes and status - no visual changes
+                
                 reportCard.dataset.status = 'cancelled';
                 reportCard.dataset.isFlagged = 'true';
                 reportCard.dataset.flagReason = flagReason;
                 reportCard.dataset.isDuplicate = 'false';
                 
-                // Update the main status badge in the card to show cancelled
                 const cardStatusBadge = reportCard.querySelector('.status-badge');
                 if (cardStatusBadge) {
                     cardStatusBadge.className = 'status-badge status-cancelled';
@@ -877,7 +800,6 @@ function submitFlag(isDuplicate) {
                 }
             }
             
-            // Update flag buttons and reload timeline
             updateFlagButtons(true, flagReason, false);
             loadTimeline(reportId);
         } else {
@@ -894,59 +816,10 @@ function submitFlag(isDuplicate) {
     });
 }
 
-function unflagReport() {
-    const reportId = document.getElementById('reportId').textContent;
-    
-    fetch(`/admin/stray-reports/${reportId}/unflag`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('Report unflagged and reactivated successfully', 'success');
-            
-            // Update the main status badge in modal
-            const statusBadge = document.getElementById('reportStatus');
-            statusBadge.className = 'status-badge status-pending';
-            statusBadge.textContent = 'Pending';
-            
-            // Update the report card appearance
-            const reportCard = document.querySelector(`[data-report-id="${reportId}"]`);
-            if (reportCard) {
-                // Just update the data attributes and status
-                reportCard.dataset.status = 'pending';
-                reportCard.dataset.isFlagged = 'false';
-                reportCard.dataset.flagReason = '';
-                reportCard.dataset.isDuplicate = 'false';
-                
-                // Update the main status badge in the card
-                const cardStatusBadge = reportCard.querySelector('.status-badge');
-                if (cardStatusBadge) {
-                    cardStatusBadge.className = 'status-badge status-pending';
-                    cardStatusBadge.textContent = 'Pending';
-                }
-            }
-            
-            // Go back to pending status - show main action buttons
-            updateButtonsForStatus('pending');
-            updateFlagButtons(false, '', false);
-            loadTimeline(reportId);
-        } else {
-            showNotification(data.message || 'Failed to unflag report', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('Network error. Please try again.', 'error');
-    });
-}
 
 function closeInvestigatingModal() {
     document.getElementById('investigatingModal').style.display = 'none';
+        document.body.style.overflow = 'auto'; 
     selectedShelters = [];
     currentReportId = null;
 }

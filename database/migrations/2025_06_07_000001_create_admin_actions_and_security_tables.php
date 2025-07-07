@@ -31,12 +31,12 @@ return new class extends Migration
     // Admin actions table
     Schema::create('admin_actions', function (Blueprint $table) {
         $table->id('action_id');
-        $table->unsignedBigInteger('admin_id'); // commenter haaahh
-        $table->string('action_type'); // ung button na post comment smthng
+        $table->unsignedBigInteger('admin_id'); 
+        $table->string('action_type'); 
         $table->unsignedBigInteger('target_user_id')->nullable();
         $table->unsignedBigInteger('target_report_id')->nullable();
-        $table->text('reason')->nullable(); // comments dito nagsasave
-        $table->timestamp('created_at')->useCurrent(); //comment time
+        $table->text('reason')->nullable(); 
+        $table->timestamp('created_at')->useCurrent(); 
 
         $table->foreign('admin_id')->references('user_id')->on('users')->onDelete('cascade');
         $table->foreign('target_user_id')->references('user_id')->on('users')->onDelete('set null');

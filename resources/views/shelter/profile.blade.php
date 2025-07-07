@@ -63,9 +63,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
-
                 </div>
-
                 <!-- Verification Settings -->
                 <div class="settings-card">
                     <div class="card-header">
