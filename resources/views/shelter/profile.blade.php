@@ -42,9 +42,9 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" id="name" name="name" class="form-input"
-                                value="{{ $user->first_name }} {{ $user->last_name }}" />
+                            <label for="shelter_name" class="form-label">Shelter Name</label>
+                            <input type="text" id="shelter_name" name="shelter_name" class="form-input"
+                                value="{{ $shelter->shelter_name }}" />
                         </div>
                         <div class="form-group">
                             <label for="email" class="form-label">Email Address</label>
@@ -57,7 +57,7 @@
                                 value="{{ $user->phone_number }}" />
                         </div>
                         <div class="form-group">
-                            <label for="address" class="form-label">Address</label>
+                            <label for="address" class="form-label">Location Address</label>
                             <input type="text" id="address" name="address" class="form-input"
                                 value="{{ $shelter->location ?? '' }}" />
                         </div>
@@ -142,44 +142,6 @@
                         </form>
                     </div>
                 </div>
-
-                <!-- Notification Settings -->
-                <div class="settings-card">
-                    <div class="card-header">
-                        <h2>Notification Preferences</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="switch-group">
-                            <span class="switch-label">Email Notifications</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">Application Updates</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">New Pet Alerts</span>
-                            <label class="switch">
-                                <input type="checkbox">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="switch-group">
-                            <span class="switch-label">Marketing Communications</span>
-                            <label class="switch">
-                                <input type="checkbox">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Account Deletion -->
                 <div class="settings-card">
                     <div class="card-header">

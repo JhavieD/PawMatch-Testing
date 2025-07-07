@@ -11,16 +11,8 @@ body {
   overflow: hidden;
 }
 
-body {
-  background: linear-gradient(rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.2));
-  min-height: 100vh;
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-
 /* =====================
-   Sidebar Styles
+   Sidebar Styles (copied from adopter.css)
    ===================== */
 .adopter-sidebar {
   background: white;
@@ -32,8 +24,8 @@ body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Simplified transition for better performance */
+  transition: transform 0.2s ease;
   z-index: 1000;
 }
 
@@ -52,6 +44,7 @@ body {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
   flex: 1;
 }
 
@@ -73,31 +66,36 @@ body {
   text-align: left;
   font-size: 1rem;
   font-weight: 500;
+  min-height: 48px;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .nav-item:hover {
   background: #f3f4f6;
   color: #4a90e2;
-  transform: translateX(4px);
 }
 
 .nav-item.active {
   background: #4a90e2;
   color: white;
-  box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
 }
 
 .nav-item i {
-  width: 20px;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  line-height: 22px;
   text-align: center;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .nav-item span {
   font-weight: 500;
 }
 
-/* Sidebar Mobile Controls */
 .sidebar-hamburger {
   display: none;
   position: fixed;
