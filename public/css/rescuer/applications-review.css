@@ -380,70 +380,176 @@ body {
    APPLICATIONS REVIEW STYLES
    ===================== */
 
-.applications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow: visible;
-  padding: 0 0.5rem;
+/* --- Applications Table Styles --- */
+
+.content-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(13, 15, 17, 0.08);
+  margin-bottom: 2rem;
+}
+.applications-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
   background: transparent;
+}
+.applications-table thead tr {
+  background: #f0f4fa;
+  border-radius: 12px;
+}
+.applications-table th,
+.applications-table td {
+  background: none;
+  padding: 1.2rem 1rem;
+  text-align: left;
   border-radius: 0;
-  box-shadow: none;
+  font-size: 1rem;
+  vertical-align: middle;
 }
-
-.application-item {
-  padding: 2rem 1.5rem;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 1.5rem;
-  align-items: center;
-  margin-bottom: 0;
-  border: none;
-  transition: transform 0.3s ease;
+.applications-table th {
+  color: #4a90e2;
+  font-weight: 600;
+  border-bottom: 2px solid #e5eaf3;
 }
-
-.application-item:hover {
-  transform: translateY(-5px);
+.applications-table th:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
-
-.application-item:last-child {
-  margin-bottom: 0;
-  border-bottom: none;
+.applications-table th:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
-
+.applications-table tr {
+  box-shadow: 0 1px 3px rgba(60, 70, 80, 0.08);
+  transition: transform 0.2s;
+  background: #fff;
+}
+.applications-table tr:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.1);
+}
 .pet-image {
-  width: 80px;
-  height: 80px;
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
   object-fit: cover;
+  display: block;
 }
 
-.application-info h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 0.25rem;
+/* badges */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-left: 0.1rem;
+  text-transform: capitalize;
+}
+.status-pending {
+  background: #fef9c3;
+  color: #854d0e;
+}
+.status-approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
-.applicant-info h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 0.25rem;
+.status-completed {
+  background: #e0e7ff;
+  color: #3730a3;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
-.application-info p {
+.status-cancelled {
+  background: #e5e5e5;
   color: #6b7280;
-  margin-bottom: 0.5rem;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
-.application-meta {
-  font-size: 0.875rem;
-  color: #6b7280;
+.applications-table td:last-child {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0;
+  background: none;
+  border: none;
 }
+
+/* Responsive Table */
+@media (max-width: 900px) {
+  .applications-table th,
+  .applications-table td {
+    padding: 0.7rem 0.4rem;
+    font-size: 0.95rem;
+  }
+}
+@media (max-width: 700px) {
+  .applications-table,
+  .applications-table thead,
+  .applications-table tbody,
+  .applications-table th,
+  .applications-table td,
+  .applications-table tr {
+    display: block;
+    width: 100%;
+  }
+  .applications-table thead {
+    display: none;
+  }
+  .applications-table tr {
+    margin-bottom: 1.2rem;
+    box-shadow: 0 1px 3px rgba(60, 70, 80, 0.08);
+    border-radius: 12px;
+    background: #fff;
+    padding: 1rem 0.5rem;
+  }
+  .applications-table td {
+    border-radius: 0;
+    padding: 0.7rem 0.5rem;
+    text-align: left;
+    position: relative;
+    background: #fff;
+  }
+  .applications-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #4a90e2;
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.92rem;
+  }
+  .pet-image {
+    width: 38vw;
+    max-width: 120px;
+    min-width: 40px;
+    height: auto;
+    margin-bottom: 0.5rem;
+  }
+  .applications-table td:last-child {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 0;
+  }
+}
+
+/* badges */
 
 .status-badge {
   display: inline-block;
@@ -494,9 +600,12 @@ body {
   text-transform: capitalize;
 }
 
+/* BUTTONS */
+
 .action-buttons {
   display: flex;
   gap: 0.5rem;
+  padding: 0 2rem;
 }
 
 .btn {
@@ -513,6 +622,7 @@ body {
   background: #4a90e2;
   color: white;
   border-color: #4a90e2;
+  margin-top: 1rem;
 }
 
 .btn-primary:hover {
@@ -527,6 +637,49 @@ body {
 
 .btn-outline:hover {
   background: #f9fafb;
+}
+
+.successfull-btn {
+  color: #15803d;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  padding: 0 0.5rem;
+  margin-top: 1rem;
+}
+
+.successfull-btn:hover {
+  color: #065f46;
+  transform: translateY(-2px) scale(1.03);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.cancelled-btn {
+  color: #991b1b;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  padding: 0 0.5rem;
+  margin-top: 1rem;
+}
+.cancelled-btn:hover {
+  color: #7f1d1d;
+  transform: translateY(-2px) scale(1.03);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.approve-btn:hover {
+  background: #15803d;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.12);
+  transform: translateY(-2px) scale(1.03);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.reject-btn:hover {
+  background: #dc3545;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.12);
+  transform: translateY(-2px) scale(1.03);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 @media (max-width: 900px) {

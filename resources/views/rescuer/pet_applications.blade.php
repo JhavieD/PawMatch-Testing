@@ -32,38 +32,64 @@
                 </select>
             </div>
 
-
-            <div class="applications-list">
-                @foreach ($applications as $application)
-                    <div class="application-item" data-applicant="{{ strtolower($application->adopter->user->name ?? '') }}"
-                        data-pet="{{ strtolower($application->pet->name ?? '') }}"
-                        data-status="{{ strtolower($application->status) }}">
-                        <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}"
-                            alt="{{ $application->pet->name }}" class="pet-image">
-                        <div class="application-info">
-                            <h3>Application for {{ $application->pet->name }}</h3>
-                            <p>From: {{ $application->adopter->user->name }} • Phone:
-                                {{ $application->adopter->user->phone_number }}</p>
-                            <div class="application-meta">
-                                <span>Submitted:
-                                    {{ \Carbon\Carbon::parse($application->submitted_at)->format('F d, Y') }}</span>
-                                <span class="status-badge status-{{ $application->status }}"
-                                    data-id="{{ $application->application_id }}">
-                                    {{ ucfirst($application->status) }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary"
-                                onclick="showApplicationModal({{ $application->application_id }})">
-                                Review
-                            </button>
-                            <button class="btn btn-outline"
-                                onclick="window.location.href= '{{ route('rescuer.messages', ['receiver_id' => $application->adopter->user->user_id]) }}'"
-                                class="btn btn-outline">Message</button>
-                        </div>
-                    </div>
-                @endforeach
+            <div class="content-card">
+                <!-- Applications Table -->
+                <table class="applications-table" style="width:100%; border-collapse:separate; border-spacing:0 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Pet</th>
+                            <th>Applicant</th>
+                            <th>Phone</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($applications as $application)
+                            <tr class="application-item"
+                                data-applicant="{{ strtolower($application->adopter->user->name ?? '') }}"
+                                data-pet="{{ strtolower($application->pet->name ?? '') }}"
+                                data-status="{{ strtolower($application->status) }}">
+                                <td>
+                                    <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}"
+                                        alt="{{ $application->pet->name }}" class="pet-image"
+                                        style="width:48px; height:48px; object-fit:cover; border-radius:8px;">
+                                </td>
+                                <td>
+                                    <strong>Application for {{ $application->pet->name }}</strong><br>
+                                    {{ $application->adopter->user->name }}
+                                </td>
+                                <td>
+                                    {{ $application->adopter->user->phone_number }}
+                                </td>
+                                <td>
+                                    {{ \Carbon\Carbon::parse($application->submitted_at)->format('F d, Y') }}
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ strtolower($application->status) }}"
+                                        data-id="{{ $application->application_id }}">
+                                        {{ ucfirst($application->status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary"
+                                        onclick="showApplicationModal({{ $application->application_id }})">Review</button>
+                                    @if (!in_array(strtolower($application->status), ['completed', 'cancelled']))
+                                        <button class="successfull-btn mark-completed-btn"
+                                            data-id="{{ $application->application_id }}">
+                                            <i class="fa-solid fa-circle-check" style="color:green"></i>
+                                        </button>
+                                        <button class="cancelled-btn mark-cancelled-btn"
+                                            data-id="{{ $application->application_id }}">
+                                            <i class="fa-solid fa-xmark" style="color:red"></i>
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -97,6 +123,8 @@
                 </div>
             </div>
         </div>
+
+
 
         <script>
             let currentApplicationId = null;
@@ -250,6 +278,40 @@
                 }
                 searchInput.addEventListener('input', filterApplications);
                 statusFilter.addEventListener('change', filterApplications);
+
+                // --- Add event listeners for completed/cancelled buttons ---
+                document.querySelectorAll('.mark-completed-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        fetch(`/rescuer/applications/${id}/complete`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) updateStatusBadge(id, 'completed');
+                            });
+                    });
+                });
+                document.querySelectorAll('.mark-cancelled-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        fetch(`/rescuer/applications/${id}/cancel`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) updateStatusBadge(id, 'cancelled');
+                            });
+                    });
+                });
             });
         </script>
     @endsection

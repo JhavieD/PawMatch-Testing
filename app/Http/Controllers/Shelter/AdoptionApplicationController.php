@@ -59,7 +59,6 @@ class AdoptionApplicationController extends Controller
         $application->status = 'approved';
         $application->save();
 
-        // Optionally, you can redirect or return a response
         return response()->json(['success' => true]);
     }
 
@@ -74,11 +73,19 @@ class AdoptionApplicationController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function requestInfo($id)
+    public function complete($id)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Request sent.'
-        ]);
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'completed';
+        $application->save();
+        return response()->json(['success' => true]);
+    }
+
+    public function cancel($id)
+    {
+        $application = AdoptionApplication::findOrFail($id);
+        $application->status = 'cancelled';
+        $application->save();
+        return response()->json(['success' => true]);
     }
 }

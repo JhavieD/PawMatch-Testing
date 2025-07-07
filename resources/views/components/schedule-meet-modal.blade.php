@@ -1,78 +1,102 @@
-<div id="schedule-meet-modal-overlay" class="modal-overlay" style="display:none;">
-  <div class="modal modal-clean modal-bigger">
-    <div class="modal-header-clean">
-      <h2 style="margin:0;">Schedule Meet & Greet</h2>
-      <button class="close-btn clean-close" onclick="closeScheduleMeetModal()" aria-label="Close">&times;</button>
+<div id="scheduleMeetModalOverlay" class="modal-overlay {{ isset($active) && $active ? 'active' : '' }}"
+    style="display: none;">
+    <div id="scheduleMeetModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Meet & Greet</h5>
+                    <button type="button" class="close" aria-label="Close" onclick="closeScheduleMeetModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="scheduleMeetForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="scheduleMeetApplicationId" name="application_id" value="">
+                        <div class="form-group">
+                            <label for="meetDate">Date</label>
+                            <input type="date" class="form-control" id="meetDate" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="meetTime">Time</label>
+                            <input type="time" class="form-control" id="meetTime" name="time" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="meetMessage">Message (optional)</label>
+                            <textarea class="form-control" id="meetMessage" name="message" rows="2"
+                                placeholder="Add a message for the shelter..."></textarea>
+                        </div>
+                        <div id="scheduleMeetError" class="alert alert-danger" style="display:none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeScheduleMeetModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <form id="schedule-meet-form" class="modal-body-clean">
-      <input type="hidden" name="application_id" id="schedule-meet-application-id">
-      <div class="modal-section" style="margin-bottom: 1.5rem;">
-        <label for="meet-date" class="modal-section-header" style="margin-top:0;">Date</label>
-        <input type="date" id="meet-date" name="meet_date" class="form-control" required style="width:100%;padding:0.5rem;margin-top:0.5rem;">
-      </div>
-      <div class="modal-section" style="margin-bottom: 1.5rem;">
-        <label for="meet-time" class="modal-section-header">Time</label>
-        <input type="time" id="meet-time" name="meet_time" class="form-control" required style="width:100%;padding:0.5rem;margin-top:0.5rem;">
-      </div>
-      <div class="modal-section" style="margin-bottom: 2rem;">
-        <label for="meet-message" class="modal-section-header">Message (optional)</label>
-        <textarea id="meet-message" name="meet_message" class="form-control" rows="3" style="width:100%;padding:0.5rem;margin-top:0.5rem;"></textarea>
-      </div>
-      <div class="modal-footer-clean">
-        <button type="submit" class="btn btn-primary btn-block">Send Request</button>
-        <button type="button" class="btn btn-outline btn-block" onclick="closeScheduleMeetModal()">Cancel</button>
-      </div>
-    </form>
-  </div>
 </div>
-
 <script>
-console.log('Schedule Meet & Greet modal script loaded');
-function openScheduleMeetModal(applicationId) {
-    document.getElementById('schedule-meet-modal-overlay').style.display = 'flex';
-    document.getElementById('schedule-meet-application-id').value = applicationId;
-}
-function closeScheduleMeetModal() {
-    document.getElementById('schedule-meet-modal-overlay').style.display = 'none';
-}
-function submitScheduleMeet() {
-    console.log('submitScheduleMeet called');
-    const form = document.getElementById('schedule-meet-form');
-    const data = {
-        application_id: form.application_id.value,
-        meet_date: form.meet_date.value,
-        meet_time: form.meet_time.value,
-        meet_message: form.meet_message.value,
-        _token: '{{ csrf_token() }}'
-    };
-    console.log('About to send fetch with data:', data);
-    fetch('{{ route('adopter.schedule-meet') }}', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(res => {
-        console.log('Schedule Meet & Greet response:', res);
-        if (res.success) {
-            alert('Meet & Greet request submitted!');
-            closeScheduleMeetModal();
-        } else {
-            alert('Error: ' + (res.error || 'Something went wrong.'));
-        }
-    })
-    .catch((err) => { console.log('AJAX error:', err); alert('AJAX error: ' + (err.message || 'Something went wrong.')); });
-}
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.querySelector('#schedule-meet-form button[type="submit"]');
-    if (btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Send Request button clicked');
-            submitScheduleMeet();
-        });
-    } else {
-        console.log('Send Request button not found');
+    function openScheduleMeetModalModal(appId) {
+        document.getElementById('scheduleMeetApplicationId').value = appId;
+        document.getElementById('scheduleMeetForm').reset();
+        document.getElementById('scheduleMeetError').style.display = 'none';
+        var overlay = document.getElementById('scheduleMeetModalOverlay');
+        overlay.classList.add('active');
+        overlay.style.display = 'flex';
     }
-});
-</script> 
+
+    function closeScheduleMeetModal() {
+        var overlay = document.getElementById('scheduleMeetModalOverlay');
+        overlay.classList.remove('active');
+        overlay.style.display = 'none';
+    }
+    // Close modal when clicking outside modal-dialog
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('scheduleMeetModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeScheduleMeetModal();
+        });
+        document.getElementById('scheduleMeetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var form = e.target;
+            var appId = document.getElementById('scheduleMeetApplicationId').value;
+            var date = form.date.value;
+            var time = form.time.value;
+            var message = form.message.value;
+            var errorDiv = document.getElementById('scheduleMeetError');
+            errorDiv.style.display = 'none';
+            try {
+                const response = await fetch('/adopter/schedule-meet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        application_id: appId,
+                        meet_date: date,
+                        meet_time: time,
+                        meet_message: message
+                    })
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    errorDiv.textContent = data.error || data.message || 'An error occurred.';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                const data = await response.json();
+                if (data && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    window.location.href = '/adopter/messages';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    });
+</script>
