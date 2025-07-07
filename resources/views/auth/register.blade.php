@@ -247,13 +247,34 @@
             <!-- Adopter Fields -->
             <div id="adopterFields" class="role-fields space-y-6" style="display:none;">
                 <div>
-                    <label for="adopter_valid_id" class="block text-sm font-medium text-gray-700">
-                        Valid ID <span class="text-red-500">*</span>
-                        <div class="help-tooltip">
-                            <i class="fas fa-question-circle text-gray-400"></i>
-                            <span class="tooltip-text">Upload a government-issued ID for verification. This helps ensure the safety of our pets.</span>
-                        </div>
-                    </label>
+                <label for="adopter_valid_id_type" class="block text-sm font-medium text-gray-700">
+                Valid ID Type <span class="text-red-500">*</span>
+                </label>
+                <select name="adopter_valid_id_type" id="adopter_valid_id_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <option value="">Select ID Type</option>
+                    <option value="philid">Philippine Identification (PhilID) / ePhilID</option>
+                    <option value="passport">Philippine Passport</option>
+                    <option value="drivers_license">Driver's License</option>
+                    <option value="umid">Unified Multi-Purpose ID (UMID)</option>
+                    <option value="sss_id">SSS ID (Social Security System ID)</option>
+                    <option value="gsis_id">GSIS ID (Government Service Insurance System ID)</option>
+                    <option value="voters_id">Voter's ID</option>
+                    <option value="prc_id">PRC ID (Professional Regulation Commission ID)</option>
+                    <option value="postal_id">Postal ID</option>
+                </select>
+                <div class="field-error" id="adopter_valid_id_typeError"></div>
+            </div>
+
+            <div class="mt-4">
+                <label for="adopter_valid_id" class="block text-sm font-medium text-gray-700">
+                    Upload Valid ID <span class="text-red-500">*</span>
+                    <div class="help-tooltip">
+                        <i class="fas fa-question-circle text-gray-400"></i>
+                        <span class="tooltip-text">Upload a government-issued ID for verification. This helps ensure the safety of our pets.</span>
+                    </div>
+                </label>
+                    
+
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">

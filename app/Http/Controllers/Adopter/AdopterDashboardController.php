@@ -34,7 +34,7 @@ class AdopterDashboardController extends Controller
             $recentApplications = $adopter ? $adopter->applications()
                 ->with(['pet.images', 'pet.shelter'])
                 ->latest()
-                ->take(5)
+                ->take(3)
                 ->get() : collect();
             
             // Get recent messages (temporarily disabled)

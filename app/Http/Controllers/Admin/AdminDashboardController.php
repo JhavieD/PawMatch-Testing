@@ -522,30 +522,96 @@ class AdminDashboardController extends Controller
                 'status' => 'required|in:pending,investigating,resolved,cancelled'
             ]);
 
-            // Check if user is authenticated
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
-            }
-
             $oldStatus = $report->status;
-            $report->status = $request->status;
-            $report->save();
+            $newStatus = $request->status;
 
-            // Insert admin action
-            DB::table('admin_actions')->insert([
-                'action_type' => 'status_update',
-                'target_report_id' => $report->report_id,
-                'reason' => "Status updated from {$oldStatus} to {$request->status}",
-                'admin_id' => auth()->id(),
-                'created_at' => now(),
+            // Create professional status messages without excessive enthusiasm
+            $statusMessages = [
+                'pending' => [
+                    'investigating' => 'The stray animal report is now being actively investigated by our team. Thank you for your patience.',
+                    'resolved' => 'The stray animal report has been successfully resolved. Thank you for helping animals in need.',
+                    'cancelled' => 'The stray animal report has been closed after careful review. Thank you for your concern for animal welfare.'
+                ],
+                'investigating' => [
+                    'pending' => 'The stray animal report is back under review. We will keep you updated on any developments.',
+                    'resolved' => 'The stray animal report has been successfully resolved. Thank you for making a difference.',
+                    'cancelled' => 'The stray animal report has been closed after thorough investigation. Thank you for your dedication to animal welfare.'
+                ],
+                'resolved' => [
+                    'pending' => 'The resolved report is being reviewed again for any additional follow-up needed.',
+                    'investigating' => 'The report is being reopened for further investigation. We will keep you informed of our progress.',
+                    'cancelled' => 'The report status has been updated. Thank you for your contribution to animal welfare.'
+                ],
+                'cancelled' => [
+                    'pending' => 'The report has been reopened and is now under review.',
+                    'investigating' => 'The report is now being actively investigated by our team.',
+                    'resolved' => 'The report has been successfully resolved. Thank you for your patience and concern for animals.'
+                ]
+            ];
+
+            // Debug: Let's add some logging to see what's happening
+            \Log::info('Status Update Debug', [
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'has_old_status_key' => isset($statusMessages[$oldStatus]),
+                'has_new_status_key' => isset($statusMessages[$oldStatus][$newStatus])
             ]);
 
-            return response()->json(['success' => true, 'message' => 'Status updated successfully']);
+            // Get the appropriate message with better fallback handling
+            $message = null;
+            
+            if (isset($statusMessages[$oldStatus]) && isset($statusMessages[$oldStatus][$newStatus])) {
+                $message = $statusMessages[$oldStatus][$newStatus];
+            } else {
+                // Specific fallback messages for each status
+                switch ($newStatus) {
+                    case 'resolved':
+                        $message = 'The stray animal report has been successfully resolved. Thank you for helping animals in need.';
+                        break;
+                    case 'cancelled':
+                        $message = 'The stray animal report has been closed. Thank you for your concern for animal welfare.';
+                        break;
+                    case 'investigating':
+                        $message = 'The stray animal report is now being actively investigated by our team. Thank you for your patience.';
+                        break;
+                    case 'pending':
+                        $message = 'The stray animal report is now under review. We will keep you updated on any developments.';
+                        break;
+                    default:
+                        $message = "The stray animal report status has been updated. Thank you for your commitment to helping animals.";
+                }
+            }
+
+            // Update the report status
+            $report->status = $newStatus;
+            $report->save();
+
+            // Create admin action with professional message
+            \DB::table('admin_actions')->insert([
+                'action_type' => 'status_update',
+                'target_report_id' => $report->report_id,
+                'reason' => $message,
+                'admin_id' => auth()->id(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'new_status' => $newStatus
+            ]);
+
         } catch (\Exception $e) {
-            \Log::error('Update status error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            \Log::error('Status update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status'
+            ], 500);
         }
     }
+
+
         
     public function strayReportTimeline($id)
     {
@@ -569,27 +635,7 @@ class AdminDashboardController extends Controller
         return response()->json(['timeline' => $timeline]);
     }
     
-    //for comments ito
-    public function strayReportComments($id)
-    {
-        $comments = \DB::table('admin_actions') //table nito for comments
-            ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-            ->where('action_type', 'comment')
-            ->where('target_report_id', $id)
-            ->orderBy('created_at', 'desc') // descending order ng comments una ung latest
-            ->select('admin_actions.*', 'users.first_name', 'users.last_name')
-            ->get()
-            ->map(function($action) {
-                return [
-                    'author' => ($action->first_name && $action->last_name) 
-                        ? $action->first_name . ' ' . $action->last_name 
-                        : 'Admin',
-                    'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
-                    'content' => $action->reason,
-                ];
-            });
-        return response()->json(['comments' => $comments]);
-    }
+
   
     public function verifications()
     {
@@ -765,54 +811,6 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with('success', 'Verification status updated.');
     }
 
-    public function addComment(Request $request, $id)
-    {
-        try {
-            $report = StrayReports::find($id);
-            if (!$report) {
-                return response()->json(['success' => false, 'message' => 'Report not found.'], 404);
-            }
-
-            $request->validate([
-                'comment' => 'required|string|max:1000'
-            ]);
-
-            // Check if user is authenticated
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
-            }
-
-            DB::table('admin_actions')->insert([
-                'action_type' => 'comment',
-                'target_report_id' => $report->report_id,
-                'reason' => $request->comment,
-                'admin_id' => auth()->id(),
-                'created_at' => now(),
-                // Remove updated_at if the column doesn't exist in your migration
-            ]);
-
-            // Get user info safely
-            $user = auth()->user();
-            $authorName = 'Admin'; // default
-            if ($user && $user->first_name && $user->last_name) {
-                $authorName = $user->first_name . ' ' . $user->last_name;
-            } elseif ($user && $user->name) {
-                $authorName = $user->name;
-            }
-
-            return response()->json([
-                'success' => true,
-                'comment' => [
-                    'author' => $authorName,
-                    'date' => now()->format('F d, Y h:i A'),
-                    'content' => $request->comment
-                ]
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Add comment error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
 
     public function findNearbyShelters($reportId)
     {
@@ -904,18 +902,18 @@ class AdminDashboardController extends Controller
             ], 500);
         }
     }
+
     public function markAsInvestigating(Request $request, $reportId)
     {
         try {
             $request->validate([
                 'selected_shelters' => 'required|array',
-                'selected_shelters.*' => 'exists:shelters,shelter_id',
-                'notification_message' => 'nullable|string|max:500'
+                'selected_shelters.*' => 'exists:shelters,shelter_id'
+                // Removed 'notification_message' since admin message is removed
             ]);
 
             $report = StrayReports::findOrFail($reportId);
             
-            // Check if already investigating
             if ($report->status === 'investigating') {
                 return response()->json([
                     'success' => false,
@@ -923,11 +921,10 @@ class AdminDashboardController extends Controller
                 ], 400);
             }
 
-            // Update report status
             $report->status = 'investigating';
             $report->save();
 
-            // Get shelter names for the timeline message
+            // Get shelter names for message
             $shelterNames = \DB::table('shelters')
                 ->whereIn('shelter_id', $request->selected_shelters)
                 ->pluck('shelter_name')
@@ -935,24 +932,25 @@ class AdminDashboardController extends Controller
 
             $shelterList = implode(', ', $shelterNames);
 
-            // CREATE NOTIFICATION RECORDS FOR EACH SELECTED SHELTER
+            $message = count($shelterNames) === 1 
+                ? "The stray animal report is now being handled by {$shelterList}. They have been notified and will work to help the animal you reported. Thank you for caring."
+                : "The stray animal report is now being handled by our partner shelters: {$shelterList}. They have been notified and will coordinate to help the animal you reported. Thank you for making a difference.";
+
+            // CREATE NOTIFICATION RECORDS FOR EACH SELECTED SHELTER (without admin_message)
             foreach ($request->selected_shelters as $shelterId) {
                 \DB::table('stray_report_notifications')->insert([
                     'report_id' => $report->report_id,
                     'shelter_id' => $shelterId,
                     'sent_at' => now(),
-                    'is_read' => false,
-                    'admin_message' => $request->notification_message, 
-                    'created_at' => now(),
-                    'updated_at' => now()
+                    'is_read' => false
                 ]);
             }
 
-            // Create admin action for timeline
+            // Create admin action with professional message
             \DB::table('admin_actions')->insert([
-                'action_type' => 'status_update',
+                'action_type' => 'status_update', 
                 'target_report_id' => $report->report_id,
-                'reason' => "Status changed to investigating. Notified shelters: {$shelterList}",
+                'reason' => $message,
                 'admin_id' => auth()->id(),
                 'created_at' => now(),
                 'updated_at' => now()
@@ -960,7 +958,7 @@ class AdminDashboardController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Report marked as investigating and shelters notified successfully!'
+                'message' => 'Report submitted to shelters successfully'
             ]);
 
         } catch (\Exception $e) {
@@ -970,6 +968,7 @@ class AdminDashboardController extends Controller
             ], 500);
         }
     }
+
 
     public function activateUser(User $user)
     {
@@ -1064,44 +1063,6 @@ class AdminDashboardController extends Controller
         }
     }
 
-    public function unflagReport($id)
-    {
-        try {
-            $report = StrayReports::findOrFail($id);
-            $oldStatus = $report->status;
-            
-            $report->update([
-                'status' => 'pending', // Reset to pending when unflagged to reactivate
-                'is_flagged' => false,
-                'flag_reason' => null,
-                'is_duplicate' => false,
-                'flagged_by' => null,
-                'flagged_at' => null
-            ]);
-
-            // Add timeline entry for unflag action
-            DB::table('admin_actions')->insert([
-                'action_type' => 'status_update',
-                'target_report_id' => $report->report_id,
-                'reason' => "Report unflagged and reactivated - status reset to pending",
-                'admin_id' => auth()->id(),
-                'created_at' => now(),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Report unflagged and reactivated successfully',
-                'new_status' => 'pending'
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Unflag report error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to unflag report: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 
     /**
      * Show user details for AJAX requests.

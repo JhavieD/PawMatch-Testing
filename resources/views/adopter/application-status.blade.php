@@ -167,32 +167,36 @@
             <!-- Completed Adoptions Tab -->
             <div id="completedTab" class="tab-content">
                 @foreach ($applications as $application)
-                    @if ($application->status == 'completed')
+                    @if($application->status == 'completed')
                         <div class="application-card" data-application-id="{{ $application->application_id }}">
                             <div class="application-header">
                                 <div class="pet-info">
-                                    <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}"
-                                        alt="{{ $application->pet->name }}" class="pet-image" />
+                                    <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image" />
                                     <div class="pet-details">
                                         <h2>{{ $application->pet->name }}</h2>
-                                        <p>{{ $application->pet->breed }} •
-                                            {{ $application->pet->shelter->shelter_name ?? '' }}</p>
+                                        <p>{{ $application->pet->breed }} • {{ $application->pet->shelter->shelter_name ?? '' }}</p>
                                     </div>
                                 </div>
                                 <span class="status status-completed">Adoption Completed</span>
                             </div>
                             <div class="application-content">
-                                <div class="rating-section">
+                                <div class="review-section">
                                     <h3>Rate Your Adoption Experience</h3>
-                                    <div class="star-rating">
-                                        <span class="star" data-rating="5">★</span>
-                                        <span class="star" data-rating="4">★</span>
-                                        <span class="star" data-rating="3">★</span>
-                                        <span class="star" data-rating="2">★</span>
-                                        <span class="star" data-rating="1">★</span>
-                                    </div>
-                                    <textarea class="review-input" placeholder="Share your adoption experience..."></textarea>
-                                    <button class="btn btn-primary submit-review">Submit Review</button>
+                                    <form class="reviewForm" data-application-id="{{ $application->application_id }}">
+                                        @csrf
+                                        <input type="hidden" name="application_id" value="{{ $application->application_id }}">
+                                        <input type="hidden" name="rating" class="rating-input" value="0">
+                                        
+                                        <div class="rating-stars">
+                                            <span class="rating-star" data-rating="1">☆</span>
+                                            <span class="rating-star" data-rating="2">☆</span>
+                                            <span class="rating-star" data-rating="3">☆</span>
+                                            <span class="rating-star" data-rating="4">☆</span>
+                                            <span class="rating-star" data-rating="5">☆</span>
+                                        </div>
+                                        <textarea name="review" class="form-control mt-3" rows="4" placeholder="Share your adoption experience..."></textarea>
+                                        <button type="submit" class="btn btn-primary mt-3">Submit Review</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -215,62 +219,133 @@
             document.getElementById(tabName + 'Tab').classList.add('active');
             event.target.classList.add('active');
         }
-        // Star rating functionality
-        // (You can keep the JS from the HTML file for star rating)
+
         document.addEventListener('DOMContentLoaded', function() {
             // Highlight application if application_id is in query
             const appId = new URLSearchParams(window.location.search).get('application_id');
             if (appId) {
                 const appCard = document.querySelector(`.application-card[data-application-id='${appId}']`);
                 if (appCard) {
-                    appCard.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
+                    appCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     appCard.style.boxShadow = '0 0 0 4px #2563eb';
                     setTimeout(() => {
                         appCard.style.boxShadow = '';
                     }, 2000);
                 }
             }
-            const starContainers = document.querySelectorAll('.star-rating');
-            starContainers.forEach(starContainer => {
-                const stars = starContainer.querySelectorAll('.star');
-                let currentRating = 0;
-                stars.forEach(star => {
+
+            // Review form functionality
+            document.querySelectorAll('.reviewForm').forEach(form => {
+                const ratingStars = form.querySelectorAll('.rating-star');
+                const ratingInput = form.querySelector('.rating-input');
+                
+                ratingStars.forEach(star => {
                     star.addEventListener('click', function() {
-                        const rating = this.getAttribute('data-rating');
-                        currentRating = rating;
-                        updateStars(stars, rating);
+                        const rating = parseInt(this.dataset.rating);
+                        ratingInput.value = rating;
+                        
+                        // Update star appearance within this form
+                        ratingStars.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.add('active');
+                                s.innerHTML = '★';
+                            } else {
+                                s.classList.remove('active');
+                                s.innerHTML = '☆';
+                            }
+                        });
+                    });
+                    
+                    star.addEventListener('mouseenter', function() {
+                        const rating = parseInt(this.dataset.rating);
+                        ratingStars.forEach((s, index) => {
+                            if (index < rating) {
+                                s.innerHTML = '★';
+                            } else {
+                                s.innerHTML = '☆';
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseleave', function() {
+                        // Reset stars to current rating
+                        const currentRating = parseInt(ratingInput.value);
+                        ratingStars.forEach((s, index) => {
+                            if (index < currentRating) {
+                                s.innerHTML = '★';
+                            } else {
+                                s.innerHTML = '☆';
+                            }
+                        });
                     });
                 });
 
-                function updateStars(stars, rating) {
-                    stars.forEach(star => {
-                        const starRating = star.getAttribute('data-rating');
-                        if (starRating <= rating) {
-                            star.classList.add('active');
+                const ratingStarsContainer = form.querySelector('.rating-stars');
+                ratingStarsContainer.addEventListener('mouseleave', function() {
+                    const currentRating = parseInt(ratingInput.value);
+                    ratingStars.forEach((s, index) => {
+                        if (index < currentRating) {
+                            s.innerHTML = '★';
                         } else {
-                            star.classList.remove('active');
+                            s.innerHTML = '☆';
                         }
                     });
-                }
-                // Submit review functionality
-                const submitBtn = starContainer.closest('.rating-section').querySelector('.submit-review');
-                submitBtn.addEventListener('click', function() {
-                    const review = starContainer.closest('.rating-section').querySelector(
-                        '.review-input').value;
-                    if (currentRating === 0) {
+                });
+                
+                // Handle review submission for this form
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    const applicationId = this.dataset.applicationId;
+                    
+                    if (formData.get('rating') === '0') {
                         alert('Please select a rating');
                         return;
                     }
-                    if (!review.trim()) {
-                        alert('Please write a review');
-                        return;
-                    }
-                    // Here you would typically send this data to your backend
-                    alert('Thank you for your review!');
+                    
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Submitting...';
+                    
+                    fetch('{{ route("adopter.review.store") }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Hide the review form and show success message
+                            this.closest('.review-section').innerHTML = `
+                                <div class="success-message">
+                                    <p>✓ Review submitted successfully!</p>
+                                </div>
+                            `;
+                        } else {
+                            alert(data.message || 'Error submitting review');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error submitting review');
+                    })
+                    .finally(() => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Review';
+                    });
                 });
+            });
+            
+            // Check for existing reviews when page loads
+            const completedApplications = document.querySelectorAll('#completedTab [data-application-id]');
+            completedApplications.forEach(app => {
+                const applicationId = app.dataset.applicationId;
+                if (app.querySelector('.review-section')) {
+                    checkExistingReview(applicationId);
+                }
             });
 
             const params = new URLSearchParams(window.location.search);
@@ -292,6 +367,29 @@
                 });
             });
         });
+
+        function checkExistingReview(applicationId) {
+            fetch(`{{ route("adopter.review.check") }}?application_id=${applicationId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.hasReview) {
+                        // Show existing review instead of form
+                        const reviewSection = document.querySelector(`[data-application-id="${applicationId}"] .review-section`);
+                        if (reviewSection) {
+                            reviewSection.innerHTML = `
+                                <div class="existing-review">
+                                    <h4>Your Review</h4>
+                                    <div class="rating-display">
+                                        ${'★'.repeat(data.review.rating)}${'☆'.repeat(5 - data.review.rating)}
+                                    </div>
+                                    <p>${data.review.review}</p>
+                                    <small>Submitted on ${data.review.created_at}</small>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+        }
 
         function openApplicationModal(card) {
             // Populate modal fields
@@ -341,5 +439,68 @@
             const overlay = document.getElementById('application-modal-overlay');
             if (e.target === overlay) closeApplicationModal();
         });
+
+        function openScheduleMeetModal(applicationId) {
+            document.getElementById('schedule-meet-modal-overlay').style.display = 'flex';
+        }
+        
+        function closeScheduleMeetModal() {
+            document.getElementById('schedule-meet-modal-overlay').style.display = 'none';
+        }
+        
+        // Attach to modal button
+        const scheduleBtns = document.querySelectorAll('.btn.btn-primary, #modal-action-btn');
+        scheduleBtns.forEach(btn => {
+            if (btn.textContent.includes('Schedule Meet & Greet')) {
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevents application modal from opening
+                    openScheduleMeetModal(this.getAttribute('data-application-id'));
+                };
+            }
+        });
+        
+        function submitScheduleMeet(e) {
+            e.preventDefault();
+            // You can add AJAX or form submission logic here
+            alert('Meet & Greet request submitted!');
+            closeScheduleMeetModal();
+        }
     </script>
-@endsection
+    
+    <style>
+        .rating-star {
+            font-size: 24px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .rating-star:hover,
+        .rating-star.active {
+            color: #ffd700;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .existing-review {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .rating-display {
+            font-size: 18px;
+            color: #ffd700;
+            margin: 5px 0;
+        }
+    </style>
+@endsection 

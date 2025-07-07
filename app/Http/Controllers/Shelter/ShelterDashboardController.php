@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shelter;
 
 use App\Models\Shelter;
+use App\Models\Adopter\AdopterReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,17 @@ class ShelterDashboardController extends Controller
             ->map(function ($id) {
                 return Message::with('sender')->find($id);
             });
+
+        // Get reviews for this shelter
+        $recentReviews = collect();
+        
+        // Get shelter reviews
+        $shelterReviews = \App\Models\Adopter\AdopterReview::where('shelter_id', $shelter->shelter_id)
+            ->with(['adopter.user'])
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get();
+            
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
         $verification = $shelter->verifications()->latest()->first();
 
@@ -384,7 +396,7 @@ class ShelterDashboardController extends Controller
     }
 
     // STRAY REPORTS METHODS added by andrea
-    public function strayReports(Request $request)
+ public function strayReports(Request $request)
     {
         $shelter = auth()->user()->shelter;
 
@@ -407,7 +419,8 @@ class ShelterDashboardController extends Controller
                 'stray_report_notifications.admin_message',
                 'stray_report_notifications.is_read',
                 'stray_report_notifications.sent_at'
-            ]);
+            ])
+            ->distinct(); // to  remove duplicates
 
         if ($request->filled('search')) {
             $search = $request->get('search');
@@ -436,6 +449,26 @@ class ShelterDashboardController extends Controller
         $shelter = auth()->user()->shelter;
 
         try {
+            // Check if the report is already accepted by this shelter
+            $notification = \DB::table('stray_report_notifications')
+                ->where('report_id', $reportId)
+                ->where('shelter_id', $shelter->shelter_id)
+                ->first();
+
+            if (!$notification) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Report notification not found'
+                ], 404);
+            }
+
+            if ($notification->handled_at) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Report is already accepted!'
+                ], 409);
+            }
+
             // Update the main stray report status to 'accepted'
             \DB::table('stray_reports')
                 ->where('report_id', $reportId)
@@ -450,6 +483,18 @@ class ShelterDashboardController extends Controller
                     'read_at' => now(),
                     'handled_at' => now()
                 ]);
+
+
+            $message = " {$shelter->shelter_name} has accepted your stray animal report and will be taking action to help the animal.";
+
+            \DB::table('admin_actions')->insert([
+                'action_type' => 'status_update',
+                'target_report_id' => $reportId,
+                'reason' => $message,
+                'admin_id' => auth()->id(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);    
 
             return response()->json([
                 'success' => true,
