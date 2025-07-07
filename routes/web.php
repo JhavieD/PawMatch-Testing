@@ -17,6 +17,7 @@ use App\Http\Controllers\Adopter\AdopterDashboardController;
 use App\Http\Controllers\Adopter\AdopterPetListingsController;
 use App\Http\Controllers\Adopter\AdopterApplicationController;
 use App\Http\Controllers\Adopter\AdopterReportController;
+use App\Http\Controllers\Adopter\AdopterReviewController;
 // Shelter Controllers
 use App\Http\Controllers\Shelter\ShelterDashboardController;
 use App\Http\Controllers\Shelter\ShelterVerificationController;

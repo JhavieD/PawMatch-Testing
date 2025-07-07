@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Shelter\Shelter;
 use App\Models\Adopter\Adopter;
 use App\Models\Rescuer\Rescuer;
+use App\Models\Shared\AdoptionApplication;
 
 class AdopterReview extends Model
 {
