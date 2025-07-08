@@ -40,7 +40,7 @@ class AdopterPetListingsController extends Controller
                     ->orWhere('location', 'like', "%$search%")
                     ->orWhereHas('shelter', function ($q2) use ($search) {
                         $q2->where('city', 'like', "%$search%")
-                            ->orWhere('name', 'like', "%$search%")
+                            ->orWhere('shelter_name', 'like', "%$search%")
                             ->orWhere('address', 'like', "%$search%")
                             ->orWhere('province', 'like', "%$search%")
                             ->orWhere('region', 'like', "%$search%")
@@ -103,17 +103,24 @@ class AdopterPetListingsController extends Controller
                             ->orWhere('adoption_testimonials', 'like', "%$search%")
                             ->orWhere('adoption_faq', 'like', "%$search%")
                             ->orWhere('adoption_policies', 'like', "%$search%");
+                            })
+                            ->orWhereHas('rescuer', function ($q2) use ($search) {
+                                $q2->where('city', 'like', "%$search%")
+                                    ->orWhere('organization_name', 'like', "%$search%")
+                                    ->orWhere('address', 'like', "%$search%")
+                                    ->orWhere('location', 'like', "%$search%")
+                                    ->orWhere('contact_info', 'like', "%$search%");
                     });
             });
         }
-        $pets = $query->with('shelter', 'images')->paginate(12);
+        $pets = $query->with(['shelter', 'rescuer', 'images'])->paginate(12);
 
         return view('adopter.pet-listings', compact('petTypes', 'ageGroups', 'sizes', 'pets'));
     }
 
     public function show(Pet $pet)
     {
-        $pet->load(['images', 'shelter']);
+        $pet->load(['images', 'shelter', 'rescuer']);
         return view('adopter.pet-details', compact('pet'));
     }
 
@@ -147,7 +154,7 @@ class AdopterPetListingsController extends Controller
     public function getPetDetails(Pet $pet)
     {
         // Force a fresh load of relationships to avoid stale data
-        $pet = Pet::with(['images', 'shelter'])->find($pet->pet_id);
+        $pet = Pet::with(['images', 'shelter', 'rescuer'])->find($pet->pet_id);
         $user = auth()->user();
         $isFavorite = false;
         
@@ -156,6 +163,12 @@ class AdopterPetListingsController extends Controller
             $isFavorite = $user->adopter->savedPets()
                 ->where('saved_pets.pet_id', $pet->pet_id)
                 ->exists();
+        }
+        
+        if ($pet->shelter) {
+            $pet->user_id = $pet->shelter->user_id;
+        } elseif ($pet->rescuer) {
+            $pet->user_id = $pet->rescuer->user_id;
         }
         
         $petData = $pet->toArray();
