@@ -42,7 +42,8 @@
             <div class="pets-grid">
                 @forelse($pets as $pet)
                     <div class="pet-card" data-name="{{ $pet->name }}" data-breed="{{ $pet->breed }}"
-                        data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}">
+                        data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}"
+                        data-medical_history='@json($pet->medical_history ?? [])'>
                         <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}"
                             class="pet-image">
                         <div class="pet-info">
@@ -229,6 +230,12 @@
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="edit-medical_history">Medical Records (PDF, Images)</label>
+                            <div id="edit-medical-records-list" style="margin-bottom: 8px; color: #6b7280;"></div>
+                            <input type="file" id="edit-medical_history" name="medical_history[]" multiple
+                                accept=".pdf,image/*">
+                        </div>
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
@@ -359,6 +366,11 @@
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="medical_history">Medical Records (PDF, Images)</label>
+                            <input type="file" id="medical_history" name="medical_history[]" multiple
+                                accept=".pdf,image/*">
+                        </div>
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid">
@@ -442,6 +454,7 @@
 
         editBtns.forEach(btn => {
             btn.addEventListener('click', () => {
+                const petCard = btn.closest('.pet-card');
                 const petId = btn.getAttribute('data-pet-id');
                 const name = btn.getAttribute('data-name');
                 const species = btn.getAttribute('data-species');
@@ -478,12 +491,41 @@
                 }
                 document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
 
-                // TODO: Display images and delete buttons dynamically if needed
+                // --- Medical Records Display Logic (shelter style) ---
+                const recordsList = document.getElementById('edit-medical-records-list');
+                let medicalHistory = [];
+                try {
+                    medicalHistory = JSON.parse(petCard.getAttribute('data-medical_history') || '[]');
+                } catch (e) {
+                    medicalHistory = [];
+                }
+                if (recordsList) {
+                    recordsList.innerHTML = '';
+                    if (Array.isArray(medicalHistory) && medicalHistory.length > 0) {
+                        medicalHistory.forEach(record => {
+                            if (typeof record === 'object' && record.url && record.name) {
+                                const link = document.createElement('a');
+                                link.href = record.url;
+                                link.textContent = record.name;
+                                link.target = '_blank';
+                                link.style.display = 'block';
+                                recordsList.appendChild(link);
+                            } else if (typeof record === 'string') {
+                                const link = document.createElement('a');
+                                link.href = record;
+                                link.textContent = record.split('/').pop();
+                                link.target = '_blank';
+                                link.style.display = 'block';
+                                recordsList.appendChild(link);
+                            }
+                        });
+                    } else {
+                        recordsList.textContent = 'No medical records uploaded.';
+                    }
+                }
+                // --- End Medical Records Display Logic ---
 
-                // Update the form action to the correct pet ID
-                const form = document.getElementById('editPetForm');
-                form.action = form.action.replace('__PET_ID__', petId);
-
+                // Show modal
                 editModal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
             });
@@ -635,10 +677,8 @@
                         applicationsList.innerHTML = '';
                         if (data.applications && data.applications.length > 0) {
                             data.applications.forEach(app => {
-                                const applicantName = app.adopter && app.adopter.user ? app
-                                    .adopter.user.name : 'Unknown';
-                                const phone = app.adopter && app.adopter.user ? app.adopter.user
-                                    .phone || '' : '';
+                                const applicantName = app.applicant_name || 'Unknown';
+                                const phone = app.phone || '';
                                 const submittedAt = app.submitted_at ? new Date(app
                                     .submitted_at).toLocaleDateString() : '';
                                 const status = app.status ? app.status.charAt(0).toUpperCase() +
@@ -656,8 +696,7 @@
                                             </div>
                                         </div>
                                         <div class="action-buttons" style="display: flex; gap: 0.5rem;">
-                                            <button class="btn btn-primary" onclick="viewApplicationDetails(${app.application_id})">Review</button>
-                                            <button class="btn btn-outline" onclick="messageApplicant('${applicantName}')">Message</button>
+                                            <button class="btn btn-outline" onclick="messageApplicant('${app.user_id || ''}')">Message</button>
                                         </div>
                                     </div>
                                 `;
@@ -680,8 +719,13 @@
             window.location.href = `applications-review.html?id=${applicationId}`;
         }
 
-        function messageApplicant(applicantName) {
-            window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
+        function messageApplicant(userId) {
+            // Redirect to the correct Laravel route for messaging with a specific user
+            if (userId) {
+                window.location.href = `/rescuer/messages?receiver_id=${userId}`;
+            } else {
+                alert('No applicant user ID found.');
+            }
         }
 
         // filtering

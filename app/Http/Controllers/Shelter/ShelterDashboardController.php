@@ -49,14 +49,14 @@ class ShelterDashboardController extends Controller
 
         // Get reviews for this shelter
         $recentReviews = collect();
-        
+
         // Get shelter reviews
         $shelterReviews = \App\Models\Adopter\AdopterReview::where('shelter_id', $shelter->shelter_id)
             ->with(['adopter.user'])
             ->orderByDesc('created_at')
             ->take(5)
             ->get();
-            
+
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
         $verification = $shelter->verifications()->latest()->first();
 
@@ -113,6 +113,12 @@ class ShelterDashboardController extends Controller
         if (!$shelter) {
             return response()->json(['success' => false, 'error' => 'Shelter not found'], 404);
         }
+
+        // Ensure adoption_status is present for validation (default to 'available' if missing)
+        if (!$request->has('adoption_status')) {
+            $request->merge(['adoption_status' => 'available']);
+        }
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'species' => 'required|string',
@@ -121,16 +127,21 @@ class ShelterDashboardController extends Controller
             'gender' => 'required|string',
             'size' => 'required|string',
             'description' => 'nullable|string',
+            'adoption_status' => 'required|string',
+            'medical_history.*' => 'file|mimes:pdf,docx,jpg,png,jpeg|max:5120',
             'behavior' => 'nullable|string',
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'eating_habits' => 'nullable|string',
             'suitable_for' => 'nullable|string',
         ]);
         $data['adoption_status'] = 'available';
         $data['shelter_id'] = $shelter->shelter_id;
+
+        // Remove medical_history from $data to avoid array-to-string error
+        unset($data['medical_history']);
 
         Log::info('Pet Add Request Data', $request->all());
         Log::info('Pet Add Validated Data', $data);
@@ -158,6 +169,20 @@ class ShelterDashboardController extends Controller
             }
         }
 
+        $medicalFiles = [];
+        if ($request->hasFile('medical_history')) {
+            foreach ($request->file('medical_history') as $file) {
+                $path = $file->store('medical_history', 's3');
+                \Storage::disk('s3')->setVisibility($path, 'public');
+                $medicalFiles[] = [
+                    'url' => \Storage::disk('s3')->url($path),
+                    'name' => $file->getClientOriginalName(),
+                ];
+            }
+            $pet->medical_history = $medicalFiles; // assign as array, not json_encode
+            $pet->save();
+        }
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true]);
         }
@@ -177,6 +202,7 @@ class ShelterDashboardController extends Controller
             'size' => 'required|string',
             'description' => 'nullable|string',
             'adoption_status' => 'required|string',
+            'medical_history.*' => 'file|mimes:pdf,docx,jpg,png,jpeg|max:5120',
             'behavior' => 'nullable|string',
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
@@ -214,6 +240,21 @@ class ShelterDashboardController extends Controller
                     'image_url' => $imageUrl,
                 ]);
             }
+        }
+
+        if ($request->hasFile('medical_history')) {
+            $medicalFiles = [];
+            foreach ($request->file('medical_history') as $file) {
+                $path = $file->store('medical_records', 's3');
+                \Storage::disk('s3')->setVisibility($path, 'public');
+                $medicalFiles[] = [
+                    'url' => \Storage::disk('s3')->url($path),
+                    'name' => $file->getClientOriginalName(),
+                ];
+            }
+            $existing = $pet->medical_history ? json_decode($pet->medical_history, true) : [];
+            $pet->medical_history = array_merge($existing, $medicalFiles);
+            $pet->save();
         }
 
         if ($request->expectsJson()) {
@@ -288,9 +329,9 @@ class ShelterDashboardController extends Controller
     {
         \Cache::forget("user_profile_image_{$userId}");
     }
-    
+
     public function updateProfile(Request $request)
-    {   
+    {
         \Log::info('Shelter profile update called');
         \Log::info('updateProfile called');
 
@@ -319,7 +360,7 @@ class ShelterDashboardController extends Controller
             'purpose' => $request->purpose,
         ]);
 
-        
+
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $profileImagePath = $file->store('profileimage', 's3');
@@ -396,7 +437,7 @@ class ShelterDashboardController extends Controller
     }
 
     // STRAY REPORTS METHODS added by andrea
- public function strayReports(Request $request)
+    public function strayReports(Request $request)
     {
         $shelter = auth()->user()->shelter;
 
@@ -494,7 +535,7 @@ class ShelterDashboardController extends Controller
                 'admin_id' => auth()->id(),
                 'created_at' => now(),
                 'updated_at' => now()
-            ]);    
+            ]);
 
             return response()->json([
                 'success' => true,
