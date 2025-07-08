@@ -108,7 +108,8 @@
                     @endif
                     <div class="pet-info">
                         <h3 class="pet-name">{{ $pet->name }}</h3>
-                        <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p>
+                        <!-- <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p> -->
+                        <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? ($pet->rescuer->city ?? '') }}</p>
                         <a href="{{ route('adopter.pet-listings') }}?pet_id={{ $pet->pet_id }}" class="btn btn-outline view-details-btn" style="margin-top:0.5rem;">View Details</a>
                     </div>
                 </div>
@@ -168,15 +169,22 @@
                 <p id="petDescription"></p>
             </div>
 
-            <div class="shelter-info">
+            <div class="shelter-info" id="shelterInfo" style="display: none;">
                 <h3>Shelter Information</h3>
                 <p id="shelterName"></p>
                 <p id="shelterAddress"></p>
                 <p id="shelterPhone"></p>
             </div>
 
+            <div class="shelter-info" id="rescuerInfo" style="display: none;">
+                <h3>Rescuer Information</h3>
+                <p id="rescuerName"></p>
+                <p id="rescuerAddress"></p>
+                <p id="rescuerPhone"></p>
+            </div>
+
             <div class="modal-actions">
-                <button id="message-shelter" class="btn-messages"> Message Shelter </button>
+                <button id="message-shelter" class="btn-messages"> Message Organization </button>
                 <button id="applyButton" class="btn">Apply for Adoption</button>
                 <button id="favoriteButton" class="btn" style="background: #f3f4f6; color: #4b5563;">Save to Favorites</button>
             </div>
@@ -280,10 +288,36 @@
             document.getElementById('petSize').textContent = petDetails.size;
             document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
             document.getElementById('petDescription').textContent = petDetails.description;
-            document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
-            document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
-            document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
-
+            // document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+            // document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+            // document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
+            document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
+            document.getElementById('petDescription').textContent = petDetails.description;
+            
+            // Handle both shelter and rescuer
+            if (petDetails.shelter) {
+                // Pet from shelter
+                    document.getElementById('shelterInfo').style.display = 'block';
+                    document.getElementById('rescuerInfo').style.display = 'none';
+                    document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+                    document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+                    document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
+                    document.getElementById('message-shelter').textContent = 'Message Shelter';
+                } else if (petDetails.rescuer) {
+                    // Pet from rescuer - show rescuer div, hide shelter div
+                    document.getElementById('shelterInfo').style.display = 'none';
+                    document.getElementById('rescuerInfo').style.display = 'block';
+                    document.getElementById('rescuerName').textContent = petDetails.rescuer.organization_name;
+                    document.getElementById('rescuerAddress').textContent = petDetails.rescuer.location;
+                    document.getElementById('rescuerPhone').textContent = petDetails.rescuer.contact_info;
+                    document.getElementById('message-shelter').textContent = 'Message Rescuer';
+                } else {
+                    // Fallback - hide both divs
+                    document.getElementById('shelterInfo').style.display = 'none';
+                    document.getElementById('rescuerInfo').style.display = 'none';
+                    document.getElementById('message-shelter').textContent = 'Message Organization';
+                }
+            
             // Update images
             if (petImagesData.images.length > 0) {
                 mainImage.src = petImagesData.images[0].image_url;
@@ -294,6 +328,7 @@
                 mainImage.src = '';
                 thumbnailGrid.innerHTML = '<p>No images available.</p>';
             }
+            
 
             // Update buttons
             applyButton.dataset.petId = petId;
@@ -308,8 +343,10 @@
             // Set the message button handler for this pet
             const messageShelterBtn = document.getElementById('message-shelter');
             messageShelterBtn.onclick = async function () {
-                const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
-                if (shelterUserId) {
+                const organizationUserId = petDetails.user_id || 
+                                        (petDetails.shelter && petDetails.shelter.user_id) ||
+                                        (petDetails.rescuer && petDetails.rescuer.user_id);
+                if (organizationUserId) {
                     try {
                         const res = await fetch('/messages', {
                             method: 'POST',
@@ -318,8 +355,8 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             },
                             body: JSON.stringify({
-                                receiver_id: shelterUserId,
-                                message: `Hi! I'm interested in adopting ${petDetails.name} from your shelter.`
+                                receiver_id: organizationUserId,
+                                message: `Hi! I'm interested in adopting ${petDetails.name} from your ${petDetails.shelter ? 'shelter' : 'rescue'}.`
                             })
                         });
                         const data = await res.json();
@@ -328,13 +365,13 @@
                             return;
                         }
                         setTimeout(() => {
-                            window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
+                            window.location.href = '/adopter/messages?receiver_id=' + organizationUserId;
                         }, 400);
                     } catch (e) {
                         alert('Error sending message: ' + e);
                     }
                 } else {
-                    alert('Shelter user ID not found. Please try again later.');
+                    alert('Organization user ID not found. Please try again later.');
                 }
             };
 
@@ -377,11 +414,37 @@
             document.getElementById('petAge').textContent = `${petDetails.age} years`;
             document.getElementById('petGender').textContent = petDetails.gender;
             document.getElementById('petSize').textContent = petDetails.size;
+            // document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
+            // document.getElementById('petDescription').textContent = petDetails.description;
+            // document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+            // document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+            // document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
             document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
             document.getElementById('petDescription').textContent = petDetails.description;
-            document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
-            document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
-            document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
+            
+            // Handle both shelter and rescuer
+            if (petDetails.shelter) {
+                // Pet from shelter - show shelter div, hide rescuer div
+                document.getElementById('shelterInfo').style.display = 'block';
+                document.getElementById('rescuerInfo').style.display = 'none';
+                document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+                document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+                document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
+                document.getElementById('message-shelter').textContent = 'Message Shelter';
+            } else if (petDetails.rescuer) {
+                // Pet from rescuer - show rescuer div, hide shelter div
+                document.getElementById('shelterInfo').style.display = 'none';
+                document.getElementById('rescuerInfo').style.display = 'block';
+                document.getElementById('rescuerName').textContent = petDetails.rescuer.organization_name;
+                document.getElementById('rescuerAddress').textContent = petDetails.rescuer.location;
+                document.getElementById('rescuerPhone').textContent = petDetails.rescuer.contact_info;
+                document.getElementById('message-shelter').textContent = 'Message Rescuer';
+            } else {
+                // Fallback - hide both divs
+                document.getElementById('shelterInfo').style.display = 'none';
+                document.getElementById('rescuerInfo').style.display = 'none';
+                document.getElementById('message-shelter').textContent = 'Message Organization';
+            }
 
             // Update images
             if (petImagesData.images.length > 0) {
@@ -407,44 +470,45 @@
                 // Set the message button handler for this pet
                 const messageShelterBtn = document.getElementById('message-shelter');
                 messageShelterBtn.onclick = async function () {
-                    const shelterUserId = petDetails.user_id || (petDetails.shelter && petDetails.shelter.user_id);
-                    if (shelterUserId) {
-                        try {
-                            const res = await fetch('/messages', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify({
-                                    receiver_id: shelterUserId,
-                                    message: `Hi! I'm interested in adopting ${petDetails.name} from your shelter.`
-                                })
-                            });
-                            const data = await res.json();
-                            if (!res.ok) {
-                                alert('Failed to send message: ' + (data.message || res.status));
-                                return;
-                            }
-                            // Wait a short moment to ensure the message is saved before redirecting
-                            setTimeout(() => {
-                                window.location.href = '/adopter/messages?receiver_id=' + shelterUserId;
-                            }, 400);
-                        } catch (e) {
-                            alert('Error sending message: ' + e);
+                    const organizationUserId = petDetails.user_id || 
+                        (petDetails.shelter && petDetails.shelter.user_id) ||
+                        (petDetails.rescuer && petDetails.rescuer.user_id);
+                if (organizationUserId) {
+                    try {
+                        const res = await fetch('/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                receiver_id: organizationUserId,
+                                message: `Hi! I'm interested in adopting ${petDetails.name} from your ${petDetails.shelter ? 'shelter' : 'rescue'}.`
+                            })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                            alert('Failed to send message: ' + (data.message || res.status));
+                            return;
                         }
-                    } else {
-                        alert('Shelter user ID not found. Please try again later.');
+                        setTimeout(() => {
+                            window.location.href = '/adopter/messages?receiver_id=' + organizationUserId;
+                        }, 400);
+                    } catch (e) {
+                        alert('Error sending message: ' + e);
                     }
-                };
+                } else {
+                    alert('Organization user ID not found. Please try again later.');
+                }
+                        };
 
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            } catch (error) {
-                console.error('Error fetching pet details:', error);
-            }
-        });
-    });
+                        modal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    } catch (error) {
+                        console.error('Error fetching pet details:', error);
+                    }
+                });
+            });
 
     closeBtn.addEventListener('click', closeModal);
 
