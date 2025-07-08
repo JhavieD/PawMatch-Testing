@@ -42,6 +42,10 @@ class Pet extends Model
     {
         return $this->belongsTo(Shelter::class, 'shelter_id');
     }
+    public function rescuer()
+    {
+        return $this->belongsTo(\App\Models\Rescuer\Rescuer::class, 'rescuer_id');
+    }
     //Pet Image Upload
     public function images()
     {

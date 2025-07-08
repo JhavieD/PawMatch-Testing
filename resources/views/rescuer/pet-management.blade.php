@@ -41,7 +41,9 @@
             <!-- Pet Cards -->
             <div class="pets-grid">
                 @forelse($pets as $pet)
-                    <div class="pet-card" data-name="{{ $pet->name }}" data-breed="{{ $pet->breed }}"
+                    <div class="pet-card"
+                        data-name="{{ $pet->name }}"
+                        data-breed="{{ $pet->breed }}"
                         data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}"
                         data-medical_history='@json($pet->medical_history ?? [])'>
                         <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}"
@@ -53,13 +55,18 @@
                                 {{ ucfirst($pet->adoption_status) }}
                             </span>
                             <div class="card-actions">
-                                <button type="button" class="edit-pet-btn" data-pet-id="{{ $pet->pet_id }}"
-                                    data-name="{{ $pet->name }}" data-species="{{ $pet->species }}"
-                                    data-breed="{{ $pet->breed }}" data-age="{{ $pet->age }}"
-                                    data-gender="{{ $pet->gender }}" data-size="{{ $pet->size }}"
+                                <button type="button" class="edit-pet-btn"
+                                    data-pet-id="{{ $pet->pet_id }}"
+                                    data-name="{{ $pet->name }}"
+                                    data-species="{{ $pet->species }}"
+                                    data-breed="{{ $pet->breed }}"
+                                    data-age="{{ $pet->age }}"
+                                    data-gender="{{ $pet->gender }}"
+                                    data-size="{{ $pet->size }}"
                                     data-description="{{ $pet->description }}"
                                     data-adoption_status="{{ $pet->adoption_status }}"
-                                    data-behavior="{{ $pet->behavior }}" data-daily_activity="{{ $pet->daily_activity }}"
+                                    data-behavior="{{ $pet->behavior }}"
+                                    data-daily_activity="{{ $pet->daily_activity }}"
                                     data-special_needs="{{ $pet->special_needs }}"
                                     data-compatibility="{{ $pet->compatibility }}"
                                     data-images='@json($pet->images)'
@@ -67,7 +74,8 @@
                                     data-suitable_for="{{ $pet->suitable_for }}">
                                     Edit
                                 </button>
-                                <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}"
+                                <button type="button" class="view-applications-btn"
+                                    data-pet-id="{{ $pet->pet_id }}"
                                     data-pet-name="{{ $pet->name }}">View Applications</button>
                                 <form method="POST" action="{{ route('rescuer.pets.destroy', $pet->pet_id) }}"
                                     style="display: contents;">
@@ -230,18 +238,18 @@
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
+                        <!-- MEDICAL RECORDS -->
                         <div class="form-group">
                             <label for="edit-medical_history">Medical Records (PDF, Images)</label>
                             <div id="edit-medical-records-list" style="margin-bottom: 8px; color: #6b7280;"></div>
-                            <input type="file" id="edit-medical_history" name="medical_history[]" multiple
-                                accept=".pdf,image/*">
+                            <input type="file" id="edit-medical_history" name="medical_history[]" multiple accept=".pdf,image/*">
                         </div>
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
                                 <!-- Existing images will be injected here by JS -->
                                 <label class="upload-box">
-                                    <input type="file" accept="image/*" multiple>
+                                    <input type="file" name="images[]" accept="image/*" multiple>
                                     <span>+ Add Photos</span>
                                 </label>
                             </div>
@@ -366,16 +374,16 @@
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
+                        <!-- MEDICAL RECORDS ADD -->
                         <div class="form-group">
                             <label for="medical_history">Medical Records (PDF, Images)</label>
-                            <input type="file" id="medical_history" name="medical_history[]" multiple
-                                accept=".pdf,image/*">
+                            <input type="file" id="medical_history" name="medical_history[]" multiple accept=".pdf,image/*">
                         </div>
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid">
                                 <label class="upload-box">
-                                    <input type="file" accept="image/*" multiple>
+                                    <input type="file" name="images[]" accept="image/*" multiple>
                                     <span>+ Add Photos</span>
                                 </label>
                             </div>
@@ -405,402 +413,467 @@
         </div>
     </div>
 
-    <script>
-        function logout() {
-            window.location.href = 'login.html';
+<script>
+
+function logout() {
+    window.location.href = 'login.html';
+}
+
+// Modal functionality
+const editModal = document.getElementById('editPetModal');
+const addModal = document.getElementById('addPetModal');
+const closeBtns = document.querySelectorAll('.close-btn');
+const editBtns = document.querySelectorAll('.edit-pet-btn');
+const addPetBtn = document.querySelector('.add-pet-btn');
+
+function closeModal(modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+document.addEventListener('submit', async (e) => {
+    if (e.target.matches('.delete-image-form')) {
+        e.preventDefault();
+
+        if (!confirm('Delete this photo?')) return;
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                form.closest('.thumbnail-wrapper').remove();
+            } else {
+                alert('Image delete failed.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong.');
+        }
+    }
+});
+// Auto reload of Pet Details
+
+editBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const petCard = btn.closest('.pet-card');
+        const petId = btn.getAttribute('data-pet-id');
+        const name = btn.getAttribute('data-name');
+        const species = btn.getAttribute('data-species');
+        const breed = btn.getAttribute('data-breed');
+        const age = btn.getAttribute('data-age');
+        const gender = btn.getAttribute('data-gender');
+        const size = btn.getAttribute('data-size') ? btn.getAttribute('data-size').toLowerCase() : '';
+        const description = btn.getAttribute('data-description');
+        const adoptionStatus = btn.getAttribute('data-adoption_status');
+        const behavior = btn.getAttribute('data-behavior');
+        const dailyActivity = btn.getAttribute('data-daily_activity');
+        const specialNeeds = btn.getAttribute('data-special_needs');
+        const compatibility = btn.getAttribute('data-compatibility');
+        const eatingHabits = btn.getAttribute('data-eating_habits');
+        const suitableFor = btn.getAttribute('data-suitable_for');
+
+        // Display existing images and Delete
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-species').value = species;
+        document.getElementById('edit-breed').value = breed;
+        document.getElementById('edit-age').value = age;
+        document.getElementById('edit-gender').value = gender;
+        document.getElementById('edit-size').value = size;
+        document.getElementById('edit-description').value = description;
+        document.getElementById('edit-adoption_status').value = adoptionStatus;
+        document.getElementById('edit-behavior').value = behavior;
+        document.getElementById('edit-daily_activity').value = dailyActivity;
+        document.getElementById('edit-special_needs').value = specialNeeds;
+        document.getElementById('edit-compatibility').value = compatibility;
+        document.getElementById('edit-eating_habits').value = eatingHabits;
+        if (document.getElementById('edit-suitable_for')) {
+            document.getElementById('edit-suitable_for').value = suitableFor || '';
+        }
+        document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
+
+        // --- Medical Records Display Logic (shelter style) ---
+        const recordsList = document.getElementById('edit-medical-records-list');
+        let medicalHistory = [];
+        try {
+            medicalHistory = JSON.parse(petCard.getAttribute('data-medical_history') || '[]');
+        } catch (e) {
+            medicalHistory = [];
+        }
+        if (recordsList) {
+            recordsList.innerHTML = '';
+            if (Array.isArray(medicalHistory) && medicalHistory.length > 0) {
+                medicalHistory.forEach(record => {
+                    if (typeof record === 'object' && record.url && record.name) {
+                        const link = document.createElement('a');
+                        link.href = record.url;
+                        link.textContent = record.name;
+                        link.target = '_blank';
+                        link.style.display = 'block';
+                        recordsList.appendChild(link);
+                    } else if (typeof record === 'string') {
+                        const link = document.createElement('a');
+                        link.href = record;
+                        link.textContent = record.split('/').pop();
+                        link.target = '_blank';
+                        link.style.display = 'block';
+                        recordsList.appendChild(link);
+                    }
+                });
+            } else {
+                recordsList.textContent = 'No medical records uploaded.';
+            }
+        }
+        // --- End Medical Records Display Logic ---
+
+        const images = JSON.parse(btn.getAttribute('data-images') || '[]');
+        const thumbnailGrid = document.getElementById('edit-thumbnail-grid');
+        if (thumbnailGrid) {
+            thumbnailGrid.innerHTML = '';
+            images.forEach(image => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'thumbnail-wrapper';
+                wrapper.innerHTML = `
+                        <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
+                        <form action="/rescuer/pet-images/${image.id}" method="POST" class="delete-image-form">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
+                        </form>
+                    `;
+                thumbnailGrid.appendChild(wrapper);
+            });
         }
 
-        // Modal functionality
-        const editModal = document.getElementById('editPetModal');
-        const addModal = document.getElementById('addPetModal');
-        const closeBtns = document.querySelectorAll('.close-btn');
-        const editBtns = document.querySelectorAll('.edit-pet-btn');
-        const addPetBtn = document.querySelector('.add-pet-btn');
+        // Debug log
+        console.log({
+            size,
+            behavior,
+            dailyActivity,
+            specialNeeds,
+            compatibility,
+            eatingHabits
+        });
 
-        function closeModal(modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
+        // Update the form action to the correct pet ID
+        const form = document.getElementById('editPetForm');
+        form.action = form.action.replace('__PET_ID__', petId);
 
-        document.addEventListener('submit', async (e) => {
-            if (e.target.matches('.delete-image-form')) {
-                e.preventDefault();
+        editModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    });
+});
 
-                if (!confirm('Delete this photo?')) return;
+addPetBtn.addEventListener('click', () => {
+    addModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+});
 
-                const form = e.target;
-                const formData = new FormData(form);
+closeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const modal = btn.closest('.modal');
+        closeModal(modal);
+    });
+});
 
-                try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        closeModal(e.target);
+    }
+});
 
-                    if (response.ok) {
-                        form.closest('.thumbnail-wrapper').remove();
-                    } else {
-                        alert('Image delete failed.');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Something went wrong.');
-                }
+// Form submission
+document.getElementById('editPetForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    formData.append('_method', 'PUT');
+
+    fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
             }
-        });
-
-        editBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const petCard = btn.closest('.pet-card');
-                const petId = btn.getAttribute('data-pet-id');
-                const name = btn.getAttribute('data-name');
-                const species = btn.getAttribute('data-species');
-                const breed = btn.getAttribute('data-breed');
-                const age = btn.getAttribute('data-age');
-                const gender = btn.getAttribute('data-gender');
-                const size = btn.getAttribute('data-size') ? btn.getAttribute('data-size').toLowerCase() :
-                    '';
-                const description = btn.getAttribute('data-description');
-                const adoptionStatus = btn.getAttribute('data-adoption_status');
-                const behavior = btn.getAttribute('data-behavior');
-                const dailyActivity = btn.getAttribute('data-daily_activity');
-                const specialNeeds = btn.getAttribute('data-special_needs');
-                const compatibility = btn.getAttribute('data-compatibility');
-                const eatingHabits = btn.getAttribute('data-eating_habits');
-                const suitableFor = btn.getAttribute('data-suitable_for');
-
-                // Display existing images and Delete
-                document.getElementById('edit-name').value = name;
-                document.getElementById('edit-species').value = species;
-                document.getElementById('edit-breed').value = breed;
-                document.getElementById('edit-age').value = age;
-                document.getElementById('edit-gender').value = gender;
-                document.getElementById('edit-size').value = size;
-                document.getElementById('edit-description').value = description;
-                document.getElementById('edit-adoption_status').value = adoptionStatus;
-                document.getElementById('edit-behavior').value = behavior;
-                document.getElementById('edit-daily_activity').value = dailyActivity;
-                document.getElementById('edit-special_needs').value = specialNeeds;
-                document.getElementById('edit-compatibility').value = compatibility;
-                document.getElementById('edit-eating_habits').value = eatingHabits;
-                if (document.getElementById('edit-suitable_for')) {
-                    document.getElementById('edit-suitable_for').value = suitableFor || '';
+        })
+        .then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    closeModal(editModal);
+                    sessionStorage.setItem('showEditSuccess', '1');
+                    location.reload();
+                } else {
+                    alert('Error saving changes. Please try again.');
                 }
-                document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
-
-                // --- Medical Records Display Logic (shelter style) ---
-                const recordsList = document.getElementById('edit-medical-records-list');
-                let medicalHistory = [];
-                try {
-                    medicalHistory = JSON.parse(petCard.getAttribute('data-medical_history') || '[]');
-                } catch (e) {
-                    medicalHistory = [];
+            } else if (response.status === 422) {
+                const errorData = await response.json();
+                let messages = [];
+                for (const key in errorData.errors) {
+                    messages.push(errorData.errors[key].join(' '));
                 }
-                if (recordsList) {
-                    recordsList.innerHTML = '';
-                    if (Array.isArray(medicalHistory) && medicalHistory.length > 0) {
-                        medicalHistory.forEach(record => {
-                            if (typeof record === 'object' && record.url && record.name) {
-                                const link = document.createElement('a');
-                                link.href = record.url;
-                                link.textContent = record.name;
-                                link.target = '_blank';
-                                link.style.display = 'block';
-                                recordsList.appendChild(link);
-                            } else if (typeof record === 'string') {
-                                const link = document.createElement('a');
-                                link.href = record;
-                                link.textContent = record.split('/').pop();
-                                link.target = '_blank';
-                                link.style.display = 'block';
-                                recordsList.appendChild(link);
-                            }
-                        });
-                    } else {
-                        recordsList.textContent = 'No medical records uploaded.';
-                    }
-                }
-                // --- End Medical Records Display Logic ---
-
-                // Show modal
-                editModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            });
-        });
-
-        addPetBtn.addEventListener('click', () => {
-            addModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        });
-
-        closeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const modal = btn.closest('.modal');
-                closeModal(modal);
-            });
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                closeModal(e.target);
+                alert('Validation error:\n' + messages.join('\n'));
+            } else {
+                alert('An error occurred. Please try again.');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
         });
+});
 
-        // Form submission
-        document.getElementById('editPetForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            formData.append('_method', 'PUT');
+document.getElementById('addPetForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
 
-            fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async response => {
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            document.getElementById('editSuccessAlert').classList.add('active');
-                            setTimeout(() => {
-                                closeModal(editModal);
-                                location.reload();
-                            }, 2000);
-                        } else {
-                            alert('Error saving changes. Please try again.');
-                        }
-                    } else if (response.status === 422) {
-                        const errorData = await response.json();
-                        let messages = [];
-                        for (const key in errorData.errors) {
-                            messages.push(errorData.errors[key].join(' '));
-                        }
-                        alert('Validation error:\n' + messages.join('\n'));
-                    } else {
-                        alert('An error occurred. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
+    // Debug: log all form data
+    for (let [key, value] of formData.entries()) {
+        console.log('ADD FORM FIELD:', key, value);
+    }
 
-            closeModal(editModal);
+    fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    closeModal(addModal);
+                    sessionStorage.setItem('showAddSuccess', '1');
+                    location.reload();
+                } else {
+                    alert('Error adding pet. Please try again.');
+                }
+            } else if (response.status === 422) {
+                const errorData = await response.json();
+                let messages = [];
+                for (const key in errorData.errors) {
+                    messages.push(errorData.errors[key].join(' '));
+                }
+                alert('Validation error:\n' + messages.join('\n'));
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
         });
+});
 
-        document.getElementById('addPetForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
+// Image upload handling
+document.querySelectorAll('.upload-box input').forEach(input => {
+    input.addEventListener('change', (e) => {
+        const files = e.target.files;
+        alert(`${files.length} image(s) selected for upload`);
+    });
+});
 
-            fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async response => {
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            document.getElementById('addSuccessAlert').classList.add('active');
-                            setTimeout(() => {
-                                closeModal(addModal);
-                                location.reload();
-                            }, 1000); // Shorter delay (1 second)
-                        } else {
-                            alert('Error adding pet. Please try again.');
-                        }
-                    } else if (response.status === 422) {
-                        const errorData = await response.json();
-                        let messages = [];
-                        for (const key in errorData.errors) {
-                            messages.push(errorData.errors[key].join(' '));
-                        }
-                        alert('Validation error:\n' + messages.join('\n'));
-                    } else {
-                        alert('An error occurred. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
+// Remove image handling
+document.querySelectorAll('.remove-image').forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.parentElement.remove();
+    });
+});
 
-            closeModal(addModal);
-        });
+// View Applications functionality
+const viewApplicationsModal = document.getElementById('viewApplicationsModal');
+const viewApplicationsBtns = document.querySelectorAll('.view-applications-btn');
 
-        // Image upload handling
-        document.querySelectorAll('.upload-box input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const files = e.target.files;
-                alert(`${files.length} image(s) selected for upload`);
-            });
-        });
+viewApplicationsBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const petCard = e.target.closest('.pet-card');
+        const petName = petCard.querySelector('.pet-name').textContent;
+        document.getElementById('petNameTitle').textContent = petName;
+        viewApplicationsModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
 
-        // Remove image handling
-        document.querySelectorAll('.remove-image').forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.parentElement.remove();
-            });
-        });
-
-        // View Applications functionality
-        const viewApplicationsModal = document.getElementById('viewApplicationsModal');
-        const viewApplicationsBtns = document.querySelectorAll('.view-applications-btn');
-
-        viewApplicationsBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const petCard = e.target.closest('.pet-card');
-                const petName = petCard.querySelector('.pet-name').textContent;
-                document.getElementById('petNameTitle').textContent = petName;
-                viewApplicationsModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-
-                const petId = btn.getAttribute('data-pet-id');
-                // Fetch and display applications for the selected pet
-                fetch(`/rescuer/pets/${petId}/applications`, {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const applicationsList = document.querySelector('.applications-list');
-                        applicationsList.innerHTML = '';
-                        if (data.applications && data.applications.length > 0) {
-                            data.applications.forEach(app => {
-                                const applicantName = app.applicant_name || 'Unknown';
-                                const phone = app.phone || '';
-                                const submittedAt = app.submitted_at ? new Date(app
-                                    .submitted_at).toLocaleDateString() : '';
-                                const status = app.status ? app.status.charAt(0).toUpperCase() +
-                                    app.status.slice(1) : '';
-                                const statusClass = app.status ?
-                                    `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` :
-                                    '';
-                                applicationsList.innerHTML += `
-                                    <div class="application-item" style="display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;">
-                                        <div class="application-info">
-                                            <h3 style="font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Application for ${petName}</h3>
-                                            <p style="color: #6b7280; margin-bottom: 0.5rem;">From: <span style="font-weight: 500; color: #1a1a1a;">${applicantName}</span>${phone ? ' • Phone: <span style=\"color:#1a1a1a;\">' + phone + '</span>' : ''}</p>
-                                            <div class="application-meta" style="font-size: 0.875rem; color: #6b7280;">
-                                                Submitted: ${submittedAt} <span class="status-badge ${statusClass}" style="margin-left: 0.5rem;">${status}</span>
-                                            </div>
-                                        </div>
-                                        <div class="action-buttons" style="display: flex; gap: 0.5rem;">
-                                            <button class="btn btn-outline" onclick="messageApplicant('${app.user_id || ''}')">Message</button>
+        const petId = btn.getAttribute('data-pet-id');
+        // Fetch and display applications for the selected pet
+        fetch(`/rescuer/pets/${petId}/applications`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const applicationsList = document.querySelector('.applications-list');
+                applicationsList.innerHTML = '';
+                // Defensive: check for data.applications as array
+                if (Array.isArray(data.applications) && data.applications.length > 0) {
+                    data.applications.forEach(app => {
+                        const applicantName = app.adopter && app.adopter.user ? app.adopter.user.name : 'Unknown';
+                        const phone = app.adopter && app.adopter.user ? app.adopter.user.phone || '' : '';
+                        const submittedAt = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : '';
+                        const status = app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : '';
+                        const statusClass = app.status ? `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` : '';
+                        applicationsList.innerHTML += `
+                                <div class="application-item" style="display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;">
+                                    <div class="application-info">
+                                        <h3 style="font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Application for ${petName}</h3>
+                                        <p style="color: #6b7280; margin-bottom: 0.5rem;">From: <span style="font-weight: 500; color: #1a1a1a;">${applicantName}</span>${phone ? ' • Phone: <span style="color:#1a1a1a;">' + phone + '</span>' : ''}</p>
+                                        <div class="application-meta" style="font-size: 0.875rem; color: #6b7280;">
+                                            Submitted: ${submittedAt} <span class="status-badge ${statusClass}" style="margin-left: 0.5rem;">${status}</span>
                                         </div>
                                     </div>
-                                `;
-                            });
-                        } else {
-                            applicationsList.innerHTML =
-                                '<div>No applications found for this pet.</div>';
-                        }
-                    })
-                    .catch(error => {
-                        const applicationsList = document.querySelector('.applications-list');
-                        applicationsList.innerHTML =
-                            '<div style="color:red;">Failed to load applications.</div>';
-                        console.error('Error fetching applications:', error);
+                                    <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                        <button class="btn btn-primary" onclick="viewApplicationDetails(${app.application_id})">Review</button>
+                                        <button class="btn btn-outline" onclick="messageApplicant('${applicantName}')">Message</button>
+                                    </div>
+                                </div>
+                            `;
                     });
+                } else {
+                    applicationsList.innerHTML =
+                        '<div>No applications found for this pet.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching applications:', error);
             });
-        });
+    });
+});
 
-        function viewApplicationDetails(applicationId) {
-            window.location.href = `applications-review.html?id=${applicationId}`;
+function viewApplicationDetails(applicationId) {
+    // Redirect to the application details page
+    window.location.href = `applications-review.html?id=${applicationId}`;
+}
+
+function messageApplicant(applicantName) {
+    // Redirect to messages with the applicant
+    window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
+}
+// filtering
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('petSearchInput');
+    const statusFilter = document.querySelector('.filter-dropdown');
+    const petCards = document.querySelectorAll('.pet-card');
+
+    function filterPets() {
+        const search = searchInput.value.trim().toLowerCase();
+        const status = statusFilter.value;
+
+        petCards.forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const breed = (card.getAttribute('data-breed') || '').toLowerCase();
+            const cardStatus = (card.getAttribute('data-status') || '').toLowerCase();
+
+            const matchesSearch = !search ||
+                name.includes(search) ||
+                breed.includes(search);
+
+            const matchesStatus = status === 'all' || cardStatus === status;
+
+            card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterPets);
+    statusFilter.addEventListener('change', filterPets);
+
+    // add pet alert
+    document.addEventListener('DOMContentLoaded', function() {
+        const addSuccessAlert = document.getElementById('addSuccessAlert');
+        const closeAddSuccessAlert = document.getElementById('closeAddSuccessAlert');
+
+        if (addSuccessAlert && closeAddSuccessAlert) {
+            closeAddSuccessAlert.addEventListener('click', function() {
+                addSuccessAlert.style.display = 'none';
+                location.reload();
+            });
         }
+    });
+});
 
-        function messageApplicant(userId) {
-            // Redirect to the correct Laravel route for messaging with a specific user
-            if (userId) {
-                window.location.href = `/rescuer/messages?receiver_id=${userId}`;
-            } else {
-                alert('No applicant user ID found.');
-            }
-        }
+// --- Success Alert Persistence ---
+function showSuccessAlert(type) {
+    let alertEl = null;
+    if (type === 'add') {
+        alertEl = document.getElementById('addSuccessAlert');
+    } else if (type === 'edit') {
+        alertEl = document.getElementById('editSuccessAlert');
+    } else if (type === 'delete') {
+        alertEl = document.getElementById('deleteSuccessAlert');
+    }
+    if (alertEl) {
+        alertEl.classList.add('active');
+        // Auto close after 2 seconds with fade out
+        setTimeout(() => {
+            alertEl.classList.remove('active');
+        }, 2000);
+    }
+}
 
-        // filtering
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('petSearchInput');
-            const statusFilter = document.querySelector('.filter-dropdown');
-            const petCards = document.querySelectorAll('.pet-card');
+// On page load, check for alert flag
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('showAddSuccess')) {
+        showSuccessAlert('add');
+        sessionStorage.removeItem('showAddSuccess');
+    }
+    if (sessionStorage.getItem('showEditSuccess')) {
+        showSuccessAlert('edit');
+        sessionStorage.removeItem('showEditSuccess');
+    }
+    if (sessionStorage.getItem('showDeleteSuccess')) {
+        showSuccessAlert('delete');
+        sessionStorage.removeItem('showDeleteSuccess');
+    }
+});
 
-            function filterPets() {
-                const search = searchInput.value.trim().toLowerCase();
-                const status = statusFilter.value;
+// Success alert close buttons (no reload)
+document.getElementById('closeAddSuccessAlert').addEventListener('click', function() {
+    document.getElementById('addSuccessAlert').classList.remove('active');
+});
+document.getElementById('closeEditSuccessAlert').addEventListener('click', function() {
+    document.getElementById('editSuccessAlert').classList.remove('active');
+});
+document.getElementById('closeDeleteSuccessAlert').addEventListener('click', function() {
+    document.getElementById('deleteSuccessAlert').classList.remove('active');
+});
 
-                petCards.forEach(card => {
-                    const name = (card.getAttribute('data-name') || '').toLowerCase();
-                    const breed = (card.getAttribute('data-breed') || '').toLowerCase();
-                    const cardStatus = (card.getAttribute('data-status') || '').toLowerCase();
-
-                    const matchesSearch = !search ||
-                        name.includes(search) ||
-                        breed.includes(search);
-
-                    const matchesStatus = status === 'all' || cardStatus === status;
-
-                    card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
-                });
-            }
-
-            searchInput.addEventListener('input', filterPets);
-            statusFilter.addEventListener('change', filterPets);
-        });
-
-        // Success alert close buttons
-        const closeAdd = document.getElementById('closeAddSuccessAlert');
-        if (closeAdd) closeAdd.onclick = function() {
-            document.getElementById('addSuccessAlert').classList.remove('active');
-        };
-        const closeEdit = document.getElementById('closeEditSuccessAlert');
-        if (closeEdit) closeEdit.onclick = function() {
-            document.getElementById('editSuccessAlert').classList.remove('active');
-        };
-        const closeDelete = document.getElementById('closeDeleteSuccessAlert');
-        if (closeDelete) closeDelete.onclick = function() {
-            document.getElementById('deleteSuccessAlert').classList.remove('active');
-        };
-
-        // Intercept delete pet form submit for AJAX delete
-        // Use event delegation for dynamic content
-
-        document.addEventListener('submit', function(e) {
-            if (e.target.matches('form[action*="rescuer/pets/"][method="POST"]') && e.target.querySelector(
-                    'input[name="_method"][value="DELETE"]')) {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(async response => {
-                        if (response.ok) {
-                            document.getElementById('deleteSuccessAlert').classList.add('active');
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1000); // Shorter delay (1 second)
-                        } else {
-                            alert('Failed to delete pet.');
-                        }
-                    })
-                    .catch(() => {
-                        alert('An error occurred. Please try again.');
-                    });
-            }
-        });
-    </script>
+// --- FIXED: Delete Pet Handler (single, clean version) ---
+document.querySelectorAll('.delete-pet-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch(form.action, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        sessionStorage.setItem('showDeleteSuccess', '1');
+                        location.reload();
+                    } else {
+                        alert('Error deleting pet. Please try again.');
+                    }
+                } else {
+                    alert('Error deleting pet. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Delete error:', error);
+                alert('Error deleting pet. Please try again.');
+            });
+    });
+});
+</script>
 @endsection
