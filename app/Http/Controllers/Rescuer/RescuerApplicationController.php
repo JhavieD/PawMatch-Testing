@@ -64,7 +64,19 @@ class RescuerApplicationController extends Controller
             ->with(['adopter.user', 'pet', 'answers'])
             ->orderByDesc('submitted_at')
             ->get();
-        return response()->json(['applications' => $applications]);
+        $formatted = $applications->map(function ($app) {
+            $adopter = $app->adopter;
+            $user = $adopter ? $adopter->user : null;
+            return [
+                'application_id' => $app->id,
+                'applicant_name' => $user ? ($user->name ?? 'Unknown') : 'Unknown',
+                'user_id' => $user ? ($user->user_id ?? $user->id ?? null) : null,
+                'phone' => $user ? ($user->phone ?? '') : '',
+                'submitted_at' => $app->submitted_at,
+                'status' => ucfirst($app->status),
+            ];
+        });
+        return response()->json(['applications' => $formatted]);
     }
 
     public function complete($id)

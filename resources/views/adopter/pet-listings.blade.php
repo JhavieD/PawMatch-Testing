@@ -1,4 +1,4 @@
-@extends('layouts.pet-listings')    
+@extends('layouts.pet-listings')
 
 @section('title', 'Pet-Listings - PawMatch')
 
@@ -23,7 +23,6 @@
                 </div>
                 @endforeach
             </div>
-
             <div class="filter-group">
                 <h3>Age</h3>
                 @foreach($ageGroups as $age)
@@ -35,7 +34,6 @@
                 </div>
                 @endforeach
             </div>
-
             <div class="filter-group">
                 <h3>Size</h3>
                 @foreach($sizes as $size)
@@ -47,7 +45,6 @@
                 </div>
                 @endforeach
             </div>
-
             <div class="filter-group">
                 <h3>Match My Purpose</h3>
                 <div class="filter-option" style="display: flex; align-items: flex-start; gap: 0.5em; flex-direction: column;">
@@ -58,12 +55,9 @@
                     <span style="margin-left: 1.8em; font-weight: bold;">{{ auth()->user()->adopter->purpose ?? 'Not specified' }}</span>
                 </div>
             </div>
-
             <button type="submit" class="btn btn-primary">Apply Filters</button>
         </form>
     </aside>
-
-    <!-- Main Content -->
     <main>
         <div class="pet-grid">
         @forelse($pets as $pet)
@@ -108,7 +102,6 @@
                     @endif
                     <div class="pet-info">
                         <h3 class="pet-name">{{ $pet->name }}</h3>
-                        <!-- <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? '' }}</p> -->
                         <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old<br>{{ $pet->shelter->city ?? ($pet->rescuer->city ?? '') }}</p>
                         <a href="{{ route('adopter.pet-listings') }}?pet_id={{ $pet->pet_id }}" class="btn btn-outline view-details-btn" style="margin-top:0.5rem;">View Details</a>
                     </div>
@@ -120,7 +113,6 @@
             </div>
         @endforelse
         </div>
-
         {{ $pets->links() }}
     </main>
 </div>
@@ -139,7 +131,6 @@
                     <!-- Thumbnails will be populated dynamically -->
                 </div>
             </div>
-
             <h2 id="petName" class="pet-name"></h2>
             <div class="pet-details-grid">
                 <div class="detail-item">
@@ -163,26 +154,27 @@
                     <p id="petStatus"></p>
                 </div>
             </div>
-
             <div class="pet-description">
                 <h3>About <span id="petNameDesc"></span></h3>
                 <p id="petDescription"></p>
             </div>
-
+            <!-- Medical Records Section -->
+            <div id="medicalRecordsSection" class="medical-records" style="margin-top: 1.5em; display: none; background: #f9fafb; border-radius: 8px; padding: 1em;">
+                <h3 style="margin-top: 0; font-weight:600; margin-bottom: 1rem;">Medical Records</h3>
+                <ul id="medicalRecordsList" style="margin-bottom: 0; color:rgb(0, 140, 255)"></ul>
+            </div>
             <div class="shelter-info" id="shelterInfo" style="display: none;">
                 <h3>Shelter Information</h3>
                 <p id="shelterName"></p>
                 <p id="shelterAddress"></p>
                 <p id="shelterPhone"></p>
             </div>
-
             <div class="shelter-info" id="rescuerInfo" style="display: none;">
                 <h3>Rescuer Information</h3>
                 <p id="rescuerName"></p>
                 <p id="rescuerAddress"></p>
                 <p id="rescuerPhone"></p>
             </div>
-
             <div class="modal-actions">
                 <button id="message-shelter" class="btn-messages"> Message Organization </button>
                 <button id="applyButton" class="btn">Apply for Adoption</button>
@@ -250,407 +242,287 @@
         </div>
     </div>
 </div>
-
 <script>
-    // Modal functionality
-    const modal = document.getElementById('petDetailsModal');
-    const closeBtn = document.querySelector('.close-btn');
-    const petCards = document.querySelectorAll('.pet-card');
-    const mainImage = document.getElementById('mainImage');
-    const thumbnailGrid = document.getElementById('thumbnailGrid');
-    const applyButton = document.getElementById('applyButton');
-    const favoriteButton = document.getElementById('favoriteButton');
-    const messageShelterButton = document.getElementById('message-shelter');
-    let currentShelterUserId = null;
+// Modal functionality
+const modal = document.getElementById('petDetailsModal');
+const closeBtn = document.querySelector('.close-btn');
+const petCards = document.querySelectorAll('.pet-card');
+const mainImage = document.getElementById('mainImage');
+const thumbnailGrid = document.getElementById('thumbnailGrid');
+const applyButton = document.getElementById('applyButton');
+const favoriteButton = document.getElementById('favoriteButton');
+const messageShelterButton = document.getElementById('message-shelter');
+let currentShelterUserId = null;
 
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
 
-    async function openPetModalById(petId) {
-        // Find the card and simulate click, or fetch and open modal directly
-        try {
-            // Fetch pet details
-            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
-            const petDetails = await petDetailsResponse.json();
+async function openPetModalById(petId) {
+    try {
+        // Fetch pet details
+        const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+        const petDetails = await petDetailsResponse.json();
 
-            // Fetch pet images
-            const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
-            const petImagesData = await petImagesResponse.json();
+        // Fetch pet images
+        const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
+        const petImagesData = await petImagesResponse.json();
 
-            // Update modal content
-            document.getElementById('petName').textContent = petDetails.name;
-            document.getElementById('petNameDesc').textContent = petDetails.name;
-            document.getElementById('petBreed').textContent = petDetails.breed;
-            document.getElementById('petAge').textContent = `${petDetails.age} years`;
-            document.getElementById('petGender').textContent = petDetails.gender;
-            document.getElementById('petSize').textContent = petDetails.size;
-            document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
-            document.getElementById('petDescription').textContent = petDetails.description;
-            // document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
-            // document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
-            // document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
-            document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
-            document.getElementById('petDescription').textContent = petDetails.description;
-            
-            // Handle both shelter and rescuer
-            if (petDetails.shelter) {
-                // Pet from shelter
-                    document.getElementById('shelterInfo').style.display = 'block';
-                    document.getElementById('rescuerInfo').style.display = 'none';
-                    document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
-                    document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
-                    document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
-                    document.getElementById('message-shelter').textContent = 'Message Shelter';
-                } else if (petDetails.rescuer) {
-                    // Pet from rescuer - show rescuer div, hide shelter div
-                    document.getElementById('shelterInfo').style.display = 'none';
-                    document.getElementById('rescuerInfo').style.display = 'block';
-                    document.getElementById('rescuerName').textContent = petDetails.rescuer.organization_name;
-                    document.getElementById('rescuerAddress').textContent = petDetails.rescuer.location;
-                    document.getElementById('rescuerPhone').textContent = petDetails.rescuer.contact_info;
-                    document.getElementById('message-shelter').textContent = 'Message Rescuer';
-                } else {
-                    // Fallback - hide both divs
-                    document.getElementById('shelterInfo').style.display = 'none';
-                    document.getElementById('rescuerInfo').style.display = 'none';
-                    document.getElementById('message-shelter').textContent = 'Message Organization';
-                }
-            
-            // Update images
-            if (petImagesData.images.length > 0) {
-                mainImage.src = petImagesData.images[0].image_url;
-                thumbnailGrid.innerHTML = petImagesData.images.map(img => 
-                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail" style="font-family: 'Inter', sans-serif;">`
-                ).join('');
-            } else {
-                mainImage.src = '';
-                thumbnailGrid.innerHTML = '<p>No images available.</p>';
-            }
-            
+        // Update modal content
+        document.getElementById('petName').textContent = petDetails.name;
+        document.getElementById('petNameDesc').textContent = petDetails.name;
+        document.getElementById('petBreed').textContent = petDetails.breed;
+        document.getElementById('petAge').textContent = `${petDetails.age} years`;
+        document.getElementById('petGender').textContent = petDetails.gender;
+        document.getElementById('petSize').textContent = petDetails.size;
+        document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
+        document.getElementById('petDescription').textContent = petDetails.description;
 
-            // Update buttons
-            applyButton.dataset.petId = petId;
-            applyButton.onclick = function() {
-                adoptionModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-                adoptionPetId.value = petId;
-            };
-            favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
-            favoriteButton.dataset.petId = petId;
-
-            // Set the message button handler for this pet
-            const messageShelterBtn = document.getElementById('message-shelter');
-            messageShelterBtn.onclick = async function () {
-                const organizationUserId = petDetails.user_id || 
-                                        (petDetails.shelter && petDetails.shelter.user_id) ||
-                                        (petDetails.rescuer && petDetails.rescuer.user_id);
-                if (organizationUserId) {
-                    try {
-                        const res = await fetch('/messages', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                receiver_id: organizationUserId,
-                                message: `Hi! I'm interested in adopting ${petDetails.name} from your ${petDetails.shelter ? 'shelter' : 'rescue'}.`
-                            })
-                        });
-                        const data = await res.json();
-                        if (!res.ok) {
-                            alert('Failed to send message: ' + (data.message || res.status));
-                            return;
-                        }
-                        setTimeout(() => {
-                            window.location.href = '/adopter/messages?receiver_id=' + organizationUserId;
-                        }, 400);
-                    } catch (e) {
-                        alert('Error sending message: ' + e);
-                    }
-                } else {
-                    alert('Organization user ID not found. Please try again later.');
-                }
-            };
-
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            console.error('Error fetching pet details:', error);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const petIdFromQuery = getQueryParam('pet_id');
-        if (petIdFromQuery) {
-            openPetModalById(petIdFromQuery);
-        }
-    });
-
-    function closeModal() {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    petCards.forEach(card => {
-    card.addEventListener('click', async () => {
-        const petId = card.dataset.petId;
-        console.log('Pet card clicked, petId:', petId);
-        try {
-            // Fetch pet details
-            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
-            const petDetails = await petDetailsResponse.json();
-
-            // Fetch pet images
-            const petImagesResponse = await fetch(`/api/pets/${petId}/images`);
-            const petImagesData = await petImagesResponse.json();
-
-            // Update modal content
-            document.getElementById('petName').textContent = petDetails.name;
-            document.getElementById('petNameDesc').textContent = petDetails.name;
-            document.getElementById('petBreed').textContent = petDetails.breed;
-            document.getElementById('petAge').textContent = `${petDetails.age} years`;
-            document.getElementById('petGender').textContent = petDetails.gender;
-            document.getElementById('petSize').textContent = petDetails.size;
-            // document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
-            // document.getElementById('petDescription').textContent = petDetails.description;
-            // document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
-            // document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
-            // document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
-            document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
-            document.getElementById('petDescription').textContent = petDetails.description;
-            
-            // Handle both shelter and rescuer
-            if (petDetails.shelter) {
-                // Pet from shelter - show shelter div, hide rescuer div
-                document.getElementById('shelterInfo').style.display = 'block';
-                document.getElementById('rescuerInfo').style.display = 'none';
-                document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
-                document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
-                document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
-                document.getElementById('message-shelter').textContent = 'Message Shelter';
-            } else if (petDetails.rescuer) {
-                // Pet from rescuer - show rescuer div, hide shelter div
-                document.getElementById('shelterInfo').style.display = 'none';
-                document.getElementById('rescuerInfo').style.display = 'block';
-                document.getElementById('rescuerName').textContent = petDetails.rescuer.organization_name;
-                document.getElementById('rescuerAddress').textContent = petDetails.rescuer.location;
-                document.getElementById('rescuerPhone').textContent = petDetails.rescuer.contact_info;
-                document.getElementById('message-shelter').textContent = 'Message Rescuer';
-            } else {
-                // Fallback - hide both divs
-                document.getElementById('shelterInfo').style.display = 'none';
-                document.getElementById('rescuerInfo').style.display = 'none';
-                document.getElementById('message-shelter').textContent = 'Message Organization';
-            }
-
-            // Update images
-            if (petImagesData.images.length > 0) {
-                mainImage.src = petImagesData.images[0].image_url;
-                thumbnailGrid.innerHTML = petImagesData.images.map(img => 
-                    `<img src="${img.image_url}" alt="Pet photo" class="thumbnail" style="font-family: 'Inter', sans-serif;">`
-                ).join('');
-            } else {
-                mainImage.src = '';
-                thumbnailGrid.innerHTML = '<p>No images available.</p>';
-            }
-
-                // Update buttons
-                applyButton.dataset.petId = petId;
-                applyButton.onclick = function() {
-                    adoptionModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                    adoptionPetId.value = petId;
-                };
-                favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
-                favoriteButton.dataset.petId = petId;
-
-                // Set the message button handler for this pet
-                const messageShelterBtn = document.getElementById('message-shelter');
-                messageShelterBtn.onclick = async function () {
-                    const organizationUserId = petDetails.user_id || 
-                        (petDetails.shelter && petDetails.shelter.user_id) ||
-                        (petDetails.rescuer && petDetails.rescuer.user_id);
-                if (organizationUserId) {
-                    try {
-                        const res = await fetch('/messages', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                receiver_id: organizationUserId,
-                                message: `Hi! I'm interested in adopting ${petDetails.name} from your ${petDetails.shelter ? 'shelter' : 'rescue'}.`
-                            })
-                        });
-                        const data = await res.json();
-                        if (!res.ok) {
-                            alert('Failed to send message: ' + (data.message || res.status));
-                            return;
-                        }
-                        setTimeout(() => {
-                            window.location.href = '/adopter/messages?receiver_id=' + organizationUserId;
-                        }, 400);
-                    } catch (e) {
-                        alert('Error sending message: ' + e);
-                    }
-                } else {
-                    alert('Organization user ID not found. Please try again later.');
-                }
-                        };
-
-                        modal.style.display = 'block';
-                        document.body.style.overflow = 'hidden';
-                    } catch (error) {
-                        console.error('Error fetching pet details:', error);
-                    }
-                });
+        // --- Medical Records Section ---
+        const medicalSection = document.getElementById('medicalRecordsSection');
+        const medicalList = document.getElementById('medicalRecordsList');
+        medicalList.innerHTML = '';
+        let files = Array.isArray(petDetails.medical_history) ? petDetails.medical_history : [];
+        if (Array.isArray(files) && files.length > 0) {
+            files.forEach(file => {
+                let url = file.url || file;
+                let name = file.name || (typeof file === 'string' ? url.split('/').pop() : 'Download');
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="${url}" target="_blank" download>${name}</a>`;
+                medicalList.appendChild(li);
             });
-
-    closeBtn.addEventListener('click', closeModal);
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-
-    // Gallery functionality
-    thumbnailGrid.addEventListener('click', (e) => {
-        if (e.target.classList.contains('thumbnail')) {
-            mainImage.src = e.target.src;
-        }
-    });
-
-    // Favorite functionality
-    favoriteButton.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const petId = e.target.dataset.petId;
-        try {
-            const response = await fetch(`/api/pets/${petId}/favorite`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            });
-            const data = await response.json();
-            favoriteButton.textContent = data.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
-            
-            // Refresh the pet details to ensure we have the latest data
-            const petDetailsResponse = await fetch(`/api/pets/${petId}`);
-            const petDetails = await petDetailsResponse.json();
-            favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
-            
-            // Refresh the favorites section if it exists
-            if (typeof refreshFavoritePetsSection === 'function') {
-                refreshFavoritePetsSection();
-            }
-        } catch (error) {
-            console.error('Error toggling favorite:', error);
-        }
-    });
-
-    // Auto-open modal if redirected with #pet-{id}
-    document.addEventListener('DOMContentLoaded', function() {
-        const hash = window.location.hash;
-        if (hash && hash.startsWith('#pet-')) {
-            const petId = hash.replace('#pet-', '');
-            const card = document.querySelector(`.pet-card[data-pet-id="${petId}"]`);
-            if (card) {
-                card.click();
-            }
-        }
-    });
-
-    const adoptionModal = document.getElementById('adoptionModal');
-    const closeAdoptionModal = document.getElementById('closeAdoptionModal');
-    const adoptionForm = document.getElementById('adoptionForm');
-    const adoptionPetId = document.getElementById('adoptionPetId');
-    const hasOtherPets = document.getElementById('has_other_pets');
-    const otherPetsDetailsGroup = document.getElementById('otherPetsDetailsGroup');
-
-    closeAdoptionModal.addEventListener('click', function() {
-        adoptionModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === adoptionModal) {
-            adoptionModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    });
-
-    hasOtherPets.addEventListener('change', function() {
-        if (this.value == '1') {
-            otherPetsDetailsGroup.style.display = 'block';
+            medicalSection.style.display = '';
         } else {
-            otherPetsDetailsGroup.style.display = 'none';
+            medicalSection.style.display = 'none';
         }
-    });
+        // --- End Medical Records Section ---
 
-    adoptionForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(adoptionForm);
-        fetch('/adopter/applications', {
+        // Handle both shelter and rescuer
+        if(petDetails.shelter){
+            document.getElementById('shelterInfo').style.display = 'block';
+            document.getElementById('rescuerInfo').style.display = 'none';
+            document.getElementById('shelterName').textContent = petDetails.shelter.shelter_name;
+            document.getElementById('shelterAddress').textContent = petDetails.shelter.location;
+            document.getElementById('shelterPhone').textContent = petDetails.shelter.contact_info;
+            document.getElementById('message-shelter').textContent = 'Message Shelter';
+        }else if(petDetails.rescuer){
+            document.getElementById('shelterInfo').style.display = 'none';
+            document.getElementById('rescuerInfo').style.display = 'block';
+            document.getElementById('rescuerName').textContent = petDetails.rescuer.organization_name;
+            document.getElementById('rescuerAddress').textContent = petDetails.rescuer.location;
+            document.getElementById('rescuerPhone').textContent = petDetails.rescuer.contact_info;
+            document.getElementById('message-shelter').textContent = 'Message Rescuer';
+        }else{
+            document.getElementById('shelterInfo').style.display = 'none';
+            document.getElementById('rescuerInfo').style.display = 'none';
+            document.getElementById('message-shelter').textContent = 'Message Organization';
+        }
+
+        // Images
+        if (petImagesData.images.length > 0) {
+            mainImage.src = petImagesData.images[0].image_url;
+            thumbnailGrid.innerHTML = petImagesData.images.map(img =>
+                `<img src="${img.image_url}" alt="Pet photo" class="thumbnail" style="font-family: 'Inter', sans-serif;">`
+            ).join('');
+        } else {
+            mainImage.src = '';
+            thumbnailGrid.innerHTML = '<p>No images available.</p>';
+        }
+
+        // Buttons
+        applyButton.dataset.petId = petId;
+        applyButton.onclick = function(){
+            adoptionModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            adoptionPetId.value = petId;
+        };
+        favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+        favoriteButton.dataset.petId = petId;
+
+        // Message button handler
+        const messageShelterBtn = document.getElementById('message-shelter');
+        messageShelterBtn.onclick = async function () {
+            const organizationUserId = petDetails.user_id ||
+                (petDetails.shelter && petDetails.shelter.user_id) ||
+                (petDetails.rescuer && petDetails.rescuer.user_id);
+            if (organizationUserId) {
+                try {
+                    const res = await fetch('/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            receiver_id: organizationUserId,
+                            message: `Hi! I'm interested in adopting ${petDetails.name} from your ${petDetails.shelter ? 'shelter' : 'rescue'}.`
+                        })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        alert('Failed to send message: ' + (data.message || res.status));
+                        return;
+                    }
+                    setTimeout(() => {
+                        window.location.href = '/adopter/messages?receiver_id=' + organizationUserId;
+                    }, 400);
+                } catch (e) {
+                    alert('Error sending message: ' + e);
+                }
+            } else {
+                alert('Organization user ID not found. Please try again later.');
+            }
+        };
+
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }catch(error){
+        console.error('Error fetching pet details:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const petIdFromQuery = getQueryParam('pet_id');
+    if (petIdFromQuery) {
+        openPetModalById(petIdFromQuery);
+    }
+});
+
+function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+petCards.forEach(card => {
+    card.addEventListener('click', async () => {
+        await openPetModalById(card.dataset.petId);
+    });
+});
+
+closeBtn.addEventListener('click', closeModal);
+
+window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+thumbnailGrid.addEventListener('click', (e) => {
+    if (e.target.classList.contains('thumbnail')) {
+        mainImage.src = e.target.src;
+    }
+});
+
+favoriteButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const petId = e.target.dataset.petId;
+    try {
+        const response = await fetch(`/api/pets/${petId}/favorite`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert('Application submitted successfully!');
-                adoptionModal.style.display = 'none';
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                window.location.href = '/adopter/application-status';
-            } else {
-                alert('Error submitting application.');
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
-        })
-        .catch(() => alert('Error submitting application.'));
-    });
+        });
+        const data = await response.json();
+        favoriteButton.textContent = data.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
 
-    // Responsive filter sidebar toggle
-    function handleFilterSidebar() {
-        const btn = document.querySelector('.show-filters-btn');
-        const sidebar = document.querySelector('.filters');
-        if(window.innerWidth <= 900) {
-            btn.style.display = 'block';
-            sidebar.classList.remove('show');
-        } else {
-            btn.style.display = 'none';
-            sidebar.classList.add('show');
+        // Refresh the pet details to ensure we have the latest data
+        const petDetailsResponse = await fetch(`/api/pets/${petId}`);
+        const petDetails = await petDetailsResponse.json();
+        favoriteButton.textContent = petDetails.is_favorite ? 'Remove from Favorites' : 'Save to Favorites';
+
+        // Refresh the favorites section if it exists
+        if (typeof refreshFavoritePetsSection === 'function') {
+            refreshFavoritePetsSection();
         }
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
     }
-    window.addEventListener('resize', handleFilterSidebar);
-    document.addEventListener('DOMContentLoaded', handleFilterSidebar);
-</script>
+});
 
+const adoptionModal = document.getElementById('adoptionModal');
+const closeAdoptionModal = document.getElementById('closeAdoptionModal');
+const adoptionForm = document.getElementById('adoptionForm');
+const adoptionPetId = document.getElementById('adoptionPetId');
+const hasOtherPets = document.getElementById('has_other_pets');
+const otherPetsDetailsGroup = document.getElementById('otherPetsDetailsGroup');
+
+closeAdoptionModal.addEventListener('click', function() {
+    adoptionModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === adoptionModal) {
+        adoptionModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
+hasOtherPets.addEventListener('change', function() {
+    if (this.value == '1') {
+        otherPetsDetailsGroup.style.display = 'block';
+    } else {
+        otherPetsDetailsGroup.style.display = 'none';
+    }
+});
+
+adoptionForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(adoptionForm);
+    fetch('/adopter/applications', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('Application submitted successfully!');
+            adoptionModal.style.display = 'none';
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            window.location.href = '/adopter/application-status';
+        } else {
+            alert('Error submitting application.');
+        }
+    })
+    .catch(() => alert('Error submitting application.'));
+});
+
+// Responsive filter sidebar toggle
+function handleFilterSidebar() {
+    const btn = document.querySelector('.show-filters-btn');
+    const sidebar = document.querySelector('.filters');
+    if(window.innerWidth <= 900) {
+        btn.style.display = 'block';
+        sidebar.classList.remove('show');
+    } else {
+        btn.style.display = 'none';
+        sidebar.classList.add('show');
+    }
+}
+window.addEventListener('resize', handleFilterSidebar);
+document.addEventListener('DOMContentLoaded', handleFilterSidebar);
+</script>
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get the selected pet ID from the URL
     const params = new URLSearchParams(window.location.search);
     const selectedId = params.get('selected');
     if (selectedId) {
-        // Find the pet card with a data-pet-id attribute matching the selected ID
         const card = document.querySelector(`[data-pet-id='${selectedId}']`);
         if (card) {
-            // Automatically click the "View Details" button
             const viewBtn = card.querySelector('.view-details-btn');
             if (viewBtn) {
                 setTimeout(() => {
                     viewBtn.click();
-                }, 600); // Wait a bit for scroll/highlight
+                }, 600);
             }
         }
     }

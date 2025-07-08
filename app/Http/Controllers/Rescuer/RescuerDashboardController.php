@@ -232,8 +232,25 @@ class RescuerDashboardController extends Controller
             'eating_habits' => 'nullable|string',
             'adoption_status' => 'required|string',
             'suitable_for' => 'nullable|string',
+            'medical_history.*' => 'nullable|file|mimes:pdf,jpeg,png,jpg,gif|max:5120',
         ]);
         $data['rescuer_id'] = $rescuer->rescuer_id;
+
+        // Handle medical records upload
+        $medicalHistory = [];
+        if ($request->hasFile('medical_history')) {
+            foreach ($request->file('medical_history') as $file) {
+                $path = $file->store('medicalrecords', 's3');
+                \Storage::disk('s3')->setVisibility($path, 'public');
+                $url = \Storage::disk('s3')->url($path);
+                $medicalHistory[] = [
+                    'url' => $url,
+                    'name' => $file->getClientOriginalName(),
+                ];
+            }
+        }
+        $data['medical_history'] = $medicalHistory;
+
         $pet = \App\Models\Shared\Pet::create($data);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -271,7 +288,24 @@ class RescuerDashboardController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'eating_habits' => 'nullable|string',
             'suitable_for' => 'nullable|string',
+            'medical_history.*' => 'nullable|file|mimes:pdf,jpeg,png,jpg,gif|max:5120',
         ]);
+
+        // Handle medical records upload (append to existing)
+        $medicalHistory = $pet->medical_history ?? [];
+        if ($request->hasFile('medical_history')) {
+            foreach ($request->file('medical_history') as $file) {
+                $path = $file->store('medicalrecords', 's3');
+                \Storage::disk('s3')->setVisibility($path, 'public');
+                $url = \Storage::disk('s3')->url($path);
+                $medicalHistory[] = [
+                    'url' => $url,
+                    'name' => $file->getClientOriginalName(),
+                ];
+            }
+        }
+        $data['medical_history'] = $medicalHistory;
+
         $pet->update($data);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {

@@ -27,7 +27,10 @@
                     </div>
                 </div>
             @empty
-                <div class="no-conversations">No conversations found.</div>
+                <div class="no-conversations"
+                    style="padding: 48px 0; text-align: center; color: #888; font-size: 1.1rem; letter-spacing: 0.5px;">
+                    No conversations found.
+                </div>
             @endforelse
         </div>
 
@@ -39,7 +42,11 @@
                         alt="Profile Image" class="profile-image">
                     <div class="chat-name">{{ $receiver->name }} </div>
                 @else
-                    <div class="chat-name">No Active Chats</div>
+                    <div class="no-active-chats"
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 220px; width: 100%;">
+                        <div class="chat-name" style="font-size: 1.3rem; color: #888; font-weight: 500;">No Active Chats
+                        </div>
+                    </div>
                 @endif
             </div>
 
@@ -48,7 +55,8 @@
             @if ($receiver)
                 <div class="chat-input">
                     <textarea class="message-input" id="message-input" placeholder="Type your message..."></textarea>
-                    <button class="attachments" id="attachments-btn" type="button"><i class="fa-solid fa-upload"></i></button>
+                    <button class="attachments" id="attachments-btn" type="button"><i
+                            class="fa-solid fa-upload"></i></button>
                     <input type="file" id="file-input" style="display:none;" accept="image/*,.pdf,.doc,.docx,.txt" />
                     <button class="send-btn" type="button"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
@@ -60,12 +68,16 @@
     <input type="hidden" id="current-user-id" value="{{ auth()->id() }}">
 
     <!-- Confirmation Modal -->
-    <div id="confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000; align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:10px; padding:24px; min-width:320px; max-width:90vw; box-shadow:0 2px 16px rgba(0,0,0,0.2);">
+    <div id="confirm-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000; align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; border-radius:10px; padding:24px; min-width:320px; max-width:90vw; box-shadow:0 2px 16px rgba(0,0,0,0.2);">
             <div id="modal-preview" style="margin-bottom:16px;"></div>
             <div style="display:flex; gap:12px; justify-content:flex-end;">
-                <button id="modal-cancel" style="background:#eee; border:none; padding:8px 16px; border-radius:5px;">Cancel</button>
-                <button id="modal-confirm" style="background:#4f46e5; color:#fff; border:none; padding:8px 16px; border-radius:5px;">Confirm</button>
+                <button id="modal-cancel"
+                    style="background:#eee; border:none; padding:8px 16px; border-radius:5px;">Cancel</button>
+                <button id="modal-confirm"
+                    style="background:#4f46e5; color:#fff; border:none; padding:8px 16px; border-radius:5px;">Confirm</button>
             </div>
         </div>
     </div>
@@ -141,36 +153,42 @@
                         }
                         // Send message directly, no modal
                         fetch('/messages', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            },
-                            body: JSON.stringify({
-                                receiver_id: receiverId,
-                                message: content
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                        .content,
+                                },
+                                body: JSON.stringify({
+                                    receiver_id: receiverId,
+                                    message: content
+                                })
                             })
-                        })
-                        .then(res => res.json())
-                        .then((message) => {
-                            if (message && message.message_content && message.sender_id) {
-                                renderMessage(message);
-                                document.getElementById('message-input').value = '';
-                                if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
-                                // Update conversation preview and time in sidebar
-                                const activeConv = document.querySelector('.conversation.active');
-                                if (activeConv) {
-                                    const preview = activeConv.querySelector('.conversation-preview');
-                                    if (preview) preview.textContent = message.message_content.length > 50 ? message.message_content.slice(0, 50) + '...' : message.message_content;
-                                    const time = activeConv.querySelector('.conversation-time');
-                                    if (time) time.textContent = timeAgo(message.sent_at);
+                            .then(res => res.json())
+                            .then((message) => {
+                                if (message && message.message_content && message.sender_id) {
+                                    renderMessage(message);
+                                    document.getElementById('message-input').value = '';
+                                    if (chatMessages) chatMessages.scrollTop = chatMessages
+                                        .scrollHeight;
+                                    // Update conversation preview and time in sidebar
+                                    const activeConv = document.querySelector('.conversation.active');
+                                    if (activeConv) {
+                                        const preview = activeConv.querySelector(
+                                            '.conversation-preview');
+                                        if (preview) preview.textContent = message.message_content
+                                            .length > 50 ? message.message_content.slice(0, 50) +
+                                            '...' : message.message_content;
+                                        const time = activeConv.querySelector('.conversation-time');
+                                        if (time) time.textContent = timeAgo(message.sent_at);
+                                    }
+                                } else if (message && message.errors) {
+                                    alert('Validation error: ' + Object.values(message.errors).join(
+                                        '\n'));
+                                } else {
+                                    alert('An error occurred. Please try again.');
                                 }
-                            } else if (message && message.errors) {
-                                alert('Validation error: ' + Object.values(message.errors).join('\n'));
-                            } else {
-                                alert('An error occurred. Please try again.');
-                            }
-                        });
+                            });
                     });
                 }
 
@@ -192,17 +210,23 @@
                         if (/image\/.*/.test(selectedFile.type)) {
                             const reader = new FileReader();
                             reader.onload = function(e) {
-                                modalPreview.innerHTML = `<div style='margin-bottom:8px;'>Send this image?</div><img src='${e.target.result}' style='max-width:200px; max-height:200px; display:block; margin-bottom:8px;'/><div>${selectedFile.name}</div>`;
+                                modalPreview.innerHTML =
+                                    `<div style='margin-bottom:8px;'>Send this image?</div><img src='${e.target.result}' style='max-width:200px; max-height:200px; display:block; margin-bottom:8px;'/><div>${selectedFile.name}</div>`;
                                 confirmModal.style.display = 'flex';
                                 pendingAction = 'upload-file';
-                                pendingData = { file: selectedFile };
+                                pendingData = {
+                                    file: selectedFile
+                                };
                             };
                             reader.readAsDataURL(selectedFile);
                         } else {
-                            modalPreview.innerHTML = `<div style='margin-bottom:8px;'>Send this file?</div><div style='padding:12px; background:#f3f4f6; border-radius:6px;'>${selectedFile.name}</div>`;
+                            modalPreview.innerHTML =
+                                `<div style='margin-bottom:8px;'>Send this file?</div><div style='padding:12px; background:#f3f4f6; border-radius:6px;'>${selectedFile.name}</div>`;
                             confirmModal.style.display = 'flex';
                             pendingAction = 'upload-file';
-                            pendingData = { file: selectedFile };
+                            pendingData = {
+                                file: selectedFile
+                            };
                         }
                     });
                 }
@@ -222,25 +246,26 @@
                             formData.append('file', pendingData.file);
                             formData.append('receiver_id', receiverId);
                             fetch('/messages/upload', {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: formData
-                            })
-                            .then(res => res.json())
-                            .then(response => {
-                                if (response.success) {
-                                    renderMessage(response.message);
-                                } else {
-                                    alert(response.error || 'Upload failed.');
-                                }
-                                if (fileInput) fileInput.value = '';
-                            })
-                            .catch(() => {
-                                alert('Upload failed.');
-                                if (fileInput) fileInput.value = '';
-                            });
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                            .content
+                                    },
+                                    body: formData
+                                })
+                                .then(res => res.json())
+                                .then(response => {
+                                    if (response.success) {
+                                        renderMessage(response.message);
+                                    } else {
+                                        alert(response.error || 'Upload failed.');
+                                    }
+                                    if (fileInput) fileInput.value = '';
+                                })
+                                .catch(() => {
+                                    alert('Upload failed.');
+                                    if (fileInput) fileInput.value = '';
+                                });
                         }
                         pendingAction = null;
                         pendingData = null;
@@ -312,7 +337,8 @@
             content.classList.add('message-content');
 
             if (message.attachments) {
-                const fileUrl = message.file_url || (message.attachments.startsWith('http') ? message.attachments : '/storage/' + message.attachments);
+                const fileUrl = message.file_url || (message.attachments.startsWith('http') ? message.attachments :
+                    '/storage/' + message.attachments);
                 const fileName = message.original_name || message.attachments.split('/').pop();
                 if (/\.(jpg|jpeg|png|gif)$/i.test(fileUrl)) {
                     const img = document.createElement('img');

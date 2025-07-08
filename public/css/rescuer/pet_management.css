@@ -195,15 +195,16 @@ body {
 
 .main-content {
   margin-left: 250px;
-  padding: 2rem;
+  padding: 2rem 1.5rem;
   background: #f0f2f5;
   min-height: 100vh;
   margin-bottom: 4rem;
 }
 
 .content-wrapper {
-  max-width: 1000px;
-  margin: 0 auto;
+  padding: 0 5rem;
+  background: #f0f2f5;
+  min-height: calc(100vh - 4rem);
 }
 
 .container {
@@ -259,7 +260,6 @@ body {
      SEARCH BAR & FILTERS
      ========================= */
 
-/* --- Enhanced Search Bar (Smaller, Less Radius) --- */
 .search-bar {
   display: flex;
   align-items: center;
@@ -499,11 +499,11 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 41, 59, 0.18); /* softer, blue-tinted overlay */
+  background: rgba(30, 41, 59, 0.18);
   z-index: 1000;
   backdrop-filter: blur(2px);
   animation: modal-fade-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden; /* Prevents outer scroll */
+  overflow: hidden;
 }
 @keyframes modal-fade-in {
   from {
@@ -526,7 +526,6 @@ body {
   overflow-y: auto;
   border: 1.5px solid #e5eaf3;
   animation: modal-content-pop 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Custom scrollbar for modal */
   scrollbar-width: thin;
   scrollbar-color: #b6c6e3 #fafdff;
 }
@@ -668,7 +667,6 @@ body {
   visibility: visible;
 }
 
-/* Deleted success alert (red background) */
 #deleteSuccessAlert.success-alert {
   background: #ffeaea;
   color: #b91c1c;
