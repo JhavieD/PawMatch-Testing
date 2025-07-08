@@ -14,7 +14,27 @@ class Pet extends Model
     protected $primaryKey = 'pet_id';
 
     protected $fillable = [
-        'shelter_id', 'rescuer_id', 'name', 'species', 'breed', 'age', 'gender', 'size', 'medical_history', 'adoption_status', 'behavior', 'daily_activity', 'eating_habits', 'special_needs', 'compatibility', 'suitable_for', 'description'
+        'shelter_id',
+        'rescuer_id',
+        'name',
+        'species',
+        'breed',
+        'age',
+        'gender',
+        'size',
+        'medical_history',
+        'adoption_status',
+        'behavior',
+        'daily_activity',
+        'eating_habits',
+        'special_needs',
+        'compatibility',
+        'suitable_for',
+        'description'
+    ];
+
+    protected $casts = [
+        'medical_history' => 'array',
     ];
 
     // Relationships can be added here as needed
@@ -29,10 +49,10 @@ class Pet extends Model
     //Pet Image Upload
     public function images()
     {
-    return $this->hasMany(PetImage::class, 'pet_id', 'pet_id');
+        return $this->hasMany(PetImage::class, 'pet_id', 'pet_id');
     }
     public function getImageUrlAttribute()
     {
         return $this->images->first()->image_url ?? null;
     }
-}   
+}

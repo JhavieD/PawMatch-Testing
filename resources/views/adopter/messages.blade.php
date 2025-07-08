@@ -12,7 +12,7 @@
     <div class="main-container">
         <!-- Conversations List -->
         <div class="conversations">
-            @foreach ($partners as $partner)
+            @forelse ($partners as $partner)
                 <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                     onclick="window.location.href='{{ route('adopter.messages', ['receiver_id' => $partner->user_id]) }}'">
                     <div class="conversation-header">
@@ -31,7 +31,12 @@
                         {{ Str::limit($partner->decrypted_last_message ?? 'No messages yet.', 50) }}
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="no-conversations"
+                    style="padding: 48px 0; text-align: center; color: #888; font-size: 1.1rem; letter-spacing: 0.5px;">
+                    No conversations found.
+                </div>
+            @endforelse
         </div>
 
         <!-- Chat Area -->
@@ -48,7 +53,11 @@
                         @endif
                     </div>
                 @else
-                    <div class="chat-name">No Active Chats</div>
+                    <div class="no-active-chats"
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 220px; width: 100%;">
+                        <div class="chat-name" style="font-size: 1.3rem; color: #888; font-weight: 500;">No Active Chats
+                        </div>
+                    </div>
                 @endif
             </div>
 

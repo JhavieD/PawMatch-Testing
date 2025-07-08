@@ -245,7 +245,7 @@ body {
   max-width: calc(1200px + 250px);
   padding: 2rem;
   display: grid;
-  grid-template-columns: 320px 1fr; /* Fixed width for conversations */
+  grid-template-columns: 320px 1fr;
   gap: 1rem;
   height: 100vh;
 }
@@ -256,7 +256,7 @@ body {
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  width: 320px; /* Fixed width */
+  width: 320px;
   min-width: 260px;
   max-width: 340px;
   flex-shrink: 0;
