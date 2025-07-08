@@ -43,7 +43,7 @@
                 @forelse($pets as $pet)
                     <div class="pet-card" data-name="{{ $pet->name }}" data-breed="{{ $pet->breed }}"
                         data-status="{{ strtolower($pet->adoption_status ?? $pet->status) }}">
-                        <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}"
+                        <img src="{{ $pet->image_url ?? 'https://placehold.co/400x300' }}" alt="{{ $pet->name }}" 
                             class="pet-image">
                         <div class="pet-info">
                             <h3 class="pet-name">{{ $pet->name }}</h3>
@@ -234,7 +234,7 @@
                             <div class="image-grid" id="edit-image-grid">
                                 <!-- Existing images will be injected here by JS -->
                                 <label class="upload-box">
-                                    <input type="file" accept="image/*" multiple>
+                                    <input type="file" name="images[]" accept="image/*" multiple>
                                     <span>+ Add Photos</span>
                                 </label>
                             </div>
@@ -363,7 +363,7 @@
                             <h3>Pet Images</h3>
                             <div class="image-grid">
                                 <label class="upload-box">
-                                    <input type="file" accept="image/*" multiple>
+                                    <input type="file" name="images[]" accept="image/*" multiple>
                                     <span>+ Add Photos</span>
                                 </label>
                             </div>
@@ -393,7 +393,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         function logout() {
             window.location.href = 'login.html';
         }
@@ -439,6 +439,7 @@
                 }
             }
         });
+        // Auto reload of Pet Details
 
         editBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -478,7 +479,53 @@
                 }
                 document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
 
-                // TODO: Display images and delete buttons dynamically if needed
+                const images = JSON.parse(btn.getAttribute('data-images') || '[]');
+                const thumbnailGrid = document.getElementById('edit-thumbnail-grid');
+                if (thumbnailGrid) {
+                    thumbnailGrid.innerHTML = '';
+                    images.forEach(image => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'thumbnail-wrapper';
+                        wrapper.innerHTML = `
+                                <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
+                                <form action="/rescuer/pet-images/${image.id}" method="POST" class="delete-image-form">
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
+                                </form>
+                            `;
+                        thumbnailGrid.appendChild(wrapper);
+                    });
+                }
+                // ^Display existing images and Delete
+
+                // Debug log
+                console.log({
+                    size,
+                    behavior,
+                    dailyActivity,
+                    specialNeeds,
+                    compatibility,
+                    eatingHabits
+                });
+
+                // Populate the edit form with the pet's current details
+                document.getElementById('edit-name').value = name;
+                document.getElementById('edit-species').value = species;
+                document.getElementById('edit-breed').value = breed;
+                document.getElementById('edit-age').value = age;
+                document.getElementById('edit-gender').value = gender;
+                document.getElementById('edit-size').value = size;
+                document.getElementById('edit-description').value = description;
+                document.getElementById('edit-adoption_status').value = adoptionStatus;
+                document.getElementById('edit-behavior').value = behavior;
+                document.getElementById('edit-daily_activity').value = dailyActivity;
+                document.getElementById('edit-special_needs').value = specialNeeds;
+                document.getElementById('edit-compatibility').value = compatibility;
+                document.getElementById('edit-eating_habits').value = eatingHabits;
+                if (document.getElementById('edit-suitable_for')) {
+                    document.getElementById('edit-suitable_for').value = suitableFor || '';
+                }
 
                 // Update the form action to the correct pet ID
                 const form = document.getElementById('editPetForm');
@@ -525,11 +572,9 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success) {
-                            document.getElementById('editSuccessAlert').classList.add('active');
-                            setTimeout(() => {
-                                closeModal(editModal);
-                                location.reload();
-                            }, 2000);
+                            closeModal(editModal);
+                            sessionStorage.setItem('showEditSuccess', '1');
+                            location.reload();
                         } else {
                             alert('Error saving changes. Please try again.');
                         }
@@ -548,14 +593,17 @@
                     console.error('Error:', error);
                     alert('An error occurred. Please try again.');
                 });
-
-            closeModal(editModal);
         });
 
         document.getElementById('addPetForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
+
+            // Debug: log all form data
+            for (let [key, value] of formData.entries()) {
+                console.log('ADD FORM FIELD:', key, value);
+            }
 
             fetch(form.action, {
                     method: 'POST',
@@ -568,11 +616,9 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success) {
-                            document.getElementById('addSuccessAlert').classList.add('active');
-                            setTimeout(() => {
-                                closeModal(addModal);
-                                location.reload();
-                            }, 1000); // Shorter delay (1 second)
+                            closeModal(addModal);
+                            sessionStorage.setItem('showAddSuccess', '1');
+                            location.reload();
                         } else {
                             alert('Error adding pet. Please try again.');
                         }
@@ -591,8 +637,6 @@
                     console.error('Error:', error);
                     alert('An error occurred. Please try again.');
                 });
-
-            closeModal(addModal);
         });
 
         // Image upload handling
@@ -633,7 +677,8 @@
                     .then(data => {
                         const applicationsList = document.querySelector('.applications-list');
                         applicationsList.innerHTML = '';
-                        if (data.applications && data.applications.length > 0) {
+                        // Defensive: check for data.applications as array
+                        if (Array.isArray(data.applications) && data.applications.length > 0) {
                             data.applications.forEach(app => {
                                 const applicantName = app.adopter && app.adopter.user ? app
                                     .adopter.user.name : 'Unknown';
@@ -647,20 +692,20 @@
                                     `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` :
                                     '';
                                 applicationsList.innerHTML += `
-                                    <div class="application-item" style="display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;">
-                                        <div class="application-info">
-                                            <h3 style="font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Application for ${petName}</h3>
-                                            <p style="color: #6b7280; margin-bottom: 0.5rem;">From: <span style="font-weight: 500; color: #1a1a1a;">${applicantName}</span>${phone ? ' • Phone: <span style=\"color:#1a1a1a;\">' + phone + '</span>' : ''}</p>
-                                            <div class="application-meta" style="font-size: 0.875rem; color: #6b7280;">
-                                                Submitted: ${submittedAt} <span class="status-badge ${statusClass}" style="margin-left: 0.5rem;">${status}</span>
+                                        <div class=\"application-item\" style=\"display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;\">
+                                            <div class=\"application-info\">
+                                                <h3 style=\"font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;\">Application for ${petName}</h3>
+                                                <p style=\"color: #6b7280; margin-bottom: 0.5rem;\">From: <span style=\"font-weight: 500; color: #1a1a1a;\">${applicantName}</span>${phone ? ' • Phone: <span style=\\\"color:#1a1a1a;\\\">' + phone + '</span>' : ''}</p>
+                                                <div class=\"application-meta\" style=\"font-size: 0.875rem; color: #6b7280;\">
+                                                    Submitted: ${submittedAt} <span class=\"status-badge ${statusClass}\" style=\"margin-left: 0.5rem;\">${status}</span>
+                                                </div>
+                                            </div>
+                                            <div class=\"action-buttons\" style=\"display: flex; gap: 0.5rem;\">
+                                                <button class=\"btn btn-primary\" onclick=\"viewApplicationDetails(${app.application_id})\">Review</button>
+                                                <button class=\"btn btn-outline\" onclick=\"messageApplicant('${applicantName}')\">Message</button>
                                             </div>
                                         </div>
-                                        <div class="action-buttons" style="display: flex; gap: 0.5rem;">
-                                            <button class="btn btn-primary" onclick="viewApplicationDetails(${app.application_id})">Review</button>
-                                            <button class="btn btn-outline" onclick="messageApplicant('${applicantName}')">Message</button>
-                                        </div>
-                                    </div>
-                                `;
+                                    `;
                             });
                         } else {
                             applicationsList.innerHTML =
@@ -668,22 +713,20 @@
                         }
                     })
                     .catch(error => {
-                        const applicationsList = document.querySelector('.applications-list');
-                        applicationsList.innerHTML =
-                            '<div style="color:red;">Failed to load applications.</div>';
                         console.error('Error fetching applications:', error);
                     });
             });
         });
 
         function viewApplicationDetails(applicationId) {
+            // Redirect to the application details page
             window.location.href = `applications-review.html?id=${applicationId}`;
         }
 
         function messageApplicant(applicantName) {
+            // Redirect to messages with the applicant
             window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
         }
-
         // filtering
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('petSearchInput');
@@ -711,52 +754,96 @@
 
             searchInput.addEventListener('input', filterPets);
             statusFilter.addEventListener('change', filterPets);
+
+            // add pet alert
+            document.addEventListener('DOMContentLoaded', function() {
+                const addSuccessAlert = document.getElementById('addSuccessAlert');
+                const closeAddSuccessAlert = document.getElementById('closeAddSuccessAlert');
+
+                if (addSuccessAlert && closeAddSuccessAlert) {
+                    closeAddSuccessAlert.addEventListener('click', function() {
+                        addSuccessAlert.style.display = 'none';
+                        location.reload();
+                    });
+                }
+            });
         });
 
-        // Success alert close buttons
-        const closeAdd = document.getElementById('closeAddSuccessAlert');
-        if (closeAdd) closeAdd.onclick = function() {
+        // --- Success Alert Persistence ---
+        function showSuccessAlert(type) {
+            let alertEl = null;
+            if (type === 'add') {
+                alertEl = document.getElementById('addSuccessAlert');
+            } else if (type === 'edit') {
+                alertEl = document.getElementById('editSuccessAlert');
+            } else if (type === 'delete') {
+                alertEl = document.getElementById('deleteSuccessAlert');
+            }
+            if (alertEl) {
+                alertEl.classList.add('active');
+                // Auto close after 2 seconds with fade out
+                setTimeout(() => {
+                    alertEl.classList.remove('active');
+                }, 2000);
+            }
+        }
+
+        // On page load, check for alert flag
+        window.addEventListener('DOMContentLoaded', function() {
+            if (sessionStorage.getItem('showAddSuccess')) {
+                showSuccessAlert('add');
+                sessionStorage.removeItem('showAddSuccess');
+            }
+            if (sessionStorage.getItem('showEditSuccess')) {
+                showSuccessAlert('edit');
+                sessionStorage.removeItem('showEditSuccess');
+            }
+            if (sessionStorage.getItem('showDeleteSuccess')) {
+                showSuccessAlert('delete');
+                sessionStorage.removeItem('showDeleteSuccess');
+            }
+        });
+
+        // Success alert close buttons (no reload)
+        document.getElementById('closeAddSuccessAlert').addEventListener('click', function() {
             document.getElementById('addSuccessAlert').classList.remove('active');
-        };
-        const closeEdit = document.getElementById('closeEditSuccessAlert');
-        if (closeEdit) closeEdit.onclick = function() {
+        });
+        document.getElementById('closeEditSuccessAlert').addEventListener('click', function() {
             document.getElementById('editSuccessAlert').classList.remove('active');
-        };
-        const closeDelete = document.getElementById('closeDeleteSuccessAlert');
-        if (closeDelete) closeDelete.onclick = function() {
+        });
+        document.getElementById('closeDeleteSuccessAlert').addEventListener('click', function() {
             document.getElementById('deleteSuccessAlert').classList.remove('active');
-        };
+        });
 
-        // Intercept delete pet form submit for AJAX delete
-        // Use event delegation for dynamic content
-
-        document.addEventListener('submit', function(e) {
-            if (e.target.matches('form[action*="rescuer/pets/"][method="POST"]') && e.target.querySelector(
-                    'input[name="_method"][value="DELETE"]')) {
+        // --- FIXED: Delete Pet Handler (single, clean version) ---
+        document.querySelectorAll('.delete-pet-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
                 fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
+                        method: 'DELETE',
                         headers: {
+                            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
                             'Accept': 'application/json'
                         }
                     })
                     .then(async response => {
                         if (response.ok) {
-                            document.getElementById('deleteSuccessAlert').classList.add('active');
-                            setTimeout(() => {
+                            const data = await response.json();
+                            if (data.success) {
+                                sessionStorage.setItem('showDeleteSuccess', '1');
                                 location.reload();
-                            }, 1000); // Shorter delay (1 second)
+                            } else {
+                                alert('Error deleting pet. Please try again.');
+                            }
                         } else {
-                            alert('Failed to delete pet.');
+                            alert('Error deleting pet. Please try again.');
                         }
                     })
-                    .catch(() => {
-                        alert('An error occurred. Please try again.');
+                    .catch(error => {
+                        console.error('Delete error:', error);
+                        alert('Error deleting pet. Please try again.');
                     });
-            }
+            });
         });
-    </script>
+</script>
 @endsection
