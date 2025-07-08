@@ -438,65 +438,104 @@ class ShelterDashboardController extends Controller
 
     // STRAY REPORTS METHODS added by andrea
     public function strayReports(Request $request)
-    {
-        $shelter = auth()->user()->shelter;
+        {
+            $shelter = auth()->user()->shelter;
 
-        if (!$shelter) {
-            abort(404, 'Shelter not found');
-        }
-
-        $query = \DB::table('stray_reports')
-            ->join('adopters', 'stray_reports.adopter_id', '=', 'adopters.adopter_id')
-            ->join('users', 'adopters.user_id', '=', 'users.user_id')
-            ->leftJoin('stray_report_notifications', function ($join) use ($shelter) {
-                $join->on('stray_reports.report_id', '=', 'stray_report_notifications.report_id')
-                    ->where('stray_report_notifications.shelter_id', '=', $shelter->shelter_id);
-            })
-            ->whereNotNull('stray_report_notifications.id')
-            ->select([
-                'stray_reports.*',
-                \DB::raw("CONCAT(users.first_name, ' ', users.last_name) as reporter_name"),
-                'users.email as reporter_email',
-                'stray_report_notifications.admin_message',
-                'stray_report_notifications.is_read',
-                'stray_report_notifications.sent_at'
-            ])
-            ->distinct(); // to  remove duplicates
-
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('stray_reports.location', 'LIKE', "%{$search}%")
-                    ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
-                    ->orWhere('stray_reports.animal_type', 'LIKE', "%{$search}%")
-                    ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('status')) {
-            $status = $request->get('status');
-            if ($status !== 'all') {
-                $query->where('stray_reports.status', $status);
+            if (!$shelter) {
+                abort(404, 'Shelter not found');
             }
+
+            $query = \DB::table('stray_reports')
+                ->join('adopters', 'stray_reports.adopter_id', '=', 'adopters.adopter_id')
+                ->join('users', 'adopters.user_id', '=', 'users.user_id')
+                ->leftJoin('stray_report_notifications', function ($join) use ($shelter) {
+                    $join->on('stray_reports.report_id', '=', 'stray_report_notifications.report_id')
+                        ->where('stray_report_notifications.shelter_id', '=', $shelter->shelter_id);
+                })
+                ->whereNotNull('stray_report_notifications.id')
+                ->select([
+                    'stray_reports.*',
+                    \DB::raw("CONCAT(users.first_name, ' ', users.last_name) as reporter_name"),
+                    'users.email as reporter_email',
+                    'stray_report_notifications.admin_message',
+                    'stray_report_notifications.is_read',
+                    'stray_report_notifications.sent_at'
+                ])
+                ->distinct(); // to  remove duplicates
+
+            if ($request->filled('search')) {
+                $search = $request->get('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('stray_reports.location', 'LIKE', "%{$search}%")
+                        ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
+                        ->orWhere('stray_reports.animal_type', 'LIKE', "%{$search}%")
+                        ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $status = $request->get('status');
+                if ($status !== 'all') {
+                    $query->where('stray_reports.status', $status);
+                }
+            }
+
+            $reports = $query->orderByDesc('stray_report_notifications.sent_at')->paginate(12);
+
+            return view('shelter.stray-reports', compact('reports'));
         }
-
-        $reports = $query->orderByDesc('stray_report_notifications.sent_at')->paginate(12);
-
-        return view('shelter.stray-reports', compact('reports'));
-    }
-
     public function acceptStrayReport($reportId)
     {
         $shelter = auth()->user()->shelter;
 
         try {
-            // Check if the report is already accepted by this shelter
+            // Start database transaction for consistency
+            \DB::beginTransaction();
+            
+            // Check if the report exists and get current status
+            $report = \DB::table('stray_reports')->where('report_id', $reportId)->first();
+            
+            if (!$report) {
+                \DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Report not found'
+                ], 404);
+            }
+
+            // Status checks - prevent accepting flagged/duplicate/cancelled reports
+            if ($report->status === 'cancelled') {
+                \DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot accept cancelled reports'
+                ], 400);
+            }
+
+            if ($report->is_flagged) {
+                \DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot accept flagged reports'
+                ], 400);
+            }
+
+            if ($report->is_duplicate) {
+                \DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot accept duplicate reports'
+                ], 400);
+            }
+
+            // Check if the notification exists for this shelter
             $notification = \DB::table('stray_report_notifications')
                 ->where('report_id', $reportId)
                 ->where('shelter_id', $shelter->shelter_id)
                 ->first();
 
             if (!$notification) {
+                \DB::rollback();
                 return response()->json([
                     'success' => false,
                     'message' => 'Report notification not found'
@@ -504,16 +543,28 @@ class ShelterDashboardController extends Controller
             }
 
             if ($notification->handled_at) {
+                \DB::rollback();
                 return response()->json([
                     'success' => false,
                     'message' => 'Report is already accepted!'
                 ], 409);
             }
 
-            // Update the main stray report status to 'accepted'
-            \DB::table('stray_reports')
-                ->where('report_id', $reportId)
-                ->update(['status' => 'accepted']);
+            // Only update status to 'accepted' if it's in a valid state
+            if (in_array($report->status, ['pending', 'investigating'])) {
+                \DB::table('stray_reports')
+                    ->where('report_id', $reportId)
+                    ->update([
+                        'status' => 'accepted',
+                        'updated_at' => now()
+                    ]);
+            } else {
+                \DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Report cannot be accepted in its current state'
+                ], 400);
+            }
 
             // Update the notification record
             \DB::table('stray_report_notifications')
@@ -522,11 +573,12 @@ class ShelterDashboardController extends Controller
                 ->update([
                     'is_read' => true,
                     'read_at' => now(),
-                    'handled_at' => now()
+                    'handled_at' => now(),
+                    'updated_at' => now()
                 ]);
 
-
-            $message = " {$shelter->shelter_name} has accepted your stray animal report and will be taking action to help the animal.";
+            // Create admin action log
+            $message = "{$shelter->shelter_name} has accepted your stray animal report and will be taking action to help the animal.";
 
             \DB::table('admin_actions')->insert([
                 'action_type' => 'status_update',
@@ -537,19 +589,25 @@ class ShelterDashboardController extends Controller
                 'updated_at' => now()
             ]);
 
+            // Commit all changes
+            \DB::commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Report accepted successfully'
             ]);
+            
         } catch (\Exception $e) {
+            \DB::rollback();
+            \Log::error('Accept stray report error: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to accept report'
+                'message' => 'Failed to accept report: ' . $e->getMessage()
             ], 500);
         }
     }
-
-    public function markStrayReportRead($reportId)
+public function markStrayReportRead($reportId)
     {
         $shelter = auth()->user()->shelter;
 
@@ -568,3 +626,4 @@ class ShelterDashboardController extends Controller
         }
     }
 }
+
