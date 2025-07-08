@@ -24,35 +24,39 @@
             </div>
         </div>
         <!-- Search and Filter -->
-        <div class="content-card">
-            <form method="GET" action="{{ route('shelter.stray-reports') }}" class="search-filter">
+         <div class="content-card">
+        <div class="search-filter">
+        <form method="GET" action="{{ route('shelter.stray-reports') }}" class="search-form">
+            <div class="search-box-container">
                 <input type="text" 
-                       name="search" 
-                       class="search-input" 
-                       placeholder="Search by report ID, location, or animal type..." 
-                       value="{{ request('search') }}">
-                
-                <select name="status" class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="investigating" {{ request('status') == 'investigating' ? 'selected' : '' }}>Investigating</option>
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
-                
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    Search
-                </button>
-                
-                @if(request('search') || request('status'))
-                    <a href="{{ route('shelter.stray-reports') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        Clear
-                    </a>
-                @endif
-            </form>
-        </div>
-
+                    name="search" 
+                    class="search-input" 
+                    placeholder="Search by report ID, location, or animal type..." 
+                    value="{{ request('search') }}">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <select name="status" class="filter-select">
+                <option value="">All Status</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="investigating" {{ request('status') == 'investigating' ? 'selected' : '' }}>Investigating</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+            </select>
+            
+            <button type="submit" class="btn btn-search">
+                <i class="fas fa-search"></i>
+                Search
+            </button>
+            
+            @if(request('search') || request('status'))
+                <a href="{{ route('shelter.stray-reports') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Clear
+                </a>
+            @endif
+        </form>
+    </div>
+</div>
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
@@ -276,7 +280,7 @@ function acceptReport() {
     })
     .then(data => {
         if (data.success) {
-            showNotification('Report accepted successfully! 🎉', 'success');
+            showNotification('Report accepted successfully!', 'success');
             closeReportModal();
             
             // Update the report card status in the grid
