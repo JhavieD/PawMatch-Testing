@@ -197,7 +197,7 @@ body {
   background: #f0f2f5;
   min-height: calc(100vh - 4rem);
 }
-/* --- Top Bar: Match Pet Management --- */
+
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -380,8 +380,6 @@ body {
    APPLICATIONS REVIEW STYLES
    ===================== */
 
-/* --- Applications Table Styles --- */
-
 .content-card {
   background: #fff;
   border-radius: 12px;
@@ -491,7 +489,6 @@ body {
   border: none;
 }
 
-/* Responsive Table */
 @media (max-width: 900px) {
   .applications-table th,
   .applications-table td {
@@ -548,8 +545,6 @@ body {
     padding: 0;
   }
 }
-
-/* badges */
 
 .status-badge {
   display: inline-block;
@@ -738,11 +733,11 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 41, 59, 0.18); /* softer, blue-tinted overlay */
+  background: rgba(30, 41, 59, 0.18);
   z-index: 1000;
   backdrop-filter: blur(2px);
   animation: modal-fade-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden; /* Prevents outer scroll */
+  overflow: hidden;
 }
 
 @keyframes modal-fade-in {
@@ -767,7 +762,7 @@ body {
   overflow-y: auto;
   border: 1.5px solid #e5eaf3;
   animation: modal-content-pop 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Custom scrollbar for modal */
+
   scrollbar-width: thin;
   scrollbar-color: #b6c6e3 #fafdff;
 }

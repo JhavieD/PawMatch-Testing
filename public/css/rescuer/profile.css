@@ -526,26 +526,26 @@ input:checked + .slider:before {
   }
 
   .profile-upload {
-    flex-direction: row !important; /* Keep row direction */
-    align-items: center !important; /* Center vertically */
+    flex-direction: row !important;
+    align-items: center !important;
     gap: 1.5rem !important;
   }
 
   .upload-buttons {
-    flex-direction: row !important; /* Keep buttons in a row */
+    flex-direction: row !important;
     gap: 1rem !important;
     width: auto !important;
   }
 
   .btn {
-    width: auto !important; /* Prevent stretching */
+    width: auto !important;
     text-align: center;
     min-width: 120px;
-    padding: 0.6rem 0.6rem !important; /* Adjust padding for smaller screens */
+    padding: 0.6rem 0.6rem !important;
   }
 
   .btn-primary {
-    width: 100% !important; /* Make primary button full width */
+    width: 100% !important;
   }
   .btn-danger {
     width: 100% !important;

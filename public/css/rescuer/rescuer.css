@@ -294,11 +294,11 @@ body {
   border-radius: 22px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.11);
   background: #fff;
-  /* Set fixed width to match three stat cards + gaps */
+
   width: 800px;
   max-width: 770px;
   min-width: 600px;
-  /* Adjust padding to match stat card content alignment */
+
   padding: 0.5rem 0.5rem 0.5rem 0.5rem;
   margin-bottom: 0.2rem;
   min-height: 120px;
@@ -320,7 +320,7 @@ body {
 
 .dashboard-top-row {
   display: grid;
-  grid-template-columns: 1fr 250px; /* Changed from 858px 1fr to 1fr 270px for alignment */
+  grid-template-columns: 1fr 250px;
   gap: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -782,11 +782,11 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 41, 59, 0.18); /* softer, blue-tinted overlay */
+  background: rgba(30, 41, 59, 0.18);
   z-index: 1000;
   backdrop-filter: blur(2px);
   animation: modal-fade-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden; /* Prevents outer scroll */
+  overflow: hidden;
 }
 
 @keyframes modal-fade-in {
@@ -811,7 +811,7 @@ body {
   overflow-y: auto;
   border: 1.5px solid #e5eaf3;
   animation: modal-content-pop 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Custom scrollbar for modal */
+
   scrollbar-width: thin;
   scrollbar-color: #b6c6e3 #fafdff;
 }
@@ -1206,7 +1206,6 @@ body {
   box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
 }
 
-/* Fix and align buttons in recent applications */
 .application-list .application-item .btn,
 .application-list .application-item .btn-outline {
   min-width: 120px;
@@ -1214,7 +1213,6 @@ body {
   margin: 0.2rem 0.3rem;
   text-align: center;
   border-radius: 10px;
-  /* Remove width and display:block from base styles */
 }
 .application-list .application-item .btn + .btn-outline {
   margin-top: 0.5rem;
@@ -1341,7 +1339,6 @@ body {
   }
 }
 
-/* --- Compact, centered rating card like the reference --- */
 .stat-card.rating-card {
   width: 270px;
   height: 200px;
@@ -1360,8 +1357,8 @@ body {
 .stat-card.rating-card .stat-header {
   width: 100%;
   display: flex;
-  align-items: flex-start; /* Left-align icon on desktop */
-  justify-content: flex-start; /* Left-align icon on desktop */
+  align-items: flex-start;
+  justify-content: flex-start;
   margin-bottom: 0.2rem;
 }
 
@@ -1384,11 +1381,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Push content to the top */
+  justify-content: flex-start;
   width: 100%;
   text-align: center;
   padding: 0;
-  padding-top: 0.05rem; /* Move content even further up */
+  padding-top: 0.05rem;
 }
 
 .stat-card.rating-card .rating-number {
@@ -1439,7 +1436,6 @@ body {
   }
 }
 
-/* --- Recent Pets List Styles (copied from rescuer.css) --- */
 .pet-list {
   list-style: none;
   margin: 0;
@@ -1561,7 +1557,6 @@ body {
   box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
 }
 
-/* Fix and align buttons in recent applications */
 .application-list .application-item .btn,
 .application-list .application-item .btn-outline {
   min-width: 120px;
@@ -1569,7 +1564,6 @@ body {
   margin: 0.2rem 0.3rem;
   text-align: center;
   border-radius: 10px;
-  /* Remove width and display:block from base styles */
 }
 .application-list .application-item .btn + .btn-outline {
   margin-top: 0.5rem;

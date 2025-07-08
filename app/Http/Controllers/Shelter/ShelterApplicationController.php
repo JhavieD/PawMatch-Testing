@@ -99,6 +99,7 @@ class ShelterApplicationController extends Controller
             return [
                 'application_id' => $app->id,
                 'applicant_name' => $user ? ($user->name ?? 'Unknown') : 'Unknown',
+                'user_id' => $user ? ($user->user_id ?? $user->id ?? null) : null,
                 'phone' => $user ? ($user->phone ?? '') : '',
                 'submitted_at' => $app->submitted_at,
                 'status' => ucfirst($app->status),

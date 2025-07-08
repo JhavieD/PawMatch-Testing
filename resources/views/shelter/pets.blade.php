@@ -51,6 +51,7 @@
                             <span class="pet-status status-{{ $pet->adoption_status }}">
                                 {{ ucfirst($pet->adoption_status) }}
                             </span>
+
                             <div class="card-actions">
                                 <button type="button" class="edit-pet-btn" data-pet-id="{{ $pet->pet_id }}"
                                     data-name="{{ $pet->name }}" data-species="{{ $pet->species }}"
@@ -63,7 +64,8 @@
                                     data-compatibility="{{ $pet->compatibility }}"
                                     data-images='@json($pet->images)'
                                     data-eating_habits="{{ $pet->eating_habits }}"
-                                    data-suitable_for="{{ $pet->suitable_for }}">
+                                    data-suitable_for="{{ $pet->suitable_for }}"
+                                    data-medical_history='@json($pet->medical_history ?? [])'>
                                     Edit
                                 </button>
                                 <button type="button" class="view-applications-btn" data-pet-id="{{ $pet->pet_id }}"
@@ -199,6 +201,15 @@
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="medical_history">Medical Records (ex. PDF,Images) (optional)</label>
+                            <!-- Existing medical records links -->
+                            <div id="edit-medical-records-list" style="margin-bottom: 8px; color: #6b7280;"></div>
+                            <input type="file" id="medical_history" name="medical_history[]"
+                                accept="application/pdf,image/*" multiple>
+                        </div>
+
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
@@ -330,6 +341,13 @@
                                 <option value="Senior Citizen Companion">Senior Citizen Companion</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="medical_history">Medical Records (PDF,Images)</label>
+                            <input type="file" id="medical_history" name="medical_history[]"
+                                accept="application/pdf,image/*" multiple>
+                        </div>
+
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid">
@@ -403,7 +421,6 @@
         const editModal = document.getElementById('editPetModal');
         const addModal = document.getElementById('addPetModal');
         const closeBtns = document.querySelectorAll('.close-btn');
-        const editBtns = document.querySelectorAll('.edit-pet-btn');
         const addPetBtn = document.querySelector('.add-pet-btn');
 
         function closeModal(modal) {
@@ -443,98 +460,93 @@
         });
         // Auto reload of Pet Details
 
-        editBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const petId = btn.getAttribute('data-pet-id');
-                const name = btn.getAttribute('data-name');
-                const species = btn.getAttribute('data-species');
-                const breed = btn.getAttribute('data-breed');
-                const age = btn.getAttribute('data-age');
-                const gender = btn.getAttribute('data-gender');
-                const size = btn.getAttribute('data-size') ? btn.getAttribute('data-size').toLowerCase() :
-                    '';
-                const description = btn.getAttribute('data-description');
-                const adoptionStatus = btn.getAttribute('data-adoption_status');
-                const behavior = btn.getAttribute('data-behavior');
-                const dailyActivity = btn.getAttribute('data-daily_activity');
-                const specialNeeds = btn.getAttribute('data-special_needs');
-                const compatibility = btn.getAttribute('data-compatibility');
-                const eatingHabits = btn.getAttribute('data-eating_habits');
-                const suitableFor = btn.getAttribute('data-suitable_for');
+        document.addEventListener('DOMContentLoaded', function() {
+            const editBtns = document.querySelectorAll('.edit-pet-btn');
+            editBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const petId = btn.getAttribute('data-pet-id');
+                    const name = btn.getAttribute('data-name');
+                    const species = btn.getAttribute('data-species');
+                    const breed = btn.getAttribute('data-breed');
+                    const age = btn.getAttribute('data-age');
+                    const gender = btn.getAttribute('data-gender');
+                    const size = btn.getAttribute('data-size') ? btn.getAttribute('data-size')
+                        .toLowerCase() :
+                        '';
+                    const description = btn.getAttribute('data-description');
+                    const adoptionStatus = btn.getAttribute('data-adoption_status');
+                    const behavior = btn.getAttribute('data-behavior');
+                    const dailyActivity = btn.getAttribute('data-daily_activity');
+                    const specialNeeds = btn.getAttribute('data-special_needs');
+                    const compatibility = btn.getAttribute('data-compatibility');
+                    const eatingHabits = btn.getAttribute('data-eating_habits');
+                    const suitableFor = btn.getAttribute('data-suitable_for');
 
-                // Display existing images and Delete
-                document.getElementById('edit-name').value = name;
-                document.getElementById('edit-species').value = species;
-                document.getElementById('edit-breed').value = breed;
-                document.getElementById('edit-age').value = age;
-                document.getElementById('edit-gender').value = gender;
-                document.getElementById('edit-size').value = size;
-                document.getElementById('edit-description').value = description;
-                document.getElementById('edit-adoption_status').value = adoptionStatus;
-                document.getElementById('edit-behavior').value = behavior;
-                document.getElementById('edit-daily_activity').value = dailyActivity;
-                document.getElementById('edit-special_needs').value = specialNeeds;
-                document.getElementById('edit-compatibility').value = compatibility;
-                document.getElementById('edit-eating_habits').value = eatingHabits;
-                if (document.getElementById('edit-suitable_for')) {
-                    document.getElementById('edit-suitable_for').value = suitableFor || '';
-                }
-                document.getElementById('editPetForm').action = `/shelter/pets/${petId}`;
+                    // Display existing images and Delete
+                    document.getElementById('edit-name').value = name;
+                    document.getElementById('edit-species').value = species;
+                    document.getElementById('edit-breed').value = breed;
+                    document.getElementById('edit-age').value = age;
+                    document.getElementById('edit-gender').value = gender;
+                    document.getElementById('edit-size').value = size;
+                    document.getElementById('edit-description').value = description;
+                    document.getElementById('edit-adoption_status').value = adoptionStatus;
+                    document.getElementById('edit-behavior').value = behavior;
+                    document.getElementById('edit-daily_activity').value = dailyActivity;
+                    document.getElementById('edit-special_needs').value = specialNeeds;
+                    document.getElementById('edit-compatibility').value = compatibility;
+                    document.getElementById('edit-eating_habits').value = eatingHabits;
+                    if (document.getElementById('edit-suitable_for')) {
+                        document.getElementById('edit-suitable_for').value = suitableFor || '';
+                    }
+                    document.getElementById('editPetForm').action = `/shelter/pets/${petId}`;
 
-                const images = JSON.parse(btn.getAttribute('data-images') || '[]');
-                const thumbnailGrid = document.getElementById('edit-thumbnail-grid');
-                if (thumbnailGrid) {
-                    thumbnailGrid.innerHTML = '';
-                    images.forEach(image => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'thumbnail-wrapper';
-                        wrapper.innerHTML = `
-                                <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
-                                <form action="/shelter/pet-images/${image.id}" method="POST" class="delete-image-form">
-                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
-                                </form>
-                            `;
-                        thumbnailGrid.appendChild(wrapper);
-                    });
-                }
-                // ^Display existing images and Delete
+                    const images = JSON.parse(btn.getAttribute('data-images') || '[]');
+                    const thumbnailGrid = document.getElementById('edit-thumbnail-grid');
+                    if (thumbnailGrid) {
+                        thumbnailGrid.innerHTML = '';
+                        images.forEach(image => {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'thumbnail-wrapper';
+                            wrapper.innerHTML = `
+                                    <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
+                                    <form action="/shelter/pet-images/${image.id}" method="POST" class="delete-image-form">
+                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
+                                    </form>
+                                `;
+                            thumbnailGrid.appendChild(wrapper);
+                        });
+                    }
 
-                // Debug log
-                console.log({
-                    size,
-                    behavior,
-                    dailyActivity,
-                    specialNeeds,
-                    compatibility,
-                    eatingHabits
+                    // --- Medical Records Display Logic ---
+                    const recordsList = document.getElementById('edit-medical-records-list');
+                    const medicalHistory = JSON.parse(btn.getAttribute('data-medical_history') ||
+                        '[]');
+                    if (recordsList) {
+                        recordsList.innerHTML = '';
+                        if (Array.isArray(medicalHistory) && medicalHistory.length > 0) {
+                            medicalHistory.forEach(record => {
+                                if (typeof record === 'object' && record.url && record
+                                    .name) {
+                                    recordsList.innerHTML +=
+                                        `<div><a href="${record.url}" target="_blank">${record.name}</a></div>`;
+                                } else if (typeof record === 'string') {
+                                    const fileName = record.split('/').pop();
+                                    recordsList.innerHTML +=
+                                        `<div><a href="${record}" target="_blank">${fileName}</a></div>`;
+                                }
+                            });
+                        } else {
+                            recordsList.innerHTML = '<em>No medical records uploaded.</em>';
+                        }
+                    }
+                    // --- End Medical Records Display Logic ---
+
+                    editModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
                 });
-
-                // Populate the edit form with the pet's current details
-                document.getElementById('edit-name').value = name;
-                document.getElementById('edit-species').value = species;
-                document.getElementById('edit-breed').value = breed;
-                document.getElementById('edit-age').value = age;
-                document.getElementById('edit-gender').value = gender;
-                document.getElementById('edit-size').value = size;
-                document.getElementById('edit-description').value = description;
-                document.getElementById('edit-adoption_status').value = adoptionStatus;
-                document.getElementById('edit-behavior').value = behavior;
-                document.getElementById('edit-daily_activity').value = dailyActivity;
-                document.getElementById('edit-special_needs').value = specialNeeds;
-                document.getElementById('edit-compatibility').value = compatibility;
-                document.getElementById('edit-eating_habits').value = eatingHabits;
-                if (document.getElementById('edit-suitable_for')) {
-                    document.getElementById('edit-suitable_for').value = suitableFor || '';
-                }
-
-                // Update the form action to the correct pet ID
-                const form = document.getElementById('editPetForm');
-                form.action = form.action.replace('__PET_ID__', petId);
-
-                editModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
             });
         });
 
@@ -682,10 +694,8 @@
                         // Defensive: check for data.applications as array
                         if (Array.isArray(data.applications) && data.applications.length > 0) {
                             data.applications.forEach(app => {
-                                const applicantName = app.adopter && app.adopter.user ? app
-                                    .adopter.user.name : 'Unknown';
-                                const phone = app.adopter && app.adopter.user ? app.adopter.user
-                                    .phone || '' : '';
+                                let applicantName = app.applicant_name || 'Unknown';
+                                let phone = app.phone || '';
                                 const submittedAt = app.submitted_at ? new Date(app
                                     .submitted_at).toLocaleDateString() : '';
                                 const status = app.status ? app.status.charAt(0).toUpperCase() +
@@ -694,20 +704,20 @@
                                     `status-${app.status.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()}` :
                                     '';
                                 applicationsList.innerHTML += `
-                                        <div class=\"application-item\" style=\"display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;\">
-                                            <div class=\"application-info\">
-                                                <h3 style=\"font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;\">Application for ${petName}</h3>
-                                                <p style=\"color: #6b7280; margin-bottom: 0.5rem;\">From: <span style=\"font-weight: 500; color: #1a1a1a;\">${applicantName}</span>${phone ? ' • Phone: <span style=\\\"color:#1a1a1a;\\\">' + phone + '</span>' : ''}</p>
-                                                <div class=\"application-meta\" style=\"font-size: 0.875rem; color: #6b7280;\">
-                                                    Submitted: ${submittedAt} <span class=\"status-badge ${statusClass}\" style=\"margin-left: 0.5rem;\">${status}</span>
-                                                </div>
-                                            </div>
-                                            <div class=\"action-buttons\" style=\"display: flex; gap: 0.5rem;\">
-                                                <button class=\"btn btn-primary\" onclick=\"viewApplicationDetails(${app.application_id})\">Review</button>
-                                                <button class=\"btn btn-outline\" onclick=\"messageApplicant('${applicantName}')\">Message</button>
+                                    <div class="application-item" style="display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(60, 70, 80, 0.1); padding: 1.5rem; margin-bottom: 1rem;">
+                                        <div class="application-info">
+                                            <h3 style="font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Application for ${petName}</h3>
+                                            <p style="color: #6b7280; margin-bottom: 0.5rem;">From: <span style="font-weight: 500; color: #1a1a1a;">${applicantName}</span>${phone ? ' • Phone: <span style=\"color:#1a1a1a;\">' + phone + '</span>' : ''}</p>
+                                            <div class="application-meta" style="font-size: 0.875rem; color: #6b7280;">
+                                                Submitted: ${submittedAt} <span class="status-badge ${statusClass}" style="margin-left: 0.5rem;">${status}</span>
                                             </div>
                                         </div>
-                                    `;
+                                        <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                            <button class="btn btn-outline" onclick="messageApplicant('${app.user_id || app.applicant_id || (app.user && app.user.id) || ''}')">Message</button>
+                                        </div>
+                                    </div>
+                                `;
+                                console.log('Application object:', app); // Debug log
                             });
                         } else {
                             applicationsList.innerHTML =
@@ -721,13 +731,17 @@
         });
 
         function viewApplicationDetails(applicationId) {
-            // Redirect to the application details page
-            window.location.href = `applications-review.html?id=${applicationId}`;
+            // Redirect to the correct Laravel route for application review
+            window.location.href = `/shelter/applications/${applicationId}/review`;
         }
 
-        function messageApplicant(applicantName) {
-            // Redirect to messages with the applicant
-            window.location.href = `messages.html?applicant=${encodeURIComponent(applicantName)}`;
+        function messageApplicant(userId) {
+            // Redirect to the correct Laravel route for messaging with a specific user
+            if (userId) {
+                window.location.href = `/shelter/messages?receiver_id=${userId}`;
+            } else {
+                alert('No applicant user ID found.');
+            }
         }
         // filtering
         document.addEventListener('DOMContentLoaded', function() {
