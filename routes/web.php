@@ -145,6 +145,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
     Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
     Route::post('/messages/mark-as-read', [MessageController::class, 'markAsRead']);
     Route::post('/messages/upload', [App\Http\Controllers\Shared\MessageController::class, 'upload'])->name('messages.upload');
+    Route::delete('/messages/{receiver_id}', [MessageController::class, 'destroyChat'])->name('messages.destroyChat');
 
     // -------- RESCUER --------
     Route::middleware(['rescuer'])->group(function () {

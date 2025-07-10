@@ -121,7 +121,7 @@
                                 </div>
                             </li>
                         @empty
-                            <li>No Recent Pets.</li>
+                            <li style="color: rgb(123, 123, 123);">No Recent Pets.</li>
                         @endforelse
                     </ul>
                 </div>
@@ -149,7 +149,7 @@
                                 </div>
                             </li>
                         @empty
-                            <li>No recent Applications</li>
+                            <li style="color: rgb(123, 123, 123);">No recent Applications</li>
                         @endforelse
                     </ul>
                 </div>
@@ -179,7 +179,7 @@
                                 </button>
                             </li>
                         @empty
-                            <li>No recent Messages</li>
+                            <li style="color: rgb(123, 123, 123);">No Recent Messages</li>
                         @endforelse
                     </ul>
                 </div>
@@ -214,7 +214,7 @@
                         </div>
                 </div>
             @empty
-                <div>no recent reviews</div>
+                <div style="color: rgb(123, 123, 123);">No Recent Reviews</div>
             </div>
             @endforelse
         </div>
