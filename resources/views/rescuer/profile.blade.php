@@ -54,6 +54,58 @@
                         </form>
                     </div>
                 </div>
+                <!-- Verification Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Account Verification</h2>
+                    </div>
+                    <div class="card-content">
+                        @if ($verification)
+                            <div class="verification-status {{ $verification->status }}">
+                                <p class="status-text">Status: {{ ucfirst($verification->status) }}</p>
+                                <p class="submission-date">Submitted:
+                                    {{ \Carbon\Carbon::parse($verification->submitted_at)->format('M d, Y') }}</p>
+                                @if ($verification->reviewed_at)
+                                    <p class="review-date">Reviewed:
+                                        {{ \Carbon\Carbon::parse($verification->reviewed_at)->format('M d, Y') }}</p>
+                                @endif
+                                @if ($verification->remarks)
+                                    <p class="remarks">{{ $verification->remarks }}</p>
+                                @endif
+                            </div>
+                        @endif
+
+                        @if (!$verification || $verification->status === 'rejected')
+                            <form action="{{ route('rescuer.verification.submit') }}" method="POST" enctype="multipart/form-data">
+                                enctype="multipart/form-data">
+                                @csrf
+                                <div class="form-group">
+                                    <label for="registration_doc" class="form-label">Registration Document</label>
+                                    <div class="file-upload">
+                                        <input type="file" name="registration_doc" id="registration_doc"
+                                            class="form-input" accept=".pdf,.jpg,.jpeg,.png" />
+                                        <p class="file-hint">PDF, JPG, PNG up to 5MB</p>
+                                    </div>
+                                    @error('registration_doc')
+                                        <p class="error-text">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="facebook_link" class="form-label">Facebook Page Link (Optional)</label>
+                                    <input type="url" name="facebook_link" id="facebook_link" class="form-input"
+                                        placeholder="https://facebook.com/your-rescuer-page"
+                                    @error('facebook_link')
+                                        <p class="error-text">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Submit for Verification</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Password Settings -->
                 <div class="settings-card">
                     <div class="card-header">
