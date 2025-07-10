@@ -60,25 +60,26 @@
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
-            @php
-                // Handle all cases: array, JSON string, or null
-                if (is_array($report->image_url)) {
-                    $imageUrls = $report->image_url;
-                } elseif ($report->image_url) {
-                    $imageUrls = json_decode($report->image_url, true);
-                } else {
-                    $imageUrls = [];
-                }
+                @php
+                    // Handle all cases: array, JSON string, or null
+                    if (is_array($report->image_url)) {
+                        $imageUrls = $report->image_url;
+                    } elseif ($report->image_url) {
+                        $imageUrls = json_decode($report->image_url, true);
+                    } else {
+                        $imageUrls = [];
+                    }
 
-                // Ensure we have a valid array
-                $imageUrls = is_array($imageUrls) ? $imageUrls : [];
-                $firstImage = !empty($imageUrls) ? $imageUrls[0] : null;
-                $imageCount = count($imageUrls);
-            @endphp
+                    // Ensure we have a valid array
+                    $imageUrls = is_array($imageUrls) ? $imageUrls : [];
+                    $firstImage = !empty($imageUrls) ? $imageUrls[0] : null;
+                    $imageCount = count($imageUrls);
+                @endphp
 
                 <div class="report-card {{ !$report->is_read ? 'unread' : '' }}"
                     data-report-id="{{ $report->report_id }}"
-                    data-image="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}"
+                    data-image="{{ !empty($imageUrls) ? $imageUrls[0] : 'https://via.placeholder.com/150' }}"
+                    data-images="{{ json_encode($imageUrls) }}"
                     data-description="{{ $report->description }}"
                     data-location="{{ $report->location }}"
                     data-status="{{ $report->status }}"
@@ -137,10 +138,15 @@
             <h2>Stray Report Details</h2>
             <button class="close-modal" onclick="closeReportModal()">&times;</button>
         </div>
-        
         <div class="report-header">
             <div class="report-images">
+            <div class="main-image-container">
                 <img id="modalReportImage" src="" alt="Stray Animal" class="report-image">
+            </div>
+            <div class="additional-images" id="additionalImages" style="display: none;">
+                    <div class="image-gallery">
+                    </div>
+                </div>
             </div>
             <div class="report-header-info">
                 <div class="info-block">
@@ -235,12 +241,53 @@ function openReportModal(card) {
     const modal = document.getElementById('reportModal');
     modal.style.display = 'flex';
 
-    // Mark as read if unread
     if (card.classList.contains('unread')) {
         markAsRead(card.dataset.reportId);
         card.classList.remove('unread');
         const indicator = card.querySelector('.unread-indicator');
         if (indicator) indicator.remove();
+    }
+
+    const imageData = card.dataset.images;
+    let images = [];
+    
+    try {
+        images = imageData ? JSON.parse(imageData) : [];
+    } catch (e) {
+        console.error('Error parsing images:', e);
+        images = [];
+    }
+
+    const mainImage = card.dataset.image;
+    const additionalImagesContainer = document.getElementById('additionalImages');
+    const imageGallery = additionalImagesContainer.querySelector('.image-gallery');
+
+    document.getElementById('modalReportImage').src = mainImage;
+
+    if (images.length > 1) {
+        additionalImagesContainer.style.display = 'block';
+        imageGallery.innerHTML = '';
+
+        images.forEach((imageUrl, index) => {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = `Report image ${index + 1}`;
+            img.className = 'gallery-image';
+            if (imageUrl === mainImage) {
+                img.classList.add('active');
+            }
+
+            img.addEventListener('click', () => {
+                document.getElementById('modalReportImage').src = imageUrl;
+                
+                imageGallery.querySelectorAll('.gallery-image').forEach(img => img.classList.remove('active'));
+                img.classList.add('active');
+            });
+
+            imageGallery.appendChild(img);
+        });
+    } else {
+        additionalImagesContainer.style.display = 'none';
     }
 
     // Fill modal fields
