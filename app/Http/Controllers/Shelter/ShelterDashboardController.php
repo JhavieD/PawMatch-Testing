@@ -339,7 +339,7 @@ class ShelterDashboardController extends Controller
         $shelter = $user->shelter;
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'shelter_name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone_number' => 'required|string|max:20',
             'address' => 'nullable|string|max:255',
@@ -356,6 +356,7 @@ class ShelterDashboardController extends Controller
         ]);
 
         $shelter->update([
+            'shelter_name' => $request->shelter_name,
             'location' => $request->address,
             'purpose' => $request->purpose,
         ]);
