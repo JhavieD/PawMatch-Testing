@@ -202,14 +202,14 @@
                                 </div>
                                 <div class="review-rating">
                                     @for ($i = 0; $i < $review->rating; $i++)
-                                        ★
+                                        <span class="star-gold">★</span>
                                     @endfor
                                 </div>
                             </div>
                         </div>
 
                         <div class="review-content">
-                            "{{ $review->comment }}"
+                            "{{ $review->review }}"
                         </div>
                 </div>
             @empty

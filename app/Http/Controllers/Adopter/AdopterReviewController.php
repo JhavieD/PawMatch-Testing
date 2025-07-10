@@ -23,6 +23,7 @@ class AdopterReviewController extends Controller
         
         // Check if a review already exists for this adopter and shelter/rescuer combination
         $existingReview = AdopterReview::where('adopter_id', $adopter->adopter_id)
+            ->where('application_id', $application->application_id) // <-- add this line
             ->where(function($query) use ($application) {
                 if ($application->shelter_id) {
                     $query->where('shelter_id', $application->shelter_id);
@@ -41,6 +42,7 @@ class AdopterReviewController extends Controller
 
         AdopterReview::create([
             'adopter_id' => $adopter->adopter_id,
+            'application_id' => $application->application_id,
             'shelter_id' => $application->shelter_id,
             'rescuer_id' => $application->rescuer_id,
             'rating' => $request->rating,
@@ -59,6 +61,7 @@ class AdopterReviewController extends Controller
         $application = AdoptionApplication::findOrFail($request->application_id);
         
         $existingReview = AdopterReview::where('adopter_id', $adopter->adopter_id)
+            ->where('application_id', $application->application_id) // <-- add this line
             ->where(function($query) use ($application) {
                 if ($application->shelter_id) {
                     $query->where('shelter_id', $application->shelter_id);

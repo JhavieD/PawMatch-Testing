@@ -21,6 +21,7 @@ class AdopterReview extends Model
         'shelter_id',
         'rescuer_id', 
         'adopter_id',
+        'application_id',
         'rating',
         'review',
         'created_at'
