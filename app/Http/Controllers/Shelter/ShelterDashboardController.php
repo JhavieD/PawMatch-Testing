@@ -482,6 +482,12 @@ class ShelterDashboardController extends Controller
 
             $reports = $query->orderByDesc('stray_report_notifications.sent_at')->paginate(12);
 
+            $reports->getCollection()->transform(function ($report) {
+                if ($report->image_url) {
+                    $report->image_url = json_decode($report->image_url, true);
+                }
+                return $report;
+            });
             return view('shelter.stray-reports', compact('reports'));
         }
     public function acceptStrayReport($reportId)

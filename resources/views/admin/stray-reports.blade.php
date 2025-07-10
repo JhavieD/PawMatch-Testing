@@ -89,7 +89,6 @@
                     data-timeline='@json($report->timeline ?? [])'
                   
                 >
-                    <!-- <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image"> -->
                     @if($firstImage)
                         <div class="image-container">
                             <img src="{{ $firstImage }}" alt="Stray Animal" class="report-image">
