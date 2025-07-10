@@ -92,9 +92,6 @@
                     @if($firstImage)
                         <div class="image-container">
                             <img src="{{ $firstImage }}" alt="Stray Animal" class="report-image">
-                            @if($imageCount > 1)
-                                <div class="image-count-badge">{{ $imageCount }}</div>
-                            @endif
                         </div>
                     @else
                         <img src="https://via.placeholder.com/150" alt="No Image" class="report-image">
