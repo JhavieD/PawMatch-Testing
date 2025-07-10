@@ -427,4 +427,17 @@ class MessageController extends Controller
         }
         return null;
     }
+
+    public function destroyChat($receiver_id)
+    {
+        $userId = auth()->id();
+        // Delete all messages where the current user is sender or receiver and the other party is $receiver_id
+        \App\Models\Shared\Message::where(function ($q) use ($userId, $receiver_id) {
+            $q->where('sender_id', $userId)->where('receiver_id', $receiver_id);
+        })->orWhere(function ($q) use ($userId, $receiver_id) {
+            $q->where('sender_id', $receiver_id)->where('receiver_id', $userId);
+        })->delete();
+
+        return response()->json(['success' => true]);
+    }
 }

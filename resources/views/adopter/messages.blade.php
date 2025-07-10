@@ -59,6 +59,7 @@
                         </div>
                     </div>
                 @endif
+                <button title="Delete Message" class="delete-message-btn"><i class="fa-solid fa-trash"></i></button>
             </div>
 
             <div class="chat-messages" id="chat-messages"></div>
@@ -87,7 +88,7 @@
                 <button id="modal-cancel"
                     style="background:#eee; border:none; padding:8px 16px; border-radius:5px;">Cancel</button>
                 <button id="modal-confirm"
-                    style="background:#4f46e5; color:#fff; border:none; padding:8px 16px; border-radius:5px;">Confirm</button>
+                    style="background: rgb(173, 0, 0); color:#fff; border:none; padding:8px 16px; border-radius:5px;">Confirm</button>
             </div>
         </div>
     </div>
@@ -299,6 +300,85 @@
                         pendingAction = null;
                         pendingData = null;
                     };
+                }
+
+                // Add delete chat logic using confirm modal
+                const deleteBtn = document.querySelector('.delete-message-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', function() {
+                        // Use the existing confirm modal for confirmation
+                        const confirmModal = document.getElementById('confirm-modal');
+                        const modalPreview = document.getElementById('modal-preview');
+                        const modalCancel = document.getElementById('modal-cancel');
+                        const modalConfirm = document.getElementById('modal-confirm');
+                        if (!confirmModal || !modalPreview || !modalCancel || !modalConfirm) return;
+                        modalPreview.innerHTML =
+                            `<div style='margin-bottom:8px;'>Are you sure you want to delete all messages in this chat?</div>`;
+                        confirmModal.style.display = 'flex';
+                        // Remove previous listeners to avoid stacking
+                        modalCancel.onclick = function() {
+                            confirmModal.style.display = 'none';
+                        };
+                        modalConfirm.onclick = function() {
+                            confirmModal.style.display = 'none';
+                            const receiverId = document.getElementById('receiver-id')?.value;
+                            fetch(`/messages/${receiverId}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector(
+                                            'meta[name="csrf-token"]').content,
+                                        'Accept': 'application/json'
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        document.getElementById('chat-messages').innerHTML = '';
+                                        // Update sidebar preview and time
+                                        const activeConv = document.querySelector(
+                                            '.conversation.active');
+                                        if (activeConv) {
+                                            const preview = activeConv.querySelector(
+                                                '.conversation-preview');
+                                            if (preview) preview.textContent = 'No messages yet.';
+                                            const time = activeConv.querySelector(
+                                                '.conversation-time');
+                                            if (time) time.textContent = 'Now';
+                                        }
+                                        showToast('All messages deleted!', 'success');
+                                        setTimeout(() => window.location.reload(), 1200);
+                                    } else {
+                                        showToast('Failed to delete messages.', 'error');
+                                    }
+                                });
+                        };
+                    });
+                }
+
+                // Toast notification function
+                function showToast(message, type = 'success') {
+                    let toast = document.createElement('div');
+                    toast.textContent = message;
+                    toast.style.position = 'fixed';
+                    toast.style.top = '32px';
+                    toast.style.right = '32px';
+                    toast.style.zIndex = 9999;
+                    toast.style.background = type === 'success' ? '#4a90e2' : '#e74c3c';
+                    toast.style.color = '#fff';
+                    toast.style.padding = '14px 28px';
+                    toast.style.borderRadius = '8px';
+                    toast.style.fontSize = '1rem';
+                    toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        toast.style.opacity = '1';
+                    }, 10);
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 2200);
                 }
 
                 // Real-time updates
