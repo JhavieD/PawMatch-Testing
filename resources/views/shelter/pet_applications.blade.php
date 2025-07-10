@@ -76,6 +76,7 @@
                                 <td>
                                     <button class="btn btn-primary"
                                         onclick="showApplicationModal({{ $application->application_id }})">Review</button>
+
                                     @if (!in_array(strtolower($application->status), ['completed', 'cancelled']))
                                         <button class="successfull-btn mark-completed-btn"
                                             data-id="{{ $application->application_id }}">
@@ -151,6 +152,8 @@
                     attachActionHandlers(id);
                 });
         }
+        // Make showApplicationModal globally accessible
+        window.showApplicationModal = showApplicationModal;
 
         function messageApplicant(adopterId) {
             window.location.href = `/shelter/messages?receiver_id=${adopterId}`;

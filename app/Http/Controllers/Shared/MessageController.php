@@ -25,7 +25,7 @@ class MessageController extends Controller
             'receiver_id' => $request->query('receiver_id')
         ]);
 
-        // If the request expects JSON, return messages as before
+
         if ($request->expectsJson() || $request->wantsJson()) {
             $receiverId = $request->query('receiver_id');
             $messages = Message::where(function ($q) use ($receiverId) {
@@ -43,7 +43,7 @@ class MessageController extends Controller
                 'messages' => $messages->toArray()
             ]);
 
-            // If no messages, return a dummy message for debugging
+
             if ($messages->isEmpty()) {
                 return response()->json([
                     [
@@ -82,7 +82,7 @@ class MessageController extends Controller
             );
         }
 
-        // Only for the generic /messages view, provide $partners for the view
+
         $partners = User::where('user_id', '!=', Auth::id())->get();
         $receiver = $request->query('receiver_id')
             ? User::where('user_id', $request->query('receiver_id'))->first()
@@ -409,9 +409,9 @@ class MessageController extends Controller
 
     private function getS3Url($path)
     {
-        // Try the most common method
+
         try {
-            // Use the AWS S3 client directly if Storage::disk('s3')->url() is not available
+
             $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
             $bucket = config('filesystems.disks.s3.bucket');
             if ($client && $bucket) {

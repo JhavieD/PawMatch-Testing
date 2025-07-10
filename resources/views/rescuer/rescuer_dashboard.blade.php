@@ -8,11 +8,12 @@
         <div class="rescuer-content-wrapper">
             <!-- Profile and Add Pet Button at Top Right -->
             <div class="dashboard-profile-actions">
-                <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}" alt="Profile Picture"
-                    class="profile-img" />
-                <button class="btn btn-primary add-pet-btn">+ Add New Pet</button>
+                <a href="{{ route('rescuer.profile') }}">
+                    <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}"
+                        alt="Profile Picture" class="profile-img" />
+                </a>
             </div>
-            <!-- Top Row: Welcome (left) and Available Pets (right) -->
+
             <div class="dashboard-top-row">
                 <div class="dashboard-welcome-card">
                     <h1 class="text-2xl font-bold mb-0" style="display:inline;">
@@ -49,7 +50,7 @@
                     <div class="stat-icon" style="color: #f472b6;"><i class="fa-solid fa-paw"></i></div>
                 </div>
             </div>
-            <!-- Stats Grid (other stats) -->
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-header">
@@ -104,13 +105,16 @@
                         <a href="{{ route('rescuer.pet-management') }}" class="btn btn-outline">View All</a>
                     </div>
                     <ul class="pet-list">
-                        @forelse ($recentPets as $pet)
+                        @forelse ($recentPets->take(2) as $pet)
                             <li class="pet-item">
                                 <img src="{{ $pet->image_url ?? 'https://placehold.co/60x60' }}" alt="{{ $pet->name }}"
                                     class="pet-image-small">
                                 <div class="pet-info">
                                     <div class="pet-name">{{ $pet->name }}</div>
                                     <div class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years</div>
+                                    <span class="status status-{{ $pet->adoption_status }}">
+                                        {{ ucfirst($pet->adoption_status) }}
+                                    </span>
                                 </div>
                             </li>
                         @empty
@@ -126,13 +130,13 @@
                         <a href="{{ route('rescuer.pet_applications') }}" class="btn btn-outline">View All</a>
                     </div>
                     <ul class="application-list">
-                        @forelse($recentApplications as $app)
+                        @forelse($recentApplications->take(2) as $app)
                             <li class="application-item">
                                 <div class="applicant-info">
-                                    <strong>{{ trim(($app->adopter->user->first_name ?? '') . ' ' . ($app->adopter->user->last_name ?? '')) ?: 'User' }}</strong>
-                                    @if (isset($app->pet))
-                                        <div class="pet-details">for {{ $app->pet->name }} - {{ $app->pet->breed }}</div>
-                                    @endif
+                                    <div class="applicant-info">
+                                        <strong>{{ $app->adopter->user->first_name ?? 'Applicant' }}</strong> applied to
+                                        adopt <strong>{{ $app->pet->name ?? 'Pet' }}</strong>
+                                    </div>
                                 </div>
                                 <div class="pet-details">{{ $app->created_at->diffForHumans() }}</div>
                                 <div class="btn-group" style="margin-top: 0.5rem;">
@@ -158,7 +162,7 @@
                         <a href="{{ route('rescuer.messages') }}" class="btn btn-outline">View All</a>
                     </div>
                     <ul class="application-list">
-                        @forelse($recentMessages as $msg)
+                        @forelse($recentMessages->take(2) as $msg)
                             <li class="application-item">
                                 <div class="applicant-info">
                                     <strong>{{ $msg->sender->name ?? 'User' }}</strong>
@@ -207,7 +211,7 @@
         </div><!-- .rescuer-content-wrapper -->
     </main>
 
-    <!-- Add New Pet Modal (FROM PET.BLADE.PHP SAME FUNCTIONALITY) -->
+    {{-- add pet modal --}}
     <div id="addPetModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -397,7 +401,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Modal functions that must be global ---
             function showApplicationModal(id) {
                 fetch(`/rescuer/applications/${id}/review`)
                     .then(response => response.text())
