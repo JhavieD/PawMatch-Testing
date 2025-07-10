@@ -240,11 +240,11 @@
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
-                                <!-- Existing images will be injected here by JS -->
                                 <label class="upload-box">
-                                    <input type="file" name="images[]" accept="image/*" multiple>
+                                    <input type="file" name="images[]" id="rescuer-edit-images" multiple accept="image/*">
                                     <span>+ Add Photos</span>
                                 </label>
+                                <div class="thumbnail-grid" id="rescuer-edit-thumbnail-grid"></div>
                             </div>
                         </div>
                         <div class="modal-actions">
@@ -455,6 +455,28 @@
         });
         // Auto reload of Pet Details
 
+        document.getElementById('rescuer-edit-images').addEventListener('change', function (e) {
+            const files = e.target.files;
+            const previewGrid = document.getElementById('rescuer-edit-thumbnail-grid');
+            previewGrid.innerHTML = '';
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'thumbnail-wrapper';
+                        wrapper.innerHTML = `
+                            <img src="${ev.target.result}" class="thumbnail" alt="Pet Image">
+                            <button type="button" class="delete-image-btn" title="Remove" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
+                        `;
+                        wrapper.querySelector('.delete-image-btn').onclick = () => wrapper.remove();
+                        previewGrid.appendChild(wrapper);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
         editBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const petCard = btn.closest('.pet-card');
@@ -494,6 +516,7 @@
                 }
                 document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
 
+                
                 // --- Medical Records Display Logic (shelter style) ---
                 const recordsList = document.getElementById('edit-medical-records-list');
                 let medicalHistory = [];
@@ -529,7 +552,7 @@
                 // --- End Medical Records Display Logic ---
 
                 const images = JSON.parse(btn.getAttribute('data-images') || '[]');
-                const thumbnailGrid = document.getElementById('edit-thumbnail-grid');
+                const thumbnailGrid = document.getElementById('rescuer-edit-thumbnail-grid');
                 if (thumbnailGrid) {
                     thumbnailGrid.innerHTML = '';
                     images.forEach(image => {
