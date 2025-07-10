@@ -60,6 +60,22 @@
         <!-- Reports Grid -->
         <div class="report-grid">
             @forelse($reports as $report)
+            @php
+                // Handle all cases: array, JSON string, or null
+                if (is_array($report->image_url)) {
+                    $imageUrls = $report->image_url;
+                } elseif ($report->image_url) {
+                    $imageUrls = json_decode($report->image_url, true);
+                } else {
+                    $imageUrls = [];
+                }
+
+                // Ensure we have a valid array
+                $imageUrls = is_array($imageUrls) ? $imageUrls : [];
+                $firstImage = !empty($imageUrls) ? $imageUrls[0] : null;
+                $imageCount = count($imageUrls);
+            @endphp
+
                 <div class="report-card {{ !$report->is_read ? 'unread' : '' }}"
                     data-report-id="{{ $report->report_id }}"
                     data-image="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}"
@@ -71,11 +87,20 @@
                     data-reporter="{{ $report->reporter_name }}"
                     data-reporter-contact="{{ $report->reporter_email }}"
                     data-sent-at="{{ $report->sent_at ? \Carbon\Carbon::parse($report->sent_at)->format('F d, Y g:i A') : '' }}"
-                >
+                >   
+                    @if($firstImage)
+                        <div class="image-container">
+                            <img src="{{ $firstImage }}" alt="Stray Animal" class="report-image">
+                            @if($imageCount > 1)
+                                <div class="image-count-badge">{{ $imageCount }}</div>
+                            @endif
+                        </div>
+                    @else
+                        <img src="https://via.placeholder.com/150" alt="No Image" class="report-image">
+                    @endif
                     @if(!$report->is_read)
                         <div class="unread-indicator"></div>
                     @endif
-                    <img src="{{ $report->image_url ?? 'https://via.placeholder.com/150' }}" alt="Stray Animal" class="report-image">
                     <div class="report-content">
                         <div class="report-title">{{ $report->animal_type ?? 'Stray Animal' }}</div>
                         <div class="report-location">
