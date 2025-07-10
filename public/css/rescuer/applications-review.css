@@ -725,6 +725,13 @@ body {
   }
 }
 
+.applicant-info h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
 /* Modal Styles */
 .modal {
   display: none;
