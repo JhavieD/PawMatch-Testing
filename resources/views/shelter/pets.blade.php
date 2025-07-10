@@ -653,21 +653,71 @@
                 });
         });
 
-        // Image upload handling
+        // ===== Toast Notification Utility (with style) =====
+        function showToast(message, duration = 2500) {
+            let toast = document.createElement('div');
+            toast.className = 'custom-toast styled-toast';
+            toast.innerHTML = `<span style="margin-right:8px;"></span> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Add Pet Modal: Show styled toast on image selection
+        const addPetImageInput = document.querySelector('#addPetModal input[type="file"][name="images[]"]');
+        if (addPetImageInput) {
+            addPetImageInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    showToast(`${this.files.length} image(s) selected for upload.`);
+                }
+            });
+        }
+
+        // Image upload handling (styled toast, not alert)
         document.querySelectorAll('.upload-box input').forEach(input => {
             input.addEventListener('change', (e) => {
                 const files = e.target.files;
-                alert(`${files.length} image(s) selected for upload`);
+                if (files && files.length > 0) {
+                    showToast(`${files.length} image(s) selected for upload.`);
+                }
             });
         });
 
-        // Remove image handling
-        document.querySelectorAll('.remove-image').forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.parentElement.remove();
-            });
-        });
-
+        // Toast CSS (inject if not present)
+        if (!document.getElementById('custom-toast-style')) {
+            const style = document.createElement('style');
+            style.id = 'custom-toast-style';
+            style.textContent = `
+        .custom-toast.styled-toast {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #323232;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.3s, top 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .custom-toast.styled-toast.show {
+            opacity: 1;
+            top: 3.5rem;
+        }
+    `;
+            document.head.appendChild(style);
+        }
         // View Applications functionality
         const viewApplicationsModal = document.getElementById('viewApplicationsModal');
         const viewApplicationsBtns = document.querySelectorAll('.view-applications-btn');
