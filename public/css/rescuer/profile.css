@@ -551,3 +551,39 @@ input:checked + .slider:before {
     width: 100% !important;
   }
 }
+
+.verification-status {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.verification-status.approved {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.verification-status.pending {
+  border-color: #fef08a;
+  background: #fefce8;
+}
+
+.verification-status.rejected {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.status-text {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.submission-date,
+.review-date,
+.remarks {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
