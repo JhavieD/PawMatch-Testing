@@ -76,6 +76,7 @@
                 <div class="report-card"
                     data-report-id="{{ $report->report_id }}"
                     data-image="{{ !empty($imageUrls) ? $imageUrls[0] : 'https://via.placeholder.com/150' }}"
+                    data-images="{{ json_encode($imageUrls) }}"
                     data-description="{{ $report->description }}"
                     data-location="{{ $report->location }}"
                     data-status="{{ $report->status }}"
@@ -92,9 +93,6 @@
                     @if($firstImage)
                         <div class="image-container">
                             <img src="{{ $firstImage }}" alt="Stray Animal" class="report-image">
-                            @if($imageCount > 1)
-                                <div class="image-count-badge">{{ $imageCount }}</div>
-                            @endif
                         </div>
                     @else
                         <img src="https://via.placeholder.com/150" alt="No Image" class="report-image">
@@ -128,7 +126,14 @@
         </div>
         <div class="report-header">
             <div class="report-images">
-                <img id="modalReportImage" src="" alt="Stray Animal" class="report-image">
+                <div class="main-image-container">
+                    <img id="modalReportImage" src="" alt="Stray Animal" class="report-image">
+                </div>
+                <div class="additional-images" id="additionalImages" style="display: none;">
+                    <div class="image-gallery">
+                        <!-- Additional images will be populated here -->
+                    </div>
+                </div>
             </div>
             <div>
                 <div class="info-block">
@@ -326,6 +331,48 @@ function openReportModal(card) {
     const modal = document.getElementById('reportModal');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+
+    const imageData = card.dataset.images;
+    let images = [];
+    
+    try {
+        images = imageData ? JSON.parse(imageData) : [];
+    } catch (e) {
+        console.error('Error parsing images:', e);
+        images = [];
+    }
+
+    const mainImage = card.dataset.image;
+    const additionalImagesContainer = document.getElementById('additionalImages');
+    const imageGallery = additionalImagesContainer.querySelector('.image-gallery');
+
+    document.getElementById('modalReportImage').src = mainImage;
+
+    if (images.length > 1) {
+        additionalImagesContainer.style.display = 'block';
+        imageGallery.innerHTML = '';
+
+        images.forEach((imageUrl, index) => {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = `Report image ${index + 1}`;
+            img.className = 'gallery-image';
+            if (imageUrl === mainImage) {
+                img.classList.add('active');
+            }
+
+            img.addEventListener('click', () => {
+                document.getElementById('modalReportImage').src = imageUrl;
+                
+                imageGallery.querySelectorAll('.gallery-image').forEach(img => img.classList.remove('active'));
+                img.classList.add('active');
+            });
+
+            imageGallery.appendChild(img);
+        });
+    } else {
+        additionalImagesContainer.style.display = 'none';
+    }
 
     document.getElementById('modalReportImage').src = card.dataset.image;
     document.getElementById('reportId').textContent = card.dataset.reportId;
