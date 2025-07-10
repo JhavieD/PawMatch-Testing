@@ -8,9 +8,10 @@
         <div class="shelter-content-wrapper">
             <!-- Profile and Add Pet Button at Top Right -->
             <div class="dashboard-profile-actions">
-                <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}" alt="Profile Picture"
-                    class="profile-img" />
-                <button class="btn btn-primary add-pet-btn">+ Add New Pet</button>
+                <a href="{{ route('shelter.profile') }}">
+                    <img src="{{ auth()->user()->profile_image ?? asset('images/default-profile.png') }}"
+                        alt="Profile Picture" class="profile-img" />
+                </a>
             </div>
             <!-- Top Row: Welcome (left) and Available Pets (right) -->
             <div class="dashboard-top-row">

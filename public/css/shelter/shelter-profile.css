@@ -227,14 +227,11 @@ body {
    ========================= */
 
 .main-content {
-  padding-left: 250px;
+  max-width: calc(100vw - 250px);
   width: 100%;
-  padding-top: 2rem;
-  padding-right: 1rem;
-  padding-bottom: 2rem;
+  padding: 2rem 1rem 2rem 2.5rem;
   display: flex;
   justify-content: flex-start;
-  box-sizing: border-box;
 }
 
 @media (min-width: 901px) {
@@ -250,12 +247,15 @@ body {
 
 @media (max-width: 900px) {
   .main-content {
-    padding-left: 0;
-    padding-right: 0.5rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    max-width: 100vw;
+    width: 100%;
+    padding: 1rem 0.5rem 1rem 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    display: flex;
   }
   .container {
+    margin-left: 0 !important;
     max-width: 100vw;
     width: 100%;
     padding: 1rem 0.5rem;
@@ -299,13 +299,11 @@ body {
 }
 
 .container {
-  margin-left: 250px;
   width: 100%;
   max-width: 700px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-sizing: border-box;
 }
 
 .header {

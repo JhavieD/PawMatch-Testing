@@ -116,9 +116,9 @@
                                 @if ($user->user_id !== auth()->user()->user_id)
                                     <button class="user-action-btn view" title="View Details"
                                         onclick="viewUser({{ $user->user_id }})">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="fas fa-eye" style="color: #2563eb;"></i>
                                     </button>
-                                    <button class="user-action-btn unban" title="Unban User"
+                                    <button class="user-action-btn unban" title="Unban User" style="color: #f59e42;"
                                         onclick="userAction({{ $user->user_id }}, 'unban')">
                                         <i class="fas fa-user-check"></i>
                                     </button>
@@ -127,14 +127,15 @@
                                         <i class="fas fa-user-slash"></i>
                                     </button>
                                     <button class="user-action-btn deactivate" title="Deactivate User"
+                                        style="color: rgb(255, 123, 0);"
                                         onclick="userAction({{ $user->user_id }}, 'deactivate')">
                                         <i class="fas fa-user-times"></i>
                                     </button>
-                                    <button class="user-action-btn activate" title="Activate User"
+                                    <button class="user-action-btn activate" title="Activate User" style="color: #22c55e;"
                                         onclick="userAction({{ $user->user_id }}, 'activate')">
                                         <i class="fas fa-user-check"></i>
                                     </button>
-                                    <button class="user-action-btn delete" title="Delete User"
+                                    <button class="user-action-btn delete" title="Delete User" style="color: #dc2626;"
                                         onclick="userAction({{ $user->user_id }}, 'delete')">
                                         <i class="fas fa-trash"></i>
                                     </button>

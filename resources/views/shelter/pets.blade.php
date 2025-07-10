@@ -48,7 +48,7 @@
                         <div class="pet-info">
                             <h3 class="pet-name">{{ $pet->name }}</h3>
                             <p class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years old </p>
-                            <span class="pet-status status-{{ $pet->adoption_status }}">
+                            <span class="pet-status status-{{ strtolower($pet->adoption_status) }}">
                                 {{ ucfirst($pet->adoption_status) }}
                             </span>
 
@@ -143,7 +143,7 @@
                             <label for="edit-adoption_status">Status</label>
                             <select id="edit-adoption_status" name="adoption_status" required>
                                 <option value="available">Available</option>
-                                <option value="pending">Application Pending</option>
+                                <option value="pending">Pending</option>
                                 <option value="adopted">Adopted</option>
                             </select>
                         </div>
