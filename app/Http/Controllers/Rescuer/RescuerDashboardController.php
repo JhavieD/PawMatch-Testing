@@ -113,7 +113,16 @@ class RescuerDashboardController extends Controller
     {
         $user = auth()->user();
         $rescuer = $user->rescuer;
-        return view('rescuer.profile', compact('user', 'rescuer'));
+
+        if (!$rescuer) {
+            return view('rescuer.profile', compact('user'))->with([
+                'rescuer' => null,
+                'verification' => null
+            ]);
+        }
+
+        $verification = $rescuer->verifications()->latest()->first(); // or correct relationship
+        return view('rescuer.profile', compact('user', 'rescuer', 'verification'));
     }
 
     protected function clearDashboardCache($userId)
