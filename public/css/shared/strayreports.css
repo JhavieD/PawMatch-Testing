@@ -874,3 +874,67 @@
     background: #fee2e2;
     color: #991b1b;
 }
+
+
+/* Stray Report Detail Images */
+.report-images {
+    margin-bottom: 20px;
+}
+
+.main-image-container {
+    margin-bottom: 15px;
+}
+
+.report-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.additional-images {
+    margin-top: 10px;
+}
+
+.image-gallery {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.gallery-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+.gallery-image:hover {
+    border-color: #007bff;
+}
+
+.gallery-image.active {
+    border-color: #007bff;
+}
+
+.image-gallery::-webkit-scrollbar {
+    height: 6px;
+}
+
+.image-gallery::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.image-gallery::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.image-gallery::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
