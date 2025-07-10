@@ -955,3 +955,67 @@ body {
     height: 150px;
   }
 }
+
+/* =========================
+   STATUS BADGES (UNIFIED)
+   ========================= */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-left: 0.1rem;
+  text-transform: capitalize;
+}
+.status-pending {
+  background: #fef9c3;
+  color: #854d0e;
+}
+.status-approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.status-completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.status-cancelled {
+  background: #e5e5e5;
+  color: #6b7280;
+}
+.status-info-requested {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+.status-adopted {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.status-available {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.application-item {
+  background: #fff;
+  border: 1.5px solid #e5eaf3;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.06);
+  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+  margin-bottom: 1.2rem;
+  transition: box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.application-item:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.13);
+  transform: translateY(-2px) scale(1.01);
+  background: #f5faff;
+}

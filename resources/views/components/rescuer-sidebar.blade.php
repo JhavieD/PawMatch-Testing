@@ -15,7 +15,8 @@
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('rescuer.pet-management') }}" class="nav-item {{ request()->routeIs('rescuer.pets') ? 'active' : '' }}">
+        <a href="{{ route('rescuer.pet-management') }}"
+            class="nav-item {{ request()->routeIs('rescuer.pet-management') ? 'active' : '' }}">
             <i class="fas fa-paw"></i>
             <span>Pet Management</span>
         </a>
@@ -45,70 +46,71 @@
 </aside>
 <script>
     function toggleSidebar(show) {
-    const sidebar = document.getElementById('rescuerSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const mainContent = document.querySelector('.main-content, .rescuer-content, .content-wrapper');
-    if (show) {
-        sidebar.style.display = 'block';
-        setTimeout(() => {
-            sidebar.style.transform = 'translateX(0)';
-            sidebar.style.opacity = '1';
-            overlay.style.display = 'block';
-            overlay.style.opacity = '1';
-        }, 10);
-        document.body.style.overflow = 'hidden';
-        if (mainContent) {
-            mainContent.classList.add('dashboard-shifted');
-            mainContent.style.pointerEvents = 'none';
-        }
-    } else {
-        sidebar.style.transform = 'translateX(-100%)';
-        sidebar.style.opacity = '0';
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            sidebar.style.display = '';
-            overlay.style.display = 'none';
-        }, 300); // match CSS transition duration
-        document.body.style.overflow = '';
-        if (mainContent) {
-            mainContent.classList.remove('dashboard-shifted');
-            mainContent.style.pointerEvents = '';
+        const sidebar = document.getElementById('rescuerSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.querySelector('.main-content, .rescuer-content, .content-wrapper');
+        if (show) {
+            sidebar.style.display = 'block';
+            setTimeout(() => {
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.opacity = '1';
+                overlay.style.display = 'block';
+                overlay.style.opacity = '1';
+            }, 10);
+            document.body.style.overflow = 'hidden';
+            if (mainContent) {
+                mainContent.classList.add('dashboard-shifted');
+                mainContent.style.pointerEvents = 'none';
+            }
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.opacity = '0';
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                sidebar.style.display = '';
+                overlay.style.display = 'none';
+            }, 300); // match CSS transition duration
+            document.body.style.overflow = '';
+            if (mainContent) {
+                mainContent.classList.remove('dashboard-shifted');
+                mainContent.style.pointerEvents = '';
+            }
         }
     }
-}
-const sidebarToggle = document.getElementById('sidebarToggle');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
-if (sidebarToggle && sidebarOverlay) {
-    sidebarToggle.addEventListener('click', () => toggleSidebar(true));
-    sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
-}
-function handleResize() {
-    const sidebar = document.getElementById('rescuerSidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const mainContent = document.querySelector('.main-content, .rescuer-content, .content-wrapper');
-    if (window.innerWidth <= 900) {
-        sidebar.style.display = 'none';
-        sidebar.style.transform = 'translateX(-100%)';
-        sidebar.style.opacity = '0';
-        sidebarToggle.style.display = 'block';
-        if (mainContent) {
-            mainContent.classList.remove('dashboard-shifted');
-            mainContent.style.pointerEvents = '';
-        }
-    } else {
-        sidebar.style.display = '';
-        sidebar.style.transform = '';
-        sidebar.style.opacity = '';
-        sidebarToggle.style.display = 'none';
-        document.getElementById('sidebarOverlay').style.display = 'none';
-        document.getElementById('sidebarOverlay').style.opacity = '0';
-        document.body.style.overflow = '';
-        if (mainContent) {
-            mainContent.classList.remove('dashboard-shifted');
-            mainContent.style.pointerEvents = '';
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (sidebarToggle && sidebarOverlay) {
+        sidebarToggle.addEventListener('click', () => toggleSidebar(true));
+        sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
+    }
+
+    function handleResize() {
+        const sidebar = document.getElementById('rescuerSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.querySelector('.main-content, .rescuer-content, .content-wrapper');
+        if (window.innerWidth <= 900) {
+            sidebar.style.display = 'none';
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.opacity = '0';
+            sidebarToggle.style.display = 'block';
+            if (mainContent) {
+                mainContent.classList.remove('dashboard-shifted');
+                mainContent.style.pointerEvents = '';
+            }
+        } else {
+            sidebar.style.display = '';
+            sidebar.style.transform = '';
+            sidebar.style.opacity = '';
+            sidebarToggle.style.display = 'none';
+            document.getElementById('sidebarOverlay').style.display = 'none';
+            document.getElementById('sidebarOverlay').style.opacity = '0';
+            document.body.style.overflow = '';
+            if (mainContent) {
+                mainContent.classList.remove('dashboard-shifted');
+                mainContent.style.pointerEvents = '';
+            }
         }
     }
-}
-window.addEventListener('resize', handleResize);
-document.addEventListener('DOMContentLoaded', handleResize);
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('DOMContentLoaded', handleResize);
 </script>
