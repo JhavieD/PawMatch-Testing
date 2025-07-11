@@ -94,7 +94,7 @@
                     @foreach ($recentReports as $report)
                         <li class="list-item">
                             <div class="item-info">
-                                <div class="item-title">{{ $report->animal_type ?? 'Stray Animal' }}</div>
+                               <div class="item-title">Stray Animal Report</div>
                                 <div class="item-subtitle">{{ $report->location }}</div>
                                 <div class="item-subtitle">Reported
                                     {{ \Carbon\Carbon::parse($report->reported_at)->diffForHumans() }}</div>

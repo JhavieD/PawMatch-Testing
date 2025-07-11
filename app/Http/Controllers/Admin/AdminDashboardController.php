@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use App\Http\Controllers\Shared\Controller;
 use Illuminate\Support\Facades\Artisan;
+use App\Models\Shared\StrayReportStatusLog;
+
 
 class AdminDashboardController extends Controller
 {
@@ -464,7 +466,6 @@ class AdminDashboardController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('report_id', 'like', "%{$search}%")
                   ->orWhere('location', 'like', "%{$search}%")
-                  ->orWhere('animal_type', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
@@ -585,16 +586,8 @@ class AdminDashboardController extends Controller
             // Update the report status
             $report->status = $newStatus;
             $report->save();
-
-            // Create admin action with professional message
-            \DB::table('admin_actions')->insert([
-                'action_type' => 'status_update',
-                'target_report_id' => $report->report_id,
-                'reason' => $message,
-                'admin_id' => auth()->id(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+       
+            $report->logStatusChange($oldStatus, $newStatus, auth()->id(), $message);
 
             return response()->json([
                 'success' => true,
@@ -611,32 +604,32 @@ class AdminDashboardController extends Controller
         }
     }
 
-
-        
     public function strayReportTimeline($id)
     {
-        $timeline = \DB::table('admin_actions')
-            ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-            ->where('target_report_id', $id)
-            ->where('action_type', 'status_update') // Only status updates in timeline
-            ->orderBy('created_at', 'desc') // Latest first
-            ->select('admin_actions.*', 'users.first_name', 'users.last_name')
+        $report = StrayReports::find($id);
+        if (!$report) {
+            return response()->json(['timeline' => []]);
+        }
+
+        $timeline = StrayReportStatusLog::with('changedBy')
+            ->where('adopter_id', $report->report_id) 
+            ->orderBy('changed_at', 'desc')
             ->get()
-            ->map(function($action) {
+            ->map(function($log) {
                 return [
-                    'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y h:i A'),
-                    'content' => $action->reason,
-                    'type' => $action->action_type,
-                    'author' => ($action->first_name && $action->last_name) 
-                        ? $action->first_name . ' ' . $action->last_name 
-                        : 'Admin',
+                    'date' => $log->changed_at->format('M d, Y g:i A'),
+                    'content' => $log->notes,
+                    'author' => $log->changedBy ? 
+                        ($log->changedBy->first_name && $log->changedBy->last_name ? 
+                            $log->changedBy->first_name . ' ' . $log->changedBy->last_name : 
+                            'Admin') : 'System',
+                    'status_change' => $log->old_status . ' → ' . $log->new_status
                 ];
             });
+
         return response()->json(['timeline' => $timeline]);
     }
-    
 
-  
     public function verifications()
     {
         // Get all verifications from different tables

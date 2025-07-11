@@ -17,7 +17,6 @@ return new class extends Migration
     Schema::create('stray_reports', function (Blueprint $table) {
         $table->id('report_id');
         $table->unsignedBigInteger('adopter_id')->nullable();
-        $table->string('animal_type')->nullable(); 
         $table->string('location');
         $table->text('description');
         $table->string('image_url')->nullable(); 

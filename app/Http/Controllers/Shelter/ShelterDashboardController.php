@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Shared\Message;
 use App\Models\Shared\User;
 use App\Http\Controllers\Shared\Controller;
+use App\Models\Shared\StrayReportStatusLog;
+use App\Models\Shared\StrayReports;
+
 
 class ShelterDashboardController extends Controller
 {
@@ -469,7 +472,6 @@ class ShelterDashboardController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('stray_reports.location', 'LIKE', "%{$search}%")
                         ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
-                        ->orWhere('stray_reports.animal_type', 'LIKE', "%{$search}%")
                         ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
                 });
             }
@@ -496,11 +498,10 @@ class ShelterDashboardController extends Controller
         $shelter = auth()->user()->shelter;
 
         try {
-            // Start database transaction for consistency
             \DB::beginTransaction();
             
-            // Check if the report exists and get current status
-            $report = \DB::table('stray_reports')->where('report_id', $reportId)->first();
+
+            $report = StrayReports::find($reportId);
             
             if (!$report) {
                 \DB::rollback();
@@ -510,7 +511,7 @@ class ShelterDashboardController extends Controller
                 ], 404);
             }
 
-            // Status checks - prevent accepting flagged/duplicate/cancelled reports
+            // Validation logic
             if ($report->status === 'cancelled') {
                 \DB::rollback();
                 return response()->json([
@@ -519,52 +520,13 @@ class ShelterDashboardController extends Controller
                 ], 400);
             }
 
-            if ($report->is_flagged) {
-                \DB::rollback();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot accept flagged reports'
-                ], 400);
-            }
-
-            if ($report->is_duplicate) {
-                \DB::rollback();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot accept duplicate reports'
-                ], 400);
-            }
-
-            // Check if the notification exists for this shelter
-            $notification = \DB::table('stray_report_notifications')
-                ->where('report_id', $reportId)
-                ->where('shelter_id', $shelter->shelter_id)
-                ->first();
-
-            if (!$notification) {
-                \DB::rollback();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Report notification not found'
-                ], 404);
-            }
-
-            if ($notification->handled_at) {
-                \DB::rollback();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Report is already accepted!'
-                ], 409);
-            }
-
-            // Only update status to 'accepted' if it's in a valid state
+            //Store the old status before updating
+            $oldStatus = $report->status;
+            
             if (in_array($report->status, ['pending', 'investigating'])) {
-                \DB::table('stray_reports')
-                    ->where('report_id', $reportId)
-                    ->update([
-                        'status' => 'accepted',
-                        'updated_at' => now()
-                    ]);
+                $report->status = 'accepted';
+                $report->updated_at = now();
+                $report->save();
             } else {
                 \DB::rollback();
                 return response()->json([
@@ -584,19 +546,10 @@ class ShelterDashboardController extends Controller
                     'updated_at' => now()
                 ]);
 
-            // Create admin action log
             $message = "{$shelter->shelter_name} has accepted your stray animal report and will be taking action to help the animal.";
+            
+            $report->logStatusChange($oldStatus, 'accepted', auth()->id(), $message);
 
-            \DB::table('admin_actions')->insert([
-                'action_type' => 'status_update',
-                'target_report_id' => $reportId,
-                'reason' => $message,
-                'admin_id' => auth()->id(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // Commit all changes
             \DB::commit();
 
             return response()->json([
@@ -614,7 +567,7 @@ class ShelterDashboardController extends Controller
             ], 500);
         }
     }
-public function markStrayReportRead($reportId)
+    public function markStrayReportRead($reportId)
     {
         $shelter = auth()->user()->shelter;
 

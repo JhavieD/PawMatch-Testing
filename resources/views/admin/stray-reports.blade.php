@@ -30,7 +30,7 @@
                 <input type="text" 
                        name="search" 
                        class="search-input" 
-                       placeholder="Search by report ID, location, or animal type..." 
+                       placeholder="Search by report ID or location..." 
                        value="{{ request('search') }}">
                 
                 <select name="status" class="filter-select">
@@ -81,7 +81,6 @@
                     data-location="{{ $report->location }}"
                     data-status="{{ $report->status }}"
                     data-reported-at="{{ $report->reported_at ? \Carbon\Carbon::parse($report->reported_at)->format('F d, Y') : '' }}"
-                    data-animal-type="{{ $report->animal_type ?? '' }}"
                     data-reporter="{{ $report->adopter->user->name }}"
                     data-reporter-contact="{{ $report->adopter->user->email }}"
                     data-is-flagged="{{ $report->is_flagged ? 'true' : 'false' }}"
@@ -156,10 +155,6 @@
             <div class="info-block">
                 <div class="info-label">Date Reported</div>
                 <div class="info-value" id="reportDate"></div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">Animal Type</div>
-                <div class="info-value" id="animalType"></div>
             </div>
         </div>
         <div class="report-description">
@@ -382,7 +377,6 @@ function openReportModal(card) {
     document.getElementById('reporterContact').textContent = card.dataset.reporterContact;
     document.getElementById('reportLocation').textContent = card.dataset.location;
     document.getElementById('reportDate').textContent = card.dataset.reportedAt;
-    document.getElementById('animalType').textContent = card.dataset.animalType;
     document.getElementById('reportDescription').textContent = card.dataset.description;
 
     updateButtonsForStatus(card.dataset.status);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Adopter;
 
 use App\Http\Controllers\Controller;
 use App\Models\Shared\StrayReports;
+use App\Models\Shared\StrayReportStatusLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,47 +14,38 @@ class AdopterReportController extends Controller
     {
         $adopter = auth()->user()->adopter;
         
-        if (!$adopter) {
-            return redirect()->route('adopter.dashboard')->with('error', 'Adopter profile not found.');
-        }
-
-        // Get reports submitted by this adopter
         $query = StrayReports::where('adopter_id', $adopter->adopter_id);
 
-        // Filter by search term
+        // Your existing filtering logic...
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
                 $q->where('report_id', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%")
-                  ->orWhere('animal_type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('location', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        // Filter by status if provided
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
         }
 
         $reports = $query->orderByDesc('reported_at')->paginate(10);
 
-        // Attach timeline for each report
+        // Attach timeline for each report using the new system
         foreach ($reports as $report) {
-            $timeline = DB::table('admin_actions')
-                ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-                ->where('target_report_id', $report->report_id)
-                ->where('action_type', 'status_update')
-                ->orderBy('created_at', 'asc')
-                ->select('admin_actions.*', 'users.first_name', 'users.last_name')
+            $timeline = StrayReportStatusLog::with('changedBy')
+                ->where('adopter_id', $report->report_id) // Fix: query by report_id stored in adopter_id field
+                ->orderBy('changed_at', 'asc')
                 ->get()
-                ->map(function($action) {
+                ->map(function($log) {
                     return [
-                        'date' => \Carbon\Carbon::parse($action->created_at)->format('M d, Y g:i A'),
-                        'content' => $action->reason,
-                        'author' => ($action->first_name && $action->last_name) 
-                            ? $action->first_name . ' ' . $action->last_name 
-                            : 'Admin',
+                        'date' => $log->changed_at->format('M d, Y g:i A'),
+                        'content' => $log->notes,
+                        'author' => $log->changedBy ? 
+                            ($log->changedBy->first_name && $log->changedBy->last_name ? 
+                                $log->changedBy->first_name . ' ' . $log->changedBy->last_name : 
+                                'Admin') : 'System',
                     ];
                 });
             $report->timeline = $timeline;
@@ -70,21 +62,19 @@ class AdopterReportController extends Controller
             ->where('report_id', $reportId)
             ->firstOrFail();
 
-        // Get detailed timeline
-        $timeline = DB::table('admin_actions')
-            ->leftJoin('users', 'admin_actions.admin_id', '=', 'users.user_id')
-            ->where('target_report_id', $report->report_id)
-            ->where('action_type', 'status_update')
-            ->orderBy('created_at', 'asc')
-            ->select('admin_actions.*', 'users.first_name', 'users.last_name')
+        // Get detailed timeline using the new status logs table
+        $timeline = StrayReportStatusLog::with('changedBy')
+            ->where('adopter_id', $report->report_id) // Fix: query by report_id stored in adopter_id field
+            ->orderBy('changed_at', 'asc')
             ->get()
-            ->map(function($action) {
+            ->map(function($log) {
                 return [
-                    'date' => \Carbon\Carbon::parse($action->created_at)->format('F d, Y g:i A'),
-                    'content' => $action->reason,
-                    'author' => ($action->first_name && $action->last_name) 
-                        ? $action->first_name . ' ' . $action->last_name 
-                        : 'Admin',
+                    'date' => $log->changed_at->format('F d, Y g:i A'),
+                    'content' => $log->notes,
+                    'author' => $log->changedBy ? 
+                        ($log->changedBy->first_name && $log->changedBy->last_name ? 
+                            $log->changedBy->first_name . ' ' . $log->changedBy->last_name : 
+                            'Admin') : 'System',
                 ];
             });
 
