@@ -54,9 +54,17 @@ class RegisterController extends Controller
             'address' => ['required', 'string', 'max:255'],
         ];
         if (!$isGoogle) {
-            $validationRules['password'] = ['required', 'string', 'min:8', 'confirmed'];
+            $validationRules['password'] = [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+            ];
         }
-        $validated = $request->validate($validationRules);
+        $validated = $request->validate($validationRules, [
+            'password.regex' => 'Password must be at least 8 characters and include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.'
+        ]);
 
         // Additional validation for shelter role
         if ($request->role === 'shelter') {
