@@ -16,7 +16,6 @@ class Adopter extends Model
     protected $primaryKey = 'adopter_id';
 
     protected $fillable = [
-        'valid_id_type',
         'valid_id_url',
         'user_id',
         'address',
