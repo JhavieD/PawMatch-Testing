@@ -4,33 +4,43 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
-        Schema::table('adopter_reviews', function (Blueprint $table) {
-            $table->unsignedBigInteger('application_id')->nullable()->after('adopter_id');
-            $table->foreign('application_id')
-                ->references('application_id')
-                ->on('adoption_applications')
-                ->onDelete('cascade');
-
-            try {
-                $table->dropUnique(['adopter_id', 'shelter_id']);
-            } catch (Exception $e) {
-            }
-            
-            $table->unique('application_id');
-        });
+        // Add the column only if it doesn't exist
+        if (!Schema::hasColumn('adopter_reviews', 'application_id')) {
+            Schema::table('adopter_reviews', function (Blueprint $table) {
+                $table->unsignedBigInteger('application_id')->nullable()->after('adopter_id');
+            });
+        }
+        // Always try to add the foreign key, but catch errors if it already exists
+        try {
+            Schema::table('adopter_reviews', function (Blueprint $table) {
+                $table->foreign('application_id')
+                    ->references('application_id')
+                    ->on('adoption_applications')
+                    ->onDelete('cascade');
+            });
+        } catch (\Throwable $e) {
+            // Ignore if the foreign key already exists
+        }
     }
 
     public function down(): void
     {
-        Schema::table('adopter_reviews', function (Blueprint $table) {
-            $table->dropForeign(['application_id']);
-            $table->dropUnique(['application_id']);
-            $table->dropColumn('application_id');
-            $table->unique(['adopter_id', 'shelter_id']);
-        });
+        // Try to drop the foreign key, ignore errors if it doesn't exist
+        try {
+            Schema::table('adopter_reviews', function (Blueprint $table) {
+                $table->dropForeign(['application_id']);
+            });
+        } catch (\Throwable $e) {
+            // Ignore if the foreign key doesn't exist
+        }
+        // Drop the column if it exists
+        if (Schema::hasColumn('adopter_reviews', 'application_id')) {
+            Schema::table('adopter_reviews', function (Blueprint $table) {
+                $table->dropColumn('application_id');
+            });
+        }
     }
 };
