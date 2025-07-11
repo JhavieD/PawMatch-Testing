@@ -225,7 +225,6 @@
                     </div>
                     <div class="password-strength" id="passwordStrength"></div>
                     <div class="field-error" id="passwordError"></div>
-                    <div class="field-success" id="passwordSuccess"></div>
                 </div>
                 <div>
                     <label for="password_confirmation" class="register-label">
@@ -235,7 +234,6 @@
                         <input type="password" name="password_confirmation" id="password_confirmation" required class="register-input register-placeholder-small pr-12" placeholder="Confirm your password" autocomplete="new-password">
                     </div>
                     <div class="field-error" id="password_confirmationError"></div>
-                    <div class="field-success" id="password_confirmationSuccess"></div>
                 </div>
             </div>
         </div>
@@ -689,7 +687,6 @@ function validateCurrentStep() {
                     isValid = false;
                 } else {
                     hideError(field + 'Error');
-                    showSuccess(field + 'Success', '✓ Valid');
                 }
             });
             
@@ -712,15 +709,13 @@ function validateCurrentStep() {
                 isValid = false;
             } else {
                 hideError('passwordError');
-                showSuccess('passwordSuccess', '✓ Password meets requirements');
             }
             
             if (password !== confirmPassword) {
                 showError('password_confirmationError', 'Passwords do not match');
                 isValid = false;
-            } else if (confirmPassword) {
+            } else {
                 hideError('password_confirmationError');
-                showSuccess('password_confirmationSuccess', '✓ Passwords match');
             }
             break;
         case 4:
@@ -791,27 +786,17 @@ function setupRealTimeValidation() {
             strengthDiv.style.display = 'none';
             return;
         }
-        
-        let strength = 0;
+
+        // Strong password regex (same as backend)
+        const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
         let feedback = '';
-        
-        if (password.length >= 8) strength++;
-        if (/[a-z]/.test(password)) strength++;
-        if (/[A-Z]/.test(password)) strength++;
-        if (/[0-9]/.test(password)) strength++;
-        if (/[^A-Za-z0-9]/.test(password)) strength++;
-        
-        if (strength <= 2) {
-            strengthDiv.className = 'password-strength strength-weak';
-            feedback = 'Weak password';
-        } else if (strength <= 3) {
-            strengthDiv.className = 'password-strength strength-medium';
-            feedback = 'Medium strength password';
-        } else {
+        if (strongRegex.test(password)) {
             strengthDiv.className = 'password-strength strength-strong';
-            feedback = 'Strong password';
+            feedback = '✓ Password meets requirements';
+        } else {
+            strengthDiv.className = 'password-strength strength-weak';
+            feedback = 'Password must be at least 8 characters and include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.';
         }
-        
         strengthDiv.textContent = feedback;
         strengthDiv.style.display = 'block';
     });
@@ -823,7 +808,6 @@ function setupRealTimeValidation() {
             showError('emailError', 'Please enter a valid email address');
         } else if (email) {
             hideError('emailError');
-            showSuccess('emailSuccess', '✓ Valid email');
         }
     });
 }
