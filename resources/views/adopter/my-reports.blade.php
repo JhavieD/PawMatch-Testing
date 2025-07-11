@@ -26,7 +26,7 @@
             <input type="text" 
                    name="search" 
                    class="search-input wide-search-input" 
-                   placeholder="Search by report ID, location, or animal type..." 
+                   placeholder="Search by report ID or location..." 
                    value="{{ request('search') }}">
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
@@ -54,7 +54,6 @@
                 <thead>
                     <tr>
                         <th>Report ID</th>
-                        <th>Animal</th>
                         <th>Status</th>
                         <th>Location</th>
                         <th>Date Reported</th>
@@ -67,7 +66,6 @@
                     @php $rowId = 'report-row-' . $report->report_id; @endphp
                     <tr class="report-row" id="{{ $rowId }}">
                         <td>#{{ $report->report_id }}</td>
-                        <td><span class="animal-badge">{{ ucfirst($report->animal_type) }}</span></td>
                         <td><span class="status-badge status-{{ $report->status }}">{{ strtoupper($report->status) }}</span></td>
                         <td>{{ $report->location }}</td>
                         <td>{{ \Carbon\Carbon::parse($report->reported_at)->format('M d, Y') }}</td>
