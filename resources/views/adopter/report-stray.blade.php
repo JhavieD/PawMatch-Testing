@@ -51,18 +51,8 @@
             @csrf
             <div class="form-section">
                 <div class="form-group">
-                    <label for="animalType">
-                        Animal Type
-                    </label>
-                    <select id="animalType" name="animalType" required>
-                        <option value="">Select animal type</option>
-                        <option value="dog">Dog</option>
-                        <option value="cat">Cat</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="description">
-                        Description
+                        Description*
                     </label>
                     <textarea id="description" name="description" placeholder="Describe the animal's appearance, behavior, and condition." required></textarea>
                     <div class="char-counter">
@@ -71,7 +61,7 @@
                 </div>
                 <div class="form-group">
                     <label>
-                        Photos
+                        Photos*
                     </label>
                     <div class="image-upload-container">
                         <div class="image-upload" id="imageUploadArea">
@@ -88,7 +78,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Address</label>
+                    <label>Address*</label>
                     <div class="location-group">
                         <input type="text" name="street" placeholder="Street Address" required>
                         <input type="text" name="city" placeholder="City" required>
@@ -97,9 +87,9 @@
                 </div>
                 <div class="form-group">
                     <label for="landmarks">
-                        Nearby Landmarks
+                        Nearby Landmarks*
                     </label>
-                    <textarea id="landmarks" name="landmarks" placeholder="Describe any nearby landmarks, businesses, or notable locations."></textarea>
+                    <textarea id="landmarks" name="landmarks" placeholder="Describe any nearby landmarks, businesses, or notable locations." required></textarea>
                 </div>
             </div>
             <div class="form-actions">

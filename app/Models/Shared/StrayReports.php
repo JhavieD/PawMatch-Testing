@@ -17,7 +17,6 @@ class StrayReports extends Model
         'status',
         'reported_at',
         'image_url',      
-        'animal_type',
         'is_flagged',
         'flag_reason',
         'is_duplicate',
@@ -31,6 +30,25 @@ class StrayReports extends Model
         'flagged_at' => 'datetime',
         'image_url' => 'json',
     ];
+
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(StrayReportStatusLog::class, 'adopter_id', 'report_id') 
+                    ->orderBy('changed_at', 'desc');
+    }
+
+    // Add a method to log status changes
+    public function logStatusChange($oldStatus, $newStatus, $changedBy, $notes = null)
+    {
+        return StrayReportStatusLog::create([
+            'adopter_id' => $this->report_id, 
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'changed_by' => $changedBy,
+            'changed_at' => now(),
+            'notes' => $notes
+        ]);
+    }
 
     public function adopter()
     {

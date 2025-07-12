@@ -31,7 +31,7 @@
                 <input type="text" 
                     name="search" 
                     class="search-input" 
-                    placeholder="Search by report ID, location, or animal type..." 
+                    placeholder="Search by report ID or location..." 
                     value="{{ request('search') }}">
                 <i class="fas fa-search search-icon"></i>
             </div>
@@ -84,7 +84,6 @@
                     data-location="{{ $report->location }}"
                     data-status="{{ $report->status }}"
                     data-reported-at="{{ $report->reported_at ? \Carbon\Carbon::parse($report->reported_at)->format('F d, Y') : '' }}"
-                    data-animal-type="{{ $report->animal_type ?? '' }}"
                     data-reporter="{{ $report->reporter_name }}"
                     data-reporter-contact="{{ $report->reporter_email }}"
                     data-sent-at="{{ $report->sent_at ? \Carbon\Carbon::parse($report->sent_at)->format('F d, Y g:i A') : '' }}"
@@ -100,13 +99,12 @@
                         <div class="unread-indicator"></div>
                     @endif
                     <div class="report-content">
-                        <div class="report-title">{{ $report->animal_type ?? 'Stray Animal' }}</div>
+                        <div class="report-title">Stray Animal Report</div>
                         <div class="report-location">
                             <i class="fas fa-map-marker-alt"></i>
                             <span>{{ $report->location }}</span>
                         </div>
                         <div class="report-meta">
-                            <span class="animal-type">{{ ucfirst($report->animal_type) }}</span>
                             <span class="sent-time">{{ $report->sent_at ? \Carbon\Carbon::parse($report->sent_at)->diffForHumans() : '' }}</span>
                         </div>
                         <div class="status-badge status-{{ $report->status }}">
@@ -158,10 +156,6 @@
             <div class="info-block">
                 <div class="info-label">📍 Location</div>
                 <div class="info-value" id="reportLocation"></div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">🐕 Animal Type</div>
-                <div class="info-value" id="animalType"></div>
             </div>
             <div class="info-block">
                 <div class="info-label">👤 Reporter</div>
@@ -293,7 +287,6 @@ function openReportModal(card) {
     document.getElementById('reportStatus').className = `status-badge status-${card.dataset.status}`;
     document.getElementById('reportStatus').textContent = card.dataset.status.charAt(0).toUpperCase() + card.dataset.status.slice(1);
     document.getElementById('reportLocation').textContent = card.dataset.location;
-    document.getElementById('animalType').textContent = card.dataset.animalType || 'Not specified';
     document.getElementById('reporterName').textContent = card.dataset.reporter;
     document.getElementById('reporterContact').textContent = card.dataset.reporterContact;
     document.getElementById('reportDate').textContent = card.dataset.reportedAt;

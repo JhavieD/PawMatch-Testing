@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Shared\StrayReports;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Shared\StrayReportStatusLog;
+
 
 class ReportStrayController extends Controller
 {
@@ -19,11 +21,10 @@ class ReportStrayController extends Controller
     public function submit(Request $request)
     {
         $request->validate([
-            'animalType' => 'required|string',
             'description' => 'required|string',
-            'street' => 'nullable|string',
-            'city' => 'nullable|string',          
-            'zip' => 'nullable|string',
+            'street' => 'required|string',
+            'city' => 'required|string',
+            'zip' => 'required|string',
             'photos' => 'nullable|array',
             'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024'
         ]);
@@ -31,12 +32,6 @@ class ReportStrayController extends Controller
         $adopter = Auth::user()->adopter;
         $location = trim("{$request->street}, {$request->city} {$request->zip}", ', ');
 
-        // $imageUrl = null;
-        // if ($request->hasFile('image')) {
-        //     $path = $request->file('image')->store('stray-reports', 's3');
-        //     Storage::disk('s3')->setVisibility($path, 'public');
-        //     $imageUrl = Storage::disk('s3')->url($path);
-        // }
         $imageUrls = [];
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
@@ -46,14 +41,23 @@ class ReportStrayController extends Controller
             }
         }
 
-        StrayReports::create([
+        $report = StrayReports::create([
             'adopter_id' => $adopter ? $adopter->adopter_id : null,
-            'animal_type' => $request->animalType,
             'location' => $location,
             'description' => $request->description,
             'image_url' => !empty($imageUrls) ? json_encode($imageUrls) : null,
             'status' => 'pending',
             'reported_at' => now(),
+        ]);
+
+        // Create initial status log entry - Fix: use empty string instead of null for old_status
+        StrayReportStatusLog::create([
+            'adopter_id' => $report->report_id, // Store report_id in adopter_id field
+            'old_status' => '', // Fix: use empty string instead of null
+            'new_status' => 'pending',
+            'changed_by' => auth()->id(),
+            'changed_at' => now(),
+            'notes' => 'Stray animal report submitted. Our team will review and investigate this report.'
         ]);
 
         return redirect()->route('adopter.report-stray')->with('success', 'Stray report submitted successfully!');
