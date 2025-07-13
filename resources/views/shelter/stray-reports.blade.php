@@ -178,14 +178,15 @@
         </div>
 
         <div class="report-actions">
+            <!-- Report Actions Template -->
             <template id="reportActionsTemplate">
                 <button class="btn btn-primary" id="acceptOrResolveBtn">
                     Mark as Accepted
                 </button>
-                <button class="btn btn-danger" id="returnPendingBtn" style="margin-left: 0.5rem; display: none;">
+                <button class="btn btn-danger" id="returnPendingBtn" style="margin-left: 0.5rem;">
                     Decline
                 </button>
-                <button class="btn btn-info" onclick="getDirections()">
+                <button class="btn btn-info" onclick="getDirections()" style="margin-left: 0.5rem;">
                     Get Directions
                 </button>
             </template>
@@ -222,16 +223,10 @@
         <div class="modal-body">
             <p>Optionally provide a note for returning this report to the admin:</p>
             <textarea id="returnPendingNote" placeholder="Add a note (optional)" style="width:100%;margin-bottom:1rem;"></textarea>
-            <div style="display:flex;gap:1rem;">
-                <button class="btn btn-warning" onclick="returnReportToPending()">Return to Admin</button>
+            <div style="display:flex;gap:1rem;justify-content:flex-end;">
                 <button class="btn btn-outline" onclick="closeReturnPendingModal()">Cancel</button>
+                <button class="btn btn-warning" onclick="returnReportToPending()">Return to Admin</button>
             </div>
-            <button class="btn btn-primary" onclick="acceptReport()">
-                Mark as Accepted
-            </button>
-            <button class="btn btn-info" onclick="getDirections()">
-                Get Directions
-            </button>
         </div>
     </div>
 </div>
