@@ -10,6 +10,7 @@ class AdminUserSeeder extends Seeder
     public function run()
     {
         User::updateOrCreate(
+            // force redeploy
             ['email' => 'admin@gmail.com'],
             [
                 'first_name' => 'Admin',
