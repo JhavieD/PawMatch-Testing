@@ -329,16 +329,17 @@
 
 /* Modal Styles */
 .report-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .modal-content {
@@ -887,16 +888,13 @@
 
 
 #resolveModal {
+    z-index: 1200 !important;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
+    left: 0; top: 0; right: 0; bottom: 0;
+    display: flex;
     align-items: center;
-    z-index: 1001;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
 }
 #resolveModal .modal-content {
     background: #fff;
@@ -989,15 +987,13 @@
 }
 
 #returnPendingModal {
+    z-index: 1300 !important;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
+    left: 0; top: 0; right: 0; bottom: 0;
+    display: flex;
     align-items: center;
-    z-index: 1002;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
 }
 #returnPendingModal .modal-content {
     background: #fff;
