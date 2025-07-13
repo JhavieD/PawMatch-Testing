@@ -483,6 +483,11 @@ class ShelterDashboardController extends Controller
                 }
             }
 
+            // Exclude 'pending' reports by default
+            if (!$request->filled('status') || $request->get('status') === 'all') {
+                $query->where('stray_reports.status', '!=', 'pending');
+            }
+
             $reports = $query->orderByDesc('stray_report_notifications.sent_at')->paginate(12);
 
             $reports->getCollection()->transform(function ($report) {
@@ -583,6 +588,101 @@ class ShelterDashboardController extends Controller
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['success' => false], 500);
+        }
+    }
+    // POST /shelter/stray-reports/{reportId}/resolve
+    public function resolveStrayReport($reportId, Request $request)
+    {
+        $shelter = auth()->user()->shelter;
+        $resolution = $request->input('resolution'); // 'found' or 'cancelled'
+        $note = $request->input('note');
+
+        if (!in_array($resolution, ['found', 'cancelled'])) {
+            return response()->json(['success' => false, 'message' => 'Invalid resolution.'], 400);
+        }
+
+        try {
+            \DB::beginTransaction();
+            $report = \App\Models\Shared\StrayReports::find($reportId);
+            if (!$report) {
+                \DB::rollback();
+                return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+            }
+            if ($report->status !== 'accepted') {
+                \DB::rollback();
+                return response()->json(['success' => false, 'message' => 'Report must be accepted before resolving.'], 400);
+            }
+            $oldStatus = $report->status;
+            $report->status = $resolution;
+            $report->updated_at = now();
+            $report->save();
+            // Update notification
+            \DB::table('stray_report_notifications')
+                ->where('report_id', $reportId)
+                ->where('shelter_id', $shelter->shelter_id)
+                ->update([
+                    'is_read' => true,
+                    'read_at' => now(),
+                    'handled_at' => now(),
+                    'updated_at' => now()
+                ]);
+            $message = $resolution === 'found'
+                ? "{$shelter->shelter_name} has found and helped the animal you reported. Thank you for making a difference!"
+                : "{$shelter->shelter_name} was unable to find the animal you reported. Thank you for your concern.";
+            if ($note) {
+                $message .= "\nNote: $note";
+            }
+            $report->logStatusChange($oldStatus, $resolution, auth()->id(), $message);
+            \DB::commit();
+            return response()->json(['success' => true, 'message' => 'Report resolved successfully.']);
+        } catch (\Exception $e) {
+            \DB::rollback();
+            \Log::error('Resolve stray report error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to resolve report: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // POST /shelter/stray-reports/{reportId}/return-pending
+    public function returnStrayReportToPending($reportId, Request $request)
+    {
+        $shelter = auth()->user()->shelter;
+        $note = $request->input('note');
+        try {
+            \DB::beginTransaction();
+            $report = \App\Models\Shared\StrayReports::find($reportId);
+            if (!$report) {
+                \DB::rollback();
+                return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+            }
+            if ($report->status !== 'investigating') {
+                \DB::rollback();
+                return response()->json(['success' => false, 'message' => 'Only investigating reports can be returned to pending.'], 400);
+            }
+            $oldStatus = $report->status;
+            $report->status = 'pending';
+            $report->updated_at = now();
+            $report->save();
+            // Update notification
+            \DB::table('stray_report_notifications')
+                ->where('report_id', $reportId)
+                ->where('shelter_id', $shelter->shelter_id)
+                ->update([
+                    'is_read' => true,
+                    'read_at' => now(),
+                    'handled_at' => now(),
+                    'updated_at' => now()
+                ]);
+            $message = "{$shelter->shelter_name} returned the stray animal report to pending.";
+            if ($note) {
+                $message .= "\nNote: $note";
+            }
+            $report->logStatusChange($oldStatus, 'pending', auth()->id(), $message);
+            \DB::commit();
+            return response()->json(['success' => true, 'message' => 'Report returned to pending successfully.']);
+        } catch (\Exception $e) {
+            \DB::rollback();
+            \Log::error('Return to pending error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to return report to pending: ' . $e->getMessage()], 500);
         }
     }
 }
