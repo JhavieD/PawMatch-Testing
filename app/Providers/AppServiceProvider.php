@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->runningInConsole()) {
+            // Skip DB checks during build/composer install
+            return;
+        }
         View::composer('*', function ($view) {
         $pendingVerifications = Verification::with('shelter')
                                             ->where('status', 'pending')
