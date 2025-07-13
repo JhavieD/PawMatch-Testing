@@ -590,7 +590,6 @@ class ShelterDashboardController extends Controller
             return response()->json(['success' => false], 500);
         }
     }
-
     // POST /shelter/stray-reports/{reportId}/resolve
     public function resolveStrayReport($reportId, Request $request)
     {

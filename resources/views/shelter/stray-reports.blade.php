@@ -226,6 +226,12 @@
                 <button class="btn btn-warning" onclick="returnReportToPending()">Return to Admin</button>
                 <button class="btn btn-outline" onclick="closeReturnPendingModal()">Cancel</button>
             </div>
+            <button class="btn btn-primary" onclick="acceptReport()">
+                Mark as Accepted
+            </button>
+            <button class="btn btn-info" onclick="getDirections()">
+                Get Directions
+            </button>
         </div>
     </div>
 </div>
@@ -334,7 +340,6 @@ function openReportModal(card) {
     document.getElementById('reportDate').textContent = card.dataset.reportedAt;
     document.getElementById('sentAt').textContent = card.dataset.sentAt;
     document.getElementById('reportDescription').textContent = card.dataset.description;
-
     updateAcceptOrResolveBtn(card.dataset.status);
 }
 
