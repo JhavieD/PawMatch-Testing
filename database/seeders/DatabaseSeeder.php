@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             PetsSeeder::class,
             Adoption_applicationsSeeder::class,
             \Database\Seeders\SettingsSeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }
