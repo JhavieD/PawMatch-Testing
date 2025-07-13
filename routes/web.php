@@ -138,6 +138,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/shelter/stray-reports', [ShelterDashboardController::class, 'strayReports'])->name('shelter.stray-reports');
         Route::post('/shelter/stray-reports/{reportId}/mark-read', [ShelterDashboardController::class, 'markStrayReportRead'])->name('shelter.stray-reports.mark-read');
         Route::post('/shelter/stray-reports/{reportId}/accept', [ShelterDashboardController::class, 'acceptStrayReport'])->name('shelter.stray-reports.accept');
+        Route::post('/shelter/stray-reports/{reportId}/resolve', [ShelterDashboardController::class, 'resolveStrayReport'])->name('shelter.stray-reports.resolve');
+        Route::post('/shelter/stray-reports/{reportId}/return-pending', [ShelterDashboardController::class, 'returnStrayReportToPending'])->name('shelter.stray-reports.return-pending');
     });
 
     // -------- MESSAGES (FOR ALL POT) --------

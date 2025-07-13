@@ -177,6 +177,15 @@
             const approveBtn = document.getElementById('approveBtn');
             const rejectBtn = document.getElementById('rejectBtn');
             const requestInfoBtn = document.getElementById('requestInfoBtn');
+            // Get the status from the badge
+            const badge = document.querySelector(`.status-badge[data-id="${id}"]`);
+            const status = badge ? badge.innerText.trim().toLowerCase() : '';
+            if (status === 'completed' || status === 'cancelled') {
+                if (approveBtn) approveBtn.style.display = 'none';
+                if (rejectBtn) rejectBtn.style.display = 'none';
+                if (requestInfoBtn) requestInfoBtn.style.display = 'none';
+                return;
+            }
 
             if (approveBtn) {
                 approveBtn.onclick = () => {

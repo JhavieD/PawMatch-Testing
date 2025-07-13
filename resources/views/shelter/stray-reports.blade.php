@@ -178,12 +178,54 @@
         </div>
 
         <div class="report-actions">
-            <button class="btn btn-primary" onclick="acceptReport()">
-                Mark as Accepted
-            </button>
-            <button class="btn btn-info" onclick="getDirections()">
-                Get Directions
-            </button>
+            <template id="reportActionsTemplate">
+                <button class="btn btn-primary" id="acceptOrResolveBtn">
+                    Mark as Accepted
+                </button>
+                <button class="btn btn-danger" id="returnPendingBtn" style="margin-left: 0.5rem; display: none;">
+                    Decline
+                </button>
+                <button class="btn btn-info" onclick="getDirections()">
+                    Get Directions
+                </button>
+            </template>
+            <div id="reportActionsContainer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Resolve Modal -->
+<div class="modal" id="resolveModal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Resolve Stray Report</h2>
+            <button class="close-modal" onclick="closeResolveModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Please select the outcome and (optionally) add a note:</p>
+            <textarea id="resolveNote" placeholder="Add a note (optional)" style="width:100%;margin-bottom:1rem;"></textarea>
+            <div style="display:flex;gap:1rem;">
+                <button class="btn btn-success" onclick="resolveReport('found')">Animal Found & Helped</button>
+                <button class="btn btn-danger" onclick="resolveReport('cancelled')">Animal Not Found</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return to Pending Modal -->
+<div class="modal" id="returnPendingModal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Return Report to Pending</h2>
+            <button class="close-modal" onclick="closeReturnPendingModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Optionally provide a note for returning this report to the admin:</p>
+            <textarea id="returnPendingNote" placeholder="Add a note (optional)" style="width:100%;margin-bottom:1rem;"></textarea>
+            <div style="display:flex;gap:1rem;">
+                <button class="btn btn-warning" onclick="returnReportToPending()">Return to Admin</button>
+                <button class="btn btn-outline" onclick="closeReturnPendingModal()">Cancel</button>
+            </div>
         </div>
     </div>
 </div>
@@ -293,7 +335,7 @@ function openReportModal(card) {
     document.getElementById('sentAt').textContent = card.dataset.sentAt;
     document.getElementById('reportDescription').textContent = card.dataset.description;
 
-
+    updateAcceptOrResolveBtn(card.dataset.status);
 }
 
 // Attach click handler to each report card
@@ -403,6 +445,107 @@ function getDirections() {
     const location = document.getElementById('reportLocation').textContent;
     const encodedLocation = encodeURIComponent(location);
     window.open(`https://www.google.com/maps/search/${encodedLocation}`, '_blank');
+}
+
+function updateAcceptOrResolveBtn(status) {
+    const container = document.getElementById('reportActionsContainer');
+    container.innerHTML = '';
+    if (status === 'found' || status === 'cancelled') {
+        // View only, no actions
+        return;
+    }
+    // Otherwise, show the action buttons
+    const tpl = document.getElementById('reportActionsTemplate');
+    if (tpl) {
+        container.appendChild(tpl.content.cloneNode(true));
+        const btn = document.getElementById('acceptOrResolveBtn');
+        const returnPendingBtn = document.getElementById('returnPendingBtn');
+        if (status === 'accepted') {
+            btn.textContent = 'Resolve Report';
+            btn.onclick = openResolveModal;
+        } else if (status === 'investigating') {
+            btn.textContent = 'Mark as Accepted';
+            btn.onclick = acceptReport;
+            if (returnPendingBtn) {
+                returnPendingBtn.style.display = '';
+                returnPendingBtn.onclick = openReturnPendingModal;
+            }
+        } else {
+            btn.textContent = 'Mark as Accepted';
+            btn.onclick = acceptReport;
+            if (returnPendingBtn) returnPendingBtn.style.display = 'none';
+        }
+    }
+}
+
+function openResolveModal() {
+    document.getElementById('resolveModal').style.display = 'flex';
+}
+function closeResolveModal() {
+    document.getElementById('resolveModal').style.display = 'none';
+}
+function resolveReport(resolution) {
+    const reportId = document.getElementById('reportId').textContent;
+    const note = document.getElementById('resolveNote').value;
+    const btns = document.querySelectorAll('#resolveModal .btn');
+    btns.forEach(btn => btn.disabled = true);
+    fetch(`/shelter/stray-reports/${reportId}/resolve`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ resolution, note })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report resolved as ' + (resolution === 'found' ? 'Animal Found & Helped' : 'Animal Not Found'), 'success');
+            closeResolveModal();
+            closeReportModal();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification('Error: ' + (data.message || 'Failed to resolve report'), 'error');
+        }
+    })
+    .catch(() => showNotification('Error: Failed to resolve report', 'error'))
+    .finally(() => btns.forEach(btn => btn.disabled = false));
+}
+
+function openReturnPendingModal() {
+    document.getElementById('returnPendingModal').style.display = 'flex';
+}
+function closeReturnPendingModal() {
+    document.getElementById('returnPendingModal').style.display = 'none';
+}
+function returnReportToPending() {
+    const reportId = document.getElementById('reportId').textContent;
+    const note = document.getElementById('returnPendingNote').value;
+    const btns = document.querySelectorAll('#returnPendingModal .btn');
+    btns.forEach(btn => btn.disabled = true);
+    fetch(`/shelter/stray-reports/${reportId}/return-pending`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ note })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report returned to pending.', 'success');
+            closeReturnPendingModal();
+            closeReportModal();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification('Error: ' + (data.message || 'Failed to return report to pending'), 'error');
+        }
+    })
+    .catch(() => showNotification('Error: Failed to return report to pending', 'error'))
+    .finally(() => btns.forEach(btn => btn.disabled = false));
 }
 
 // Close modal when clicking outside

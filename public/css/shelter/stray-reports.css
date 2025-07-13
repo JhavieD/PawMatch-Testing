@@ -885,3 +885,194 @@
 .notification-close:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+
+#resolveModal {
+    z-index: 1200 !important;
+    position: fixed;
+    left: 0; top: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+}
+#resolveModal .modal-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+#resolveModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+#resolveModal .modal-header h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+}
+#resolveModal .close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+#resolveModal .close-modal:hover {
+    color: #333;
+}
+#resolveModal .modal-body p {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+#resolveModal textarea {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    resize: vertical;
+    min-height: 60px;
+    max-height: 180px;
+}
+#resolveModal .modal-body .btn {
+    min-width: 160px;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+#resolveModal .btn-success {
+    background: #2ecc71;
+    color: #fff;
+}
+#resolveModal .btn-success:hover {
+    background: #27ae60;
+}
+#resolveModal .btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+#resolveModal .btn-danger:hover {
+    background: #c0392b;
+}
+@media (max-width: 600px) {
+    #resolveModal .modal-content {
+        padding: 1rem 0.5rem;
+        max-width: 98vw;
+    }
+}
+
+#returnPendingBtn.btn-danger {
+  background: #e74c3c !important;
+  color: #fff !important;
+  border: none;
+}
+#returnPendingBtn.btn-danger:hover {
+  background: #c0392b !important;
+}
+
+#returnPendingModal {
+    z-index: 1300 !important;
+    position: fixed;
+    left: 0; top: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+}
+#returnPendingModal .modal-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+#returnPendingModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+#returnPendingModal .modal-header h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+}
+#returnPendingModal .close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+#returnPendingModal .close-modal:hover {
+    color: #333;
+}
+#returnPendingModal .modal-body p {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+#returnPendingModal textarea {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    resize: vertical;
+    min-height: 60px;
+    max-height: 180px;
+}
+#returnPendingModal .modal-body .btn {
+    min-width: 160px;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+#returnPendingModal .btn-warning {
+    background: #f39c12;
+    color: #fff;
+}
+#returnPendingModal .btn-warning:hover {
+    background: #e67e22;
+}
+#returnPendingModal .btn-outline {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+}
+#returnPendingModal .btn-outline:hover {
+    background: #f5f5f5;
+}
+@media (max-width: 600px) {
+    #returnPendingModal .modal-content {
+        padding: 1rem 0.5rem;
+        max-width: 98vw;
+    }
+}
