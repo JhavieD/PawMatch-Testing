@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Shared;
+namespace App\Models\Adopter;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Pet\Pet;
