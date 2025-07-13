@@ -18,7 +18,8 @@ RUN apk add --no-cache \
     nginx \
     mysql-client \
     sqlite \
-    sqlite-dev
+    sqlite-dev \
+    oniguruma-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install \
