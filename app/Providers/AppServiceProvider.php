@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use App\Models\Shared\Verification;
 use App\Models\Setting;
 
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS in production
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         // Skip all database operations during console commands (build, composer install, etc.)
         if (app()->runningInConsole()) {
             return;
