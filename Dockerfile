@@ -17,7 +17,6 @@ RUN apk add --no-cache \
     supervisor \
     nginx \
     mysql-client \
-    postgresql-client \
     sqlite \
     sqlite-dev
 
@@ -26,7 +25,6 @@ RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
     pdo_sqlite \
-    pdo_pgsql \
     mbstring \
     exif \
     pcntl \
