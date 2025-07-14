@@ -9,7 +9,7 @@
             <h1>Find Your Perfect Pet Companion</h1>
             <p>Connect with local shelters and rescuers to adopt your next furry friend or help animals in need.</p>
             <a href="{{ route('register') }}" id="get-started-btn">Get Started</a>
-            <a href="{{ route('pet-listings') }}" id="browse-pets-btn">Browse Pets</a>
+            <a href="{{ route('public.pet-listings') }}" id="browse-pets-btn">Browse Pets</a>
         </div>
     </section>
 
