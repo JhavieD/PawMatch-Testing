@@ -85,12 +85,6 @@
                         <input type="text" name="zip" placeholder="ZIP Code" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="landmarks">
-                        Nearby Landmarks*
-                    </label>
-                    <textarea id="landmarks" name="landmarks" placeholder="Describe any nearby landmarks, businesses, or notable locations." required></textarea>
-                </div>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">
