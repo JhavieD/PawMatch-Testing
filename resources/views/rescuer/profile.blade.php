@@ -77,7 +77,6 @@
 
                         @if (!$verification || $verification->status === 'rejected')
                             <form action="{{ route('rescuer.verification.submit') }}" method="POST" enctype="multipart/form-data">
-                                enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group">
                                     <label for="registration_doc" class="form-label">Registration Document</label>

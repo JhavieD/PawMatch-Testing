@@ -110,8 +110,6 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
 
     // -------- SHELTER --------
     Route::middleware(['shelter'])->group(function () {
-        Route::get('/shelter/verification', [ShelterVerificationController::class, 'showVerificationForm'])->name('shelter.verification.form');
-        Route::post('/shelter/verification', [ShelterVerificationController::class, 'submitVerification'])->name('shelter.verification.submit');
         Route::get('/shelter/dashboard', [ShelterDashboardController::class, 'index'])->name('shelter.dashboard');
         Route::post('/shelter/pets', [ShelterDashboardController::class, 'createPetListing'])->name('shelter.pets.create');
         Route::get('/shelter/pets', [ShelterDashboardController::class, 'pets'])->name('shelter.pets');

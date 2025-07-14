@@ -1,0 +1,285 @@
+[33meb97a47d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m fix home browse pets
+[33mdd30fb04[m fix home browse pets
+[33mf411a51b[m fix home browse pets
+[33m0d8e1063[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fixed
+[33maf2c22f8[m fixed bugs
+[33m919aa03b[m fixedfr
+[33m6c861cf8[m fixed duplicate
+[33m547a3082[m Merge pull request #1 from JhavieD/fix-reports
+[33m447aed06[m[33m ([m[1;31morigin/fix-reports[m[33m)[m Merge branch 'main' into fix-reports
+[33m89360271[m fixed reports
+[33me63c4534[m fixed reports and majority
+[33m1347c5a5[m added
+[33mc9846aa9[m added
+[33mdc02fa68[m added
+[33m247e908c[m added
+[33mbfaca293[m Add admin user seeder and register in DatabaseSeeder
+[33mcb35b206[m Add admin user seeder and register in DatabaseSeeder
+[33m61ddb319[m FIX
+[33mc0ffd02e[m FIX
+[33m1f4b24df[m Fix AppServiceProvider to prevent database queries during build
+[33mab6b7b64[m Fix AppServiceProvider to prevent database queries during build
+[33m8e2b4668[m rebuild assets
+[33m106ac16f[m rebuild assets
+[33md899c7a9[m force vito to use https
+[33m6d057e4a[m force vito to use https
+[33ma14dafd7[m Resolve merge conflict: remove manifest.json as deleted in remote
+[33m1f944a48[m Resolve merge conflict: remove manifest.json as deleted in remote
+[33mb73c9ee0[m force vite
+[33m9bd8a642[m force vite
+[33m0bca79c5[m Delete public/build directory
+[33mece591ec[m Delete public/build directory
+[33m4094fb33[m Delete .env
+[33mfa8e19ff[m fix
+[33m9e477ebd[m fix
+[33m9f276b97[m Update AdoptionApplication.php
+[33mdc0fa9ab[m Update AdoptionApplication.php
+[33m13be2e54[m Update and rename adminmiddleware.php to AdminMiddleware.php
+[33m24116046[m Update and rename adminmiddleware.php to AdminMiddleware.php
+[33m9a0a64e2[m added
+[33m9e02c432[m added
+[33m2b363300[m removed docker
+[33m8f96fa33[m removed docker
+[33mb5babc0a[m add
+[33md426eb85[m add
+[33md0d2dd01[m added
+[33m7e1e79d8[m added
+[33m20ece4b6[m added dockerfile
+[33m8c51b0ce[m added dockerfile
+[33m43f1bda8[m For Testing Initial Commit
+[33m2b6e949c[m For Testing Initial Commit
+[33m4c1a600d[m Merge pull request #92 from JhavieD/logsstatus
+[33m12332eff[m Merge pull request #92 from JhavieD/logsstatus
+[33m7857bc41[m logsstatus
+[33m65ce9c81[m logsstatus
+[33m3ede9e3b[m fixed the register
+[33md713e2d3[m fixed the register
+[33mad81a2d1[m removed-valid-id
+[33m78a15c17[m removed-valid-id
+[33m93e62b4e[m Merge pull request #91 from JhavieD/almost-final-release
+[33mb210f1f7[m Merge pull request #91 from JhavieD/almost-final-release
+[33m5cb43300[m almost final release just fix remaining
+[33md52df5af[m almost final release just fix remaining
+[33mfc79b8eb[m Merge pull request #90 from JhavieD/delete-messages-updated-updated-css
+[33med9b52fb[m Merge pull request #90 from JhavieD/delete-messages-updated-updated-css
+[33md79aac92[m added delete message features & updated updated css and alerts
+[33mb409e082[m added delete message features & updated updated css and alerts
+[33m43901278[m Merge pull request #89 from JhavieD/FixedRescuerPetManagementImagePreview
+[33mff34624f[m Merge pull request #89 from JhavieD/FixedRescuerPetManagementImagePreview
+[33m3d204925[m yes
+[33mebd85fa9[m yes
+[33m3ac1050b[m Merge pull request #88 from JhavieD/FixedRescuerProfileVerificationStatus
+[33mc6c17c6f[m Merge pull request #88 from JhavieD/FixedRescuerProfileVerificationStatus
+[33m75d8cc03[m clear
+[33m668a4233[m clear
+[33m0dfb7b95[m Merge pull request #87 from JhavieD/FixedUploadImageShelterandRescuerDashboards
+[33m4861a8dc[m Merge pull request #87 from JhavieD/FixedUploadImageShelterandRescuerDashboards
+[33m78c5557d[m no
+[33m93283e35[m no
+[33mee9b19f5[m Merge pull request #86 from JhavieD/FinalAdopterToShelterReview
+[33ma4dc5ceb[m Merge pull request #86 from JhavieD/FinalAdopterToShelterReview
+[33m31fd65d2[m Yes
+[33m2cbc1963[m Yes
+[33m6d7a48b1[m Merge pull request #85 from JhavieD/updated-css-all
+[33mf88ce692[m Merge pull request #85 from JhavieD/updated-css-all
+[33m6d188bbd[m updated css for all roles
+[33m765f7b47[m updated css for all roles
+[33m8af42074[m Merge pull request #84 from JhavieD/FinalStrayReportsImages
+[33mc7ae45cd[m Merge pull request #84 from JhavieD/FinalStrayReportsImages
+[33mc1c9ca60[m ok
+[33ma6e426d8[m ok
+[33medccb89e[m Merge pull request #83 from JhavieD/WorkingShelterStrayReportImageDisplay
+[33m0554fb57[m Merge pull request #83 from JhavieD/WorkingShelterStrayReportImageDisplay
+[33me41bc61d[m Clear
+[33m916725ef[m Clear
+[33m3246116d[m Merge pull request #81 from JhavieD/updatedstrayreportshelters
+[33medb1de68[m Merge pull request #81 from JhavieD/updatedstrayreportshelters
+[33m3d95df9e[m updatedstrayreportshelters
+[33m4c8d287e[m updatedstrayreportshelters
+[33md56ba4cc[m Merge pull request #80 from JhavieD/medical-records
+[33mec344f33[m Merge pull request #80 from JhavieD/medical-records
+[33m40ed08cf[m Merge branch 'main' into medical-records
+[33m7ec74844[m Merge branch 'main' into medical-records
+[33mb265e619[m medicalrecords and backends. Next nalang css
+[33ma4b68bd4[m medicalrecords and backends. Next nalang css
+[33m9cafe7f7[m Merge pull request #79 from JhavieD/FixedAdopterListing/RescuerPetManagement
+[33m0c17029e[m Merge pull request #79 from JhavieD/FixedAdopterListing/RescuerPetManagement
+[33m1bd91628[m kupal
+[33m4dd07908[m kupal
+[33maf2bb984[m Merge pull request #78 from JhavieD/working-review
+[33m8a66b91e[m Merge pull request #78 from JhavieD/working-review
+[33m9f622126[m working-reviews
+[33m6eb3f8d3[m working-reviews
+[33m06573916[m Merge pull request #77 from JhavieD/almostfinal
+[33m017f4e3c[m Merge pull request #77 from JhavieD/almostfinal
+[33mbb59eb57[m fixed majority of the bugs
+[33mc63b943d[m fixed majority of the bugs
+[33mf728b18b[m Update 2025_07_06_164926_change_image_url_column_to_text_in_stray_reports.php
+[33m63487906[m Update 2025_07_06_164926_change_image_url_column_to_text_in_stray_reports.php
+[33m22ed7f4e[m Merge pull request #76 from JhavieD/messagesfixed-attachments-applicationstable-applicationstatuses-meetandgreetbutton
+[33mf9861831[m Merge pull request #76 from JhavieD/messagesfixed-attachments-applicationstable-applicationstatuses-meetandgreetbutton
+[33md9a05962[m Merge branch 'main' into messagesfixed-attachments-applicationstable-applicationstatuses-meetandgreetbutton
+[33mca35ef96[m Merge branch 'main' into messagesfixed-attachments-applicationstable-applicationstatuses-meetandgreetbutton
+[33me59abf2a[m side tasks, messages fixed, attachments added, meet and greets, added statuses
+[33m6e54bb57[m side tasks, messages fixed, attachments added, meet and greets, added statuses
+[33me6a76965[m Merge pull request #75 from JhavieD/cssstrayreportshelters
+[33mbc1d14d6[m Merge pull request #75 from JhavieD/cssstrayreportshelters
+[33m76630f55[m cssstrayreportshelters
+[33m3b53a56a[m cssstrayreportshelters
+[33ma9e12ade[m Merge pull request #72 from JhavieD/modifiedstrayreports
+[33mfd505ac3[m Merge pull request #72 from JhavieD/modifiedstrayreports
+[33mfa0d91ed[m Merge pull request #74 from JhavieD/ShelterRatingSystem
+[33m12c0ca3f[m Merge pull request #74 from JhavieD/ShelterRatingSystem
+[33m6208c282[m Shelter Rating System
+[33m30de580f[m Shelter Rating System
+[33m9993da56[m Merge pull request #73 from JhavieD/AdopterRegisterValidIDList/StrayReportsImageUpload
+[33md3642331[m Merge pull request #73 from JhavieD/AdopterRegisterValidIDList/StrayReportsImageUpload
+[33md2b5d218[m AdopterRegisterValidIDList/StrayReportsImageUpload
+[33mfd737347[m AdopterRegisterValidIDList/StrayReportsImageUpload
+[33mb09736b8[m Merge branch 'main' into modifiedstrayreports
+[33ma0c52e3f[m Merge branch 'main' into modifiedstrayreports
+[33me0f4a5e4[m modifiedstrayreports shelter, adopter, and admin side
+[33m10f4aba6[m modifiedstrayreports shelter, adopter, and admin side
+[33m77613eca[m Merge pull request #71 from JhavieD/adopterfinalize
+[33m9c8cd2d8[m Merge pull request #71 from JhavieD/adopterfinalize
+[33m9963e08c[m finalize adopter except notif system
+[33me3f9c449[m finalize adopter except notif system
+[33mcbe0ee42[m Update profile.blade.php
+[33mbe029c51[m Update profile.blade.php
+[33m61f1a8f0[m Update web.php
+[33m487f0f72[m Update web.php
+[33m91aa9741[m Merge pull request #70 from JhavieD/fixed-css-and-responsive-ui
+[33m5d4ac021[m Merge pull request #70 from JhavieD/fixed-css-and-responsive-ui
+[33m899bfbc2[m Merge branch 'main' into fixed-css-and-responsive-ui
+[33m34f435cf[m Merge branch 'main' into fixed-css-and-responsive-ui
+[33mb910477e[m fixed css and responsive ui
+[33m9893c76b[m fixed css and responsive ui
+[33ma7e00e00[m Merge pull request #69 from JhavieD/adopterfinish
+[33mcce8880b[m Merge pull request #69 from JhavieD/adopterfinish
+[33mab73af65[m 90%finished adopter side
+[33m77c8f945[m 90%finished adopter side
+[33m395b2506[m Merge pull request #68 from JhavieD/FullyFunctionalUploaDProfileImage
+[33mc9382952[m Merge pull request #68 from JhavieD/FullyFunctionalUploaDProfileImage
+[33mdc9c79cd[m FullyFunctionalUploadProfileImage
+[33maedbed9c[m FullyFunctionalUploadProfileImage
+[33md3c9295a[m working public find pets
+[33m42d8fe2f[m working public find pets
+[33m0c4482f6[m Merge pull request #65 from JhavieD/flagduplicate
+[33m4d5e4de1[m Merge pull request #65 from JhavieD/flagduplicate
+[33m43c2582c[m Merge pull request #67 from JhavieD/notification
+[33m05f5cfaf[m Merge pull request #67 from JhavieD/notification
+[33ma123abed[m added notification WIP
+[33mf935aedc[m added notification WIP
+[33mbd334a4f[m Merge pull request #66 from JhavieD/merge-pull-for-jabi-and-seen-indicator
+[33m97f47ac4[m Merge pull request #66 from JhavieD/merge-pull-for-jabi-and-seen-indicator
+[33m4a3bd079[m seen indicator and merge pull bc of jabi
+[33m23699aac[m seen indicator and merge pull bc of jabi
+[33m7058515d[m flagduplicate feature
+[33m07879b3f[m flagduplicate feature
+[33mb83e4bb0[m Merge pull request #64 from JhavieD/sidebar-rescuer-and-shelter
+[33mc98ae024[m Merge pull request #64 from JhavieD/sidebar-rescuer-and-shelter
+[33m1ef6b8b2[m Merge branch 'main' into sidebar-rescuer-and-shelter
+[33mafaf066c[m Merge branch 'main' into sidebar-rescuer-and-shelter
+[33m5d5a4cc9[m Updated sidebar for shelter and rescuer
+[33m396b5519[m Updated sidebar for shelter and rescuer
+[33me336377f[m Merge pull request #63 from JhavieD/usermanagement
+[33m63e8257e[m Merge pull request #63 from JhavieD/usermanagement
+[33mc650dd3f[m added user management functionality
+[33m0956b8b2[m added user management functionality
+[33ma4cdb815[m Merge pull request #62 from JhavieD/fixedregister
+[33m6aebd1cb[m Merge pull request #62 from JhavieD/fixedregister
+[33mfc3d9cb4[m added purpose fix
+[33mf4f3b619[m added purpose fix
+[33md8f58f52[m Update AppServiceProvider.php
+[33m4777fe2d[m Update AppServiceProvider.php
+[33m30b376dd[m Merge pull request #61 from JhavieD/almost-final
+[33m6ba3d383[m Merge pull request #61 from JhavieD/almost-final
+[33mc15605ab[m almost finished WIP find pets nad user management
+[33m186c18f3[m almost finished WIP find pets nad user management
+[33maa34b364[m Merge pull request #60 from JhavieD/AdminToShelterAndRescuerVerification
+[33m558f9d3c[m Merge pull request #60 from JhavieD/AdminToShelterAndRescuerVerification
+[33maab0ece7[m meow
+[33m6eab9fff[m meow
+[33m910905cc[m Merge pull request #59 from JhavieD/adopter-dashboard
+[33m06ac8ba8[m Merge pull request #59 from JhavieD/adopter-dashboard
+[33m56b2e4a2[m Merge pull request #58 from JhavieD/updated
+[33m6df2cbaf[m Merge pull request #58 from JhavieD/updated
+[33m6524fa7a[m updated the dashboard
+[33mc82c9160[m updated the dashboard
+[33m3aec721e[m WIP table
+[33m92b09fec[m WIP table
+[33m51c9ada4[m Merge pull request #56 from JhavieD/AdminToShelterApprovial-PartiallyWorking
+[33mef92cb76[m Merge pull request #56 from JhavieD/AdminToShelterApprovial-PartiallyWorking
+[33m6983df44[m Merge branch 'main' into AdminToShelterApprovial-PartiallyWorking
+[33m31f5586b[m Merge branch 'main' into AdminToShelterApprovial-PartiallyWorking
+[33m57ca8677[m compatible-for-mobile-layouts
+[33mba290e97[m compatible-for-mobile-layouts
+[33m40799811[m Merge branch 'main' into compatible-for-mobile
+[33md650f607[m Merge branch 'main' into compatible-for-mobile
+[33m71edcc01[m Compatible for a mobile view
+[33m75478b5a[m Compatible for a mobile view
+[33mbf744caa[m partially
+[33m26dd1f8a[m partially
+[33m3e1cd291[m PartiallyWorking
+[33m062ba21d[m PartiallyWorking
+[33m6b06b948[m Merge pull request #54 from JhavieD/googlesignin
+[33m68ed3579[m Merge pull request #54 from JhavieD/googlesignin
+[33m59bdfc17[m FINAL WORKING GOOGLE
+[33ma4a3bbaa[m FINAL WORKING GOOGLE
+[33mf152254c[m working google
+[33m55c1b462[m working google
+[33mb91f45ac[m Merge pull request #53 from JhavieD/finalregister
+[33maff58441[m Merge pull request #53 from JhavieD/finalregister
+[33m28c5c27f[m Merge branch 'main' into finalregister
+[33m95733c8a[m Merge branch 'main' into finalregister
+[33m168923ac[m addedregister
+[33mfab15d35[m addedregister
+[33mdff351f8[m Merge pull request #52 from JhavieD/remove-users-usertype
+[33m33b71390[m Merge pull request #52 from JhavieD/remove-users-usertype
+[33mec749088[m Merge branch 'main' into remove-users-usertype
+[33macc0f60f[m Merge branch 'main' into remove-users-usertype
+[33m8cb2510c[m removed usertype in users table
+[33ma137fcda[m removed usertype in users table
+[33m77336058[m Update 2024_06_07_000000_create_users_table.php
+[33mab8768ad[m Update 2024_06_07_000000_create_users_table.php
+[33m3dd470d5[m Merge pull request #51 from JhavieD/newstrayreports
+[33m4dd345d2[m Merge pull request #51 from JhavieD/newstrayreports
+[33m5b304d4b[m newstrayreports
+[33mcc3f70b6[m newstrayreports
+[33mfab85250[m Merge pull request #50 from JhavieD/revert-46-stray-reports
+[33m96e0aa0e[m Merge pull request #50 from JhavieD/revert-46-stray-reports
+[33mff267353[m Revert "stray reports feature"
+[33m84748c51[m Revert "stray reports feature"
+[33md4a4f6f1[m Merge pull request #47 from JhavieD/revert-45-updateregisterFINAL
+[33m8bae9308[m Merge pull request #47 from JhavieD/revert-45-updateregisterFINAL
+[33m982c7c03[m Revert "updated the registerFINAL"
+[33m384234fb[m Revert "updated the registerFINAL"
+[33m73c6c0b8[m Merge pull request #46 from JhavieD/stray-reports
+[33ma5a76213[m Merge pull request #46 from JhavieD/stray-reports
+[33m43fd2325[m Merge branch 'main' into stray-reports
+[33mc2021d0e[m Merge branch 'main' into stray-reports
+[33m27d6d282[m stray reports feature
+[33m2a37321c[m stray reports feature
+[33md69d4c0b[m Merge pull request #45 from JhavieD/updateregisterFINAL
+[33m3ed65779[m Merge pull request #45 from JhavieD/updateregisterFINAL
+[33mfc0f4259[m updated the registerFINAL
+[33m8ec3e008[m updated the registerFINAL
+[33m150ae139[m Merge pull request #44 from JhavieD/AdminToShelterWithVerifiedLogo
+[33m1b9d8333[m Merge pull request #44 from JhavieD/AdminToShelterWithVerifiedLogo
+[33m09020957[m AdminToShelterWithVerifiedLogo
+[33m5a31035b[m AdminToShelterWithVerifiedLogo
+[33m27ddca94[m Merge pull request #43 from JhavieD/updateregister
+[33m1a6177b9[m Merge pull request #43 from JhavieD/updateregister
+[33mc92dbf8c[m updated the register
+[33mb4a9c77e[m updated the register
+[33m873b5b68[m Merge pull request #42 from JhavieD/final-adopter
+[33mbde0e7f2[m Merge pull request #42 from JhavieD/final-adopter
+[33ma5c8af4f[m Merge branch 'main' into final-adopter
+[33md35644ab[m Merge branch 'main' into final-adopter
+[33m1b22dadd[m finalized adopter page UI and some public routes finalized
+[33m158f20cd[m finalized adopter page UI and some public routes finalized
+[33m4b1d3da1[m Merge pull request #41 from JhavieD/collapsing-sidebar-rescurer-dashboard
+[33m8abd4a55[m Merge pull request #41 from JhavieD/collapsing-sidebar-rescurer-dashboard
+[33me53fd673[m collapsing sidebar and working  rescuer dashboard
+[33m0a5641c5[m collapsing sidebar and working  rescuer dashboard
+[33m5f60877e[m Merge pull request #40 from JhavieD/AdminToShelterApproval/Verification

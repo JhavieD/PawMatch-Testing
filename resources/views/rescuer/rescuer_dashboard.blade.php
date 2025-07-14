@@ -19,7 +19,7 @@
                     <h1 class="text-2xl font-bold mb-0" style="display:inline;">
                         Hi, {{ $rescuer->organization_name ?? 'Rescuer' }}!
                         @if ($verification && $verification->status === 'approved')
-                            <a href="{{ route('rescuer.verification.form') }}" class="verification-badge approved"
+                            <a href="{{ route('rescuer.profile') }}" class="verification-badge approved"
                                 title="Verified rescuer (click to view verification)"
                                 style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border-radius:50%;background:#d1d5db;margin-left:0.2em;vertical-align:middle;">
                                 <svg class="w-3 h-3 align-middle" style="margin-left:0;position:relative;top:1px;"
@@ -29,7 +29,7 @@
                                 </svg>
                             </a>
                         @else
-                            <a href="{{ route('rescuer.verification.form') }}" class="verification-badge unverified"
+                            <a href="{{ route('rescuer.profile') }}" class="verification-badge unverified"
                                 title="Click to verify your rescuer organization"
                                 style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border-radius:50%;background:#f1f1f1;margin-left:0.2em;vertical-align:middle;">
                                 <svg class="w-3 h-3 text-gray-400 align-middle"

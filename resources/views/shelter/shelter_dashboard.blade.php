@@ -31,7 +31,7 @@
                                     </svg>
                                 </span>
                             @else
-                                <a href="{{ route('shelter.verification.form') }}"
+                                <a href="{{ route('shelter.profile') }}"
                                     class="verification-badge unverified flex items-center ml-2"
                                     title="Click to verify your shelter"
                                     style="background: #fbbf24; border-radius: 9999px; padding: 0.25rem;">
