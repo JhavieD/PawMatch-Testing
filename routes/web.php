@@ -47,7 +47,7 @@ Route::get('/', fn() => view('home'))->name('home');
 Route::get('/faq', fn() => view('faq'))->name('faq');
 Route::get('/terms', fn() => view('terms'))->name('terms');
 Route::get('/about', fn() => view('about'))->name('about');
-Route::get('/public-pet-listings', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'index'])->name('pet-listings');
+Route::get('/pet-listings', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'index'])->name('pet-listings');
 Route::get('/report-stray', fn() => view('report-stray'))->name('report-stray');
 Route::get('/public-pet-listings', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'publicIndex'])->name('public.pet-listings');
 Route::get('/public-pet-details/{pet}', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'publicPetDetails'])->name('public.pet-details');
