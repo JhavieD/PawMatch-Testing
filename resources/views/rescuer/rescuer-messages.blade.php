@@ -10,9 +10,13 @@
     @endphp
 
     <div class="main-container">
-
+        <!-- Sidebar Toggle Button (for mobile) -->
+        <button id="sidebar-toggle" class="sidebar-toggle"
+            style="background:#4a90e2; color:#fff; border:none; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:8px 18px; cursor:pointer; font-weight:600; letter-spacing:0.5px; width:100%; margin-bottom:8px; display:none;">
+            Hide Conversations
+        </button>
         <!-- Conversations List -->
-        <div class="conversations">
+        <div class="conversations" id="sidebar-conversations">
             @forelse ($partners as $partner)
                 <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                     onclick="window.location.href='{{ route('rescuer.messages', ['receiver_id' => $partner->user_id]) }}'">
@@ -88,6 +92,47 @@
             const receiverId = document.getElementById('receiver-id')?.value;
             const currentUserId = document.getElementById('current-user-id')?.value;
             const chatMessages = document.getElementById('chat-messages');
+
+            // Sidebar toggle/collapse logic
+            let sidebarCollapsed = false;
+            const sidebar = document.getElementById('sidebar-conversations');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const mainContainer = document.querySelector('.main-container');
+
+            function setSidebarCollapsed(collapsed) {
+                sidebarCollapsed = collapsed;
+                if (window.innerWidth > 900) {
+                    sidebar.classList.remove('collapsed');
+                    sidebarToggle.textContent = 'Hide Conversations';
+                    mainContainer.classList.remove('sidebar-collapsed');
+                    return;
+                }
+                if (collapsed) {
+                    sidebar.classList.add('collapsed');
+                    sidebarToggle.textContent = 'Show Conversations';
+                    mainContainer.classList.add('sidebar-collapsed');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    sidebarToggle.textContent = 'Hide Conversations';
+                    mainContainer.classList.remove('sidebar-collapsed');
+                }
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    setSidebarCollapsed(!sidebarCollapsed);
+                });
+            }
+
+            function handleResize() {
+                if (window.innerWidth > 900) {
+                    setSidebarCollapsed(false);
+                } else {
+                    setSidebarCollapsed(true);
+                }
+            }
+            window.addEventListener('resize', handleResize);
+            handleResize();
 
             if (receiverId && currentUserId) {
 

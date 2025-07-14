@@ -10,8 +10,13 @@
     @endphp
 
     <div class="main-container">
+        <!-- Sidebar Toggle Button (Mobile Only, outside sidebar for visibility) -->
+        <button id="sidebar-toggle" class="sidebar-toggle"
+            style="background:#4a90e2; color:#fff; border:none; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:8px 18px; cursor:pointer; font-weight:600; letter-spacing:0.5px; width:100%; margin-bottom:8px; display:none;">
+            <span id="sidebar-toggle-label">Hide Conversations</span>
+        </button>
         <!-- Conversations List -->
-        <div class="conversations">
+        <div id="sidebar-conversations" class="conversations">
             @forelse ($partners as $partner)
                 <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                     onclick="window.location.href='{{ route('adopter.messages', ['receiver_id' => $partner->user_id]) }}'">
@@ -98,6 +103,72 @@
             const receiverId = document.getElementById('receiver-id')?.value;
             const currentUserId = document.getElementById('current-user-id')?.value;
             const chatMessages = document.getElementById('chat-messages');
+
+            // Sidebar collapse/expand logic
+            let sidebarCollapsed = false;
+            const sidebar = document.getElementById('sidebar-conversations');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const mainContainer = document.querySelector('.main-container');
+
+            function syncSidebarState() {
+                sidebarCollapsed = sidebar.classList.contains('collapsed');
+                document.getElementById('sidebar-toggle-label').textContent = sidebarCollapsed ?
+                    'Show Current Conversations' :
+                    'Hide Conversations';
+                mainContainer.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+                sidebar.style.zIndex = sidebarCollapsed ? '0' : '10';
+            }
+
+            function setSidebarCollapsed(collapsed) {
+                if (window.innerWidth > 900) {
+                    sidebar.classList.remove('collapsed');
+                    mainContainer.classList.remove('sidebar-collapsed');
+                    sidebar.style.removeProperty('z-index');
+                    sidebar.style.removeProperty('display');
+                    sidebar.removeAttribute('hidden');
+                    document.getElementById('sidebar-toggle-label').textContent = 'Hide Conversations';
+                    sidebarCollapsed = false;
+                    return;
+                }
+                if (collapsed) {
+                    sidebar.classList.add('collapsed');
+                    sidebar.style.setProperty('display', 'none', 'important');
+                    sidebar.setAttribute('hidden', 'hidden');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.style.setProperty('display', 'block', 'important');
+                    sidebar.removeAttribute('hidden');
+                }
+                syncSidebarState();
+                // Force reflow for transition
+                sidebar.offsetHeight;
+            }
+
+            // Ensure sidebar starts collapsed on mobile
+            function handleSidebarToggleVisibility() {
+                if (window.innerWidth <= 900) {
+                    sidebarToggle.style.display = 'block';
+                    // Do not force collapse every time, just sync label and z-index
+                    syncSidebarState();
+                } else {
+                    sidebarToggle.style.display = 'none';
+                    setSidebarCollapsed(false);
+                }
+            }
+            handleSidebarToggleVisibility();
+            window.addEventListener('resize', handleSidebarToggleVisibility);
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    setSidebarCollapsed(!sidebar.classList.contains('collapsed'));
+                    console.log('Sidebar collapsed:', sidebar.classList.contains('collapsed'));
+                });
+            }
+
+            // On load, collapse sidebar on mobile
+            if (window.innerWidth <= 900) {
+                setSidebarCollapsed(true);
+            }
 
             if (receiverId && currentUserId) {
                 // Load old messages
