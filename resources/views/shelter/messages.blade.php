@@ -9,10 +9,15 @@
         use Carbon\Carbon;
     @endphp
 
+    <!-- Removed inline CSS for sidebar toggle/collapse, now in messages.css -->
     <div class="main-container">
-
+        <!-- Sidebar Toggle Button (moved outside sidebar for visibility when collapsed) -->
+        <button id="sidebar-toggle" class="sidebar-toggle"
+            style="background:#4a90e2; color:#fff; border:none; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:8px 18px; cursor:pointer; font-weight:600; letter-spacing:0.5px; width:100%; margin-bottom:8px; display:none;">
+            Hide Conversations
+        </button>
         <!-- Conversations List -->
-        <div class="conversations">
+        <div class="conversations" id="sidebar-conversations" style="transition: margin-left 0.3s, width 0.3s;">
             @forelse ($partners as $partner)
                 <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                     onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $partner->user_id]) }}'">
@@ -414,6 +419,48 @@
                             }
                         });
                 }
+
+                // Sidebar collapse/expand logic
+                let sidebarCollapsed = false;
+                const sidebar = document.getElementById('sidebar-conversations');
+                const sidebarToggle = document.getElementById('sidebar-toggle');
+                const mainContainer = document.querySelector('.main-container');
+
+                function setSidebarCollapsed(collapsed) {
+                    sidebarCollapsed = collapsed;
+                    if (window.innerWidth > 900) {
+                        // Always show sidebar on large screens
+                        sidebar.classList.remove('collapsed');
+                        sidebarToggle.textContent = 'Hide Conversations';
+                        mainContainer.classList.remove('sidebar-collapsed');
+                        return;
+                    }
+                    if (collapsed) {
+                        sidebar.classList.add('collapsed');
+                        sidebarToggle.textContent = 'Show Current Conversations';
+                        mainContainer.classList.add('sidebar-collapsed');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        sidebarToggle.textContent = 'Hide Conversations';
+                        mainContainer.classList.remove('sidebar-collapsed');
+                    }
+                }
+
+                if (sidebarToggle) {
+                    sidebarToggle.addEventListener('click', function() {
+                        setSidebarCollapsed(!sidebarCollapsed);
+                    });
+                }
+
+                function handleResize() {
+                    if (window.innerWidth > 900) {
+                        setSidebarCollapsed(false);
+                    } else {
+                        setSidebarCollapsed(true);
+                    }
+                }
+                window.addEventListener('resize', handleResize);
+                handleResize(); // Set initial state
             });
 
             // Toast notification function
@@ -540,5 +587,16 @@
 
                 chatMessages.appendChild(bubble);
             }
+
+            // On load and on resize, set correct state
+            function handleResize() {
+                if (window.innerWidth > 900) {
+                    setSidebarCollapsed(false);
+                } else {
+                    setSidebarCollapsed(true);
+                }
+            }
+            window.addEventListener('resize', handleResize);
+            document.addEventListener('DOMContentLoaded', handleResize);
         </script>
     @endsection
