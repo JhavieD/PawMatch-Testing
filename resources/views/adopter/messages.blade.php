@@ -52,6 +52,7 @@
                             {{ $receiver->name ?? 'Unknown User' }}
                         @endif
                     </div>
+                    <button title="Delete Message" class="delete-message-btn"><i class="fa-solid fa-trash"></i></button>
                 @else
                     <div class="no-active-chats"
                         style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 220px; width: 100%;">
@@ -59,7 +60,6 @@
                         </div>
                     </div>
                 @endif
-                <button title="Delete Message" class="delete-message-btn"><i class="fa-solid fa-trash"></i></button>
             </div>
 
             <div class="chat-messages" id="chat-messages"></div>

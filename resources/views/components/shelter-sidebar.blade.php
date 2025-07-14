@@ -4,7 +4,7 @@
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 <aside class="shelter-sidebar" id="shelterSidebar">
     <div class="sidebar-header">
-        <a href="{{ route('adopter.dashboard') }}">
+        <a href="{{ route('shelter.dashboard') }}">
             <img src="{{ asset('images/logo.png') }}" alt="PawMatch Logo"
                 style="height: 40px; display: block; margin: 0 auto;" />
         </a>
