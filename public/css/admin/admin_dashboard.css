@@ -478,6 +478,44 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  .admin-layout {
+    flex-direction: column;
+    overflow-x: hidden !important;
+    width: 100vw !important;
+  }
+  .admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    z-index: 1002;
+    background: #fff;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .admin-sidebar[style*="display: block"] {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .admin-content {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    overflow-x: hidden !important;
+    padding: 1rem !important;
+  }
+  body,
+  html {
+    overflow-x: hidden !important;
+  }
+}
+
 /* Action Buttons */
 .action-buttons {
   display: flex;

@@ -16,32 +16,34 @@
 
             <div class="dashboard-top-row">
                 <div class="dashboard-welcome-card">
-                    <h1 class="text-2xl font-bold mb-0" style="display:inline;">
-                        Hi, {{ $rescuer->organization_name ?? 'Rescuer' }}!
-                        @if ($verification && $verification->status === 'approved')
-                            <a href="{{ route('rescuer.profile') }}" class="verification-badge approved"
-                                title="Verified rescuer (click to view verification)"
-                                style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border-radius:50%;background:#d1d5db;margin-left:0.2em;vertical-align:middle;">
-                                <svg class="w-3 h-3 align-middle" style="margin-left:0;position:relative;top:1px;"
-                                    fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 10.5l3 3 5-5"
-                                        stroke="#22c55e" />
-                                </svg>
-                            </a>
-                        @else
-                            <a href="{{ route('rescuer.profile') }}" class="verification-badge unverified"
-                                title="Click to verify your rescuer organization"
-                                style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border-radius:50%;background:#f1f1f1;margin-left:0.2em;vertical-align:middle;">
-                                <svg class="w-3 h-3 text-gray-400 align-middle"
-                                    style="margin-left:0;position:relative;top:1px;" fill="currentColor"
-                                    viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </a>
-                        @endif
-                    </h1>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-2xl font-bold flex items-center mb-0">
+                            Hi, {{ $rescuer->organization_name ?? 'Rescuer' }}!
+                            @if ($verification && $verification->status === 'approved')
+                                <span class="verification-badge approved flex items-center ml-2" title="Verified rescuer"
+                                    style="background: #22c55e; border-radius: 9999px; padding: 0.25rem;">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"
+                                        style="display: block;">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            @else
+                                <a href="{{ route('rescuer.profile') }}"
+                                    class="verification-badge unverified flex items-center ml-2"
+                                    title="Click to verify your rescuer organization"
+                                    style="background: #fbbf24; border-radius: 9999px; padding: 0.25rem;">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"
+                                        style="display: block;">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 6.293a1 1 0 00-1.414 0L9 12.586 6.707 10.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            @endif
+                        </h1>
+                    </div>
                     <p>Welcome back! Here's what's happening at your rescue dashboard.</p>
                 </div>
                 <div class="available-pets-card">
@@ -163,21 +165,19 @@
                     </div>
                     <ul class="application-list">
                         @forelse($recentMessages->take(2) as $msg)
-                            <li class="application-item">
-                                <div class="applicant-info">
+                            <li class="application-item" style="display: flex; align-items: center;">
+                                <div class="applicant-info-messages"
+                                    style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem;">
                                     <strong>{{ $msg->sender->name ?? 'User' }}</strong>
                                     @if (isset($msg->pet))
                                         <div class="pet-details">Re: {{ $msg->pet->name }} - {{ $msg->pet->breed }}</div>
                                     @endif
-                                    <div class="pet-details">
-                                        {{ Str::limit($msg->content, 60) }}
-                                    </div>
-                                    <button
-                                        onclick="window.location.href='{{ route('rescuer.messages', ['receiver_id' => $msg->sender->user_id]) }}'"
-                                        class="reply-btn">
-                                        Reply
-                                    </button>
                                 </div>
+                                <button
+                                    onclick="window.location.href='{{ route('rescuer.messages', ['receiver_id' => $msg->sender->user_id]) }}'"
+                                    class="reply-btn" style="margin-left: auto;">
+                                    Reply
+                                </button>
                             </li>
                         @empty
                             <li style="color: rgb(123, 123, 123);">No Recent Messages</li>
