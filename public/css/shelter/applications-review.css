@@ -971,6 +971,11 @@ body {
   margin: 0.5rem 0;
 }
 
+.star-empty {
+    color: #d1d5db;
+    font-size: 1.1rem;
+}
+
 .total-reviews {
   color: #6b7280;
   font-size: 0.875rem;

@@ -1081,3 +1081,60 @@ body {
   margin: 0 auto;
   overflow: hidden;
 }
+
+/* =====================
+   File Upload Preview Styles
+   ===================== */
+.file-preview-container {
+  transition: all 0.3s ease;
+}
+
+.file-preview-image {
+  max-width: 320px;
+  max-height: 192px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-preview-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.file-preview-pdf {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 2px solid #fca5a5;
+}
+
+.file-preview-document {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: 2px solid #d1d5db;
+}
+
+.file-remove-btn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.file-remove-btn:hover {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.upload-area-active {
+  border-color: var(--primary-color) !important;
+  background-color: #eff6ff;
+}

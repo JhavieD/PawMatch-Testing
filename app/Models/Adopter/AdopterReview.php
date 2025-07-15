@@ -48,6 +48,11 @@ class AdopterReview extends Model
         return $this->belongsTo(Rescuer::class, 'rescuer_id', 'rescuer_id');
     }
     
+    public function application()
+    {
+        return $this->belongsTo(AdoptionApplication::class, 'application_id', 'application_id');
+    }
+    
     public function getRelatedApplication()
     {
         if ($this->shelter_id) {

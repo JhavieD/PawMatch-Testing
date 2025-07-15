@@ -193,16 +193,25 @@
                         <div class="review-card">
                             <div class="review-header">
                                 <div class="reviewer-info">
-                                    <img src="{{ $review->user->profile_picture ?? 'https://placehold.co/40x40' }}"
-                                        alt="Reviewer" class="reviewer-image">
+                                    @if($review->adopter && $review->adopter->user && $review->adopter->user->profile_image)
+                                    <img src="{{ $review->adopter->user->profile_image }}" alt="{{ $review->adopter->user->first_name }}" class="reviewer-image">
+                                    @else
+                                    <div class="reviewer-image" style="background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600; width: 40px; height: 40px; border-radius: 50%;">
+                                        {{ $review->adopter && $review->adopter->user ? strtoupper(substr($review->adopter->user->first_name, 0, 1)) : 'U' }}
+                                    </div>
+                                    @endif
                                     <div>
-                                        <div class="reviewer-name">{{ $review->user->name ?? 'User' }}</div>
+                                        <div class="reviewer-name">{{ $review->adopter->user->first_name ?? 'User' }}</div>
                                         <div class="review-date">{{ $review->created_at->format('F d, Y') }}</div>
                                     </div>
                                 </div>
                                 <div class="review-rating">
-                                    @for ($i = 0; $i < $review->rating; $i++)
-                                        <span class="star-gold">★</span>
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $review->rating)
+                                            <span class="star-gold">★</span>
+                                        @else
+                                            <span class="star-empty">★</span>
+                                        @endif
                                     @endfor
                                 </div>
                             </div>

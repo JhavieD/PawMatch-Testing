@@ -1653,29 +1653,31 @@ body {
   background: #e3f2fd;
   color: #357abd;
 }
-@media (max-width: 700px) {
-  .recent-messages-list .message-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    padding: 0.8rem 0.2rem 0.8rem 0.2rem;
-  }
-  .recent-messages-list .message-username {
-    margin-right: 0;
-    margin-bottom: 0.3rem;
-    font-size: 1rem;
-    text-align: left;
-    height: auto;
-    line-height: normal;
-    display: block;
-  }
-  .reply-btn {
-    width: 30%;
-    min-width: 0;
-    max-width: 100%;
-    margin-left: 0;
-    margin-top: 0.2rem;
-    font-size: 0.98rem;
+
+/* Star Rating Styles for Reviews */
+.star-gold {
+    color: #fbbf24;
+    font-size: 1.1rem;
+}
+
+.star-empty {
+    color: #d1d5db;
+    font-size: 1.1rem;
+}
+
+/* Reviewer Image Styles */
+.reviewer-image {
+    width: 40px;
     height: 40px;
-  }
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.reviewer-name {
+    font-weight: 500;
+}
+
+.review-date {
+    color: #6b7280;
+    font-size: 0.875rem;
 }
