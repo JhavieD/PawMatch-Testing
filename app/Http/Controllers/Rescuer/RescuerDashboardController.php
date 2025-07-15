@@ -24,17 +24,30 @@ class RescuerDashboardController extends Controller
         $recentApplications = $rescuer->applications()
             ->with(['adopter.user', 'pet'])
             ->latest()
-            ->take(5)
+            ->take(2)
             ->get();
         // Fetch all recent messages, order by newest, keep only one per sender
         $recentMessages = $rescuer->messages()
             ->with('sender')
-            ->orderByDesc('created_at')
+            ->orderByDesc('sent_at')
             ->get()
             ->unique('sender_id')
-            ->take(5)
+            ->take(2)
+            ->map(function ($msg) {
+                // Try to decrypt message_content if present
+                if (!empty($msg->message_content)) {
+                    try {
+                        $msg->decrypted_content = \Crypt::decryptString($msg->message_content);
+                    } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                        $msg->decrypted_content = '[Unable to decrypt]';
+                    }
+                } else {
+                    $msg->decrypted_content = $msg->content ?? '';
+                }
+                return $msg;
+            })
             ->values();
-        $recentReviews = $rescuer->reviews()->with(['adopter.user'])->latest()->take(5)->get();
+        $recentReviews = $rescuer->reviews()->with(['adopter.user'])->latest()->take(3)->get();
         $verification = $rescuer->verifications()->latest()->first();
 
         return view('rescuer.rescuer_dashboard', compact(

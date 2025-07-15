@@ -167,14 +167,16 @@
             <!-- Completed Adoptions Tab -->
             <div id="completedTab" class="tab-content">
                 @foreach ($applications as $application)
-                    @if($application->status == 'completed')
+                    @if ($application->status == 'completed')
                         <div class="application-card" data-application-id="{{ $application->application_id }}">
                             <div class="application-header">
                                 <div class="pet-info">
-                                    <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}" alt="{{ $application->pet->name }}" class="pet-image" />
+                                    <img src="{{ $application->pet->image_url ?? '/images/default-pet.png' }}"
+                                        alt="{{ $application->pet->name }}" class="pet-image" />
                                     <div class="pet-details">
                                         <h2>{{ $application->pet->name }}</h2>
-                                        <p>{{ $application->pet->breed }} • {{ $application->pet->shelter->shelter_name ?? '' }}</p>
+                                        <p>{{ $application->pet->breed }} •
+                                            {{ $application->pet->shelter->shelter_name ?? '' }}</p>
                                     </div>
                                 </div>
                                 <span class="status status-completed">Adoption Completed</span>
@@ -184,9 +186,10 @@
                                     <h3>Rate Your Adoption Experience</h3>
                                     <form class="reviewForm" data-application-id="{{ $application->application_id }}">
                                         @csrf
-                                        <input type="hidden" name="application_id" value="{{ $application->application_id }}">
+                                        <input type="hidden" name="application_id"
+                                            value="{{ $application->application_id }}">
                                         <input type="hidden" name="rating" class="rating-input" value="0">
-                                        
+
                                         <div class="rating-stars">
                                             <span class="rating-star" data-rating="1">☆</span>
                                             <span class="rating-star" data-rating="2">☆</span>
@@ -226,7 +229,10 @@
             if (appId) {
                 const appCard = document.querySelector(`.application-card[data-application-id='${appId}']`);
                 if (appCard) {
-                    appCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    appCard.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                     appCard.style.boxShadow = '0 0 0 4px #2563eb';
                     setTimeout(() => {
                         appCard.style.boxShadow = '';
@@ -238,12 +244,12 @@
             document.querySelectorAll('.reviewForm').forEach(form => {
                 const ratingStars = form.querySelectorAll('.rating-star');
                 const ratingInput = form.querySelector('.rating-input');
-                
+
                 ratingStars.forEach(star => {
                     star.addEventListener('click', function() {
                         const rating = parseInt(this.dataset.rating);
                         ratingInput.value = rating;
-                        
+
                         // Update star appearance within this form
                         ratingStars.forEach((s, index) => {
                             if (index < rating) {
@@ -255,7 +261,7 @@
                             }
                         });
                     });
-                    
+
                     star.addEventListener('mouseenter', function() {
                         const rating = parseInt(this.dataset.rating);
                         ratingStars.forEach((s, index) => {
@@ -291,54 +297,55 @@
                         }
                     });
                 });
-                
+
                 // Handle review submission for this form
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(this);
                     const submitButton = this.querySelector('button[type="submit"]');
                     const applicationId = this.dataset.applicationId;
-                    
+
                     if (formData.get('rating') === '0') {
                         alert('Please select a rating');
                         return;
                     }
-                    
+
                     submitButton.disabled = true;
                     submitButton.textContent = 'Submitting...';
-                    
-                    fetch('{{ route("adopter.review.store") }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Hide the review form and show success message
-                            this.closest('.review-section').innerHTML = `
+
+                    fetch('{{ route('adopter.review.store') }}', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Hide the review form and show success message
+                                this.closest('.review-section').innerHTML = `
                                 <div class="success-message">
                                     <p>✓ Review submitted successfully!</p>
                                 </div>
                             `;
-                        } else {
-                            alert(data.message || 'Error submitting review');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error submitting review');
-                    })
-                    .finally(() => {
-                        submitButton.disabled = false;
-                        submitButton.textContent = 'Submit Review';
-                    });
+                            } else {
+                                alert(data.message || 'Error submitting review');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error submitting review');
+                        })
+                        .finally(() => {
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Submit Review';
+                        });
                 });
             });
-            
+
             // Check for existing reviews when page loads
             const completedApplications = document.querySelectorAll('#completedTab [data-application-id]');
             completedApplications.forEach(app => {
@@ -369,12 +376,13 @@
         });
 
         function checkExistingReview(applicationId) {
-            fetch(`{{ route("adopter.review.check") }}?application_id=${applicationId}`)
+            fetch(`{{ route('adopter.review.check') }}?application_id=${applicationId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.hasReview) {
                         // Show existing review instead of form
-                        const reviewSection = document.querySelector(`[data-application-id="${applicationId}"] .review-section`);
+                        const reviewSection = document.querySelector(
+                            `[data-application-id="${applicationId}"] .review-section`);
                         if (reviewSection) {
                             reviewSection.innerHTML = `
                                 <div class="existing-review">
@@ -440,14 +448,8 @@
             if (e.target === overlay) closeApplicationModal();
         });
 
-        function openScheduleMeetModal(applicationId) {
-            document.getElementById('schedule-meet-modal-overlay').style.display = 'flex';
-        }
-        
-        function closeScheduleMeetModal() {
-            document.getElementById('schedule-meet-modal-overlay').style.display = 'none';
-        }
-        
+
+
         // Attach to modal button
         const scheduleBtns = document.querySelectorAll('.btn.btn-primary, #modal-action-btn');
         scheduleBtns.forEach(btn => {
@@ -459,7 +461,7 @@
                 };
             }
         });
-        
+
         function submitScheduleMeet(e) {
             e.preventDefault();
             // You can add AJAX or form submission logic here
@@ -467,7 +469,7 @@
             closeScheduleMeetModal();
         }
     </script>
-    
+
     <style>
         .rating-star {
             font-size: 24px;
@@ -503,4 +505,4 @@
             margin: 5px 0;
         }
     </style>
-@endsection 
+@endsection

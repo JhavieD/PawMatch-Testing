@@ -17,36 +17,52 @@ class AdopterDashboardController extends Controller
     {
         $user = auth()->user();
         $userId = $user->user_id;
-        
+
         // Cache the dashboard data for 5 minutes to improve performance
         $cacheKey = "adopter_dashboard_{$userId}";
-        
+
         $dashboardData = Cache::remember($cacheKey, 300, function () use ($user) {
             $adopter = $user->adopter()->with([
                 'savedPets.images',
                 'applications.pet.images',
                 'applications.pet.shelter'
             ])->first();
-            
+
             $favoritePets = $adopter ? $adopter->savedPets : collect();
-            
+
             // Get recent applications with proper eager loading
             $recentApplications = $adopter ? $adopter->applications()
                 ->with(['pet.images', 'pet.shelter'])
                 ->latest()
                 ->take(3)
                 ->get() : collect();
-            
-            // Get recent messages (temporarily disabled)
-            $recentMessages = collect();
-            
+
+            // Get recent messages (show last 3 messages involving the adopter)
+            $recentMessages = Message::with('sender')
+                ->where(function ($q) use ($user) {
+                    $q->where('sender_id', $user->user_id)
+                        ->orWhere('receiver_id', $user->user_id);
+                })
+                ->orderByDesc('sent_at')
+                ->take(3)
+                ->get()
+                ->map(function ($msg) {
+                    // Decrypt message content if encrypted, fallback to raw if not
+                    try {
+                        $msg->content = \Illuminate\Support\Facades\Crypt::decryptString($msg->message_content);
+                    } catch (\Exception $e) {
+                        $msg->content = $msg->message_content;
+                    }
+                    return $msg;
+                });
+
             return [
                 'favoritePets' => $favoritePets,
                 'recentApplications' => $recentApplications,
                 'recentMessages' => $recentMessages
             ];
         });
-        
+
         return view('adopter.adopter_dashboard', array_merge(
             ['user' => $user],
             $dashboardData
@@ -181,9 +197,4 @@ class AdopterDashboardController extends Controller
 
         return view('adopter.messages', compact('partners', 'receiver'));
     }
-    
 }
-
-
-        
-

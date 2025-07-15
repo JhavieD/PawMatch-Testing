@@ -4,8 +4,9 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Schedule Meet & Greet</h5>
-                    <button type="button" class="close" aria-label="Close" onclick="closeScheduleMeetModal()">
+                    <h5 class="modal-title" style="margin: 0;">Schedule Meet & Greet</h5>
+                    <button type="button" class="close" aria-label="Close" onclick="closeScheduleMeetModal()"
+                        style="margin-left: auto; font-size: 1.5rem; background: none; border: none; cursor: pointer; line-height: 1;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
