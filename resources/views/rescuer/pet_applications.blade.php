@@ -26,9 +26,11 @@
                 </div>
                 <select class="filter-dropdown">
                     <option value="all">All Status</option>
-                    <option value="available">Available</option>
                     <option value="pending">Pending</option>
-                    <option value="adopted">Adopted</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
                 </select>
             </div>
 
@@ -269,10 +271,13 @@
                             applicant.includes(search) ||
                             pet.includes(search);
 
-                        const matchesStatus = status === 'all' ||
+                        const matchesStatus =
+                            status === 'all' ||
                             (status === 'pending' && itemStatus === 'pending') ||
                             (status === 'approved' && itemStatus === 'approved') ||
-                            (status === 'rejected' && itemStatus === 'rejected');
+                            (status === 'rejected' && itemStatus === 'rejected') ||
+                            (status === 'completed' && itemStatus === 'completed') ||
+                            (status === 'cancelled' && itemStatus === 'cancelled');
 
                         if (matchesSearch && matchesStatus) {
                             item.style.display = '';
