@@ -213,12 +213,16 @@
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
-                                <label class="upload-box">
-                                    <input type="file" name="images[]" id="edit-images" multiple accept="image/*">
-                                    <span>+ Add Photos</span>
-                                </label>
-                                <!-- Add this for JS image preview -->
-                                <div class="thumbnail-grid" id="edit-thumbnail-grid"></div>
+                                <div class="image-container">
+                                    <label class="upload-box" id="edit-upload-box">
+                                        <input type="file" name="images[]" id="edit-images" multiple accept="image/*">
+                                        <span>+</span>
+                                    </label>
+                                    <!-- Existing images will be loaded here -->
+                                    <div class="existing-images" id="edit-existing-images"></div>
+                                    <!-- Preview container for new images -->
+                                    <div class="image-preview-container" id="edit-image-preview"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -351,10 +355,14 @@
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid">
-                                <label class="upload-box">
-                                    <input type="file" name="images[]" accept="image/*" multiple>
-                                    <span>+ Add Photos</span>
-                                </label>
+                                <div class="image-container">
+                                    <label class="upload-box" id="add-upload-box">
+                                        <input type="file" name="images[]" id="add-images" accept="image/*" multiple>
+                                        <span>+</span>
+                                    </label>
+                                    <!-- Preview container for new images -->
+                                    <div class="image-preview-container" id="add-image-preview"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-actions">
@@ -501,24 +509,13 @@
                     }
                     document.getElementById('editPetForm').action = `/shelter/pets/${petId}`;
 
+                    // Load existing images using the new preview system
                     const images = JSON.parse(btn.getAttribute('data-images') || '[]');
-                    const thumbnailGrid = document.getElementById('edit-thumbnail-grid');
-                    if (thumbnailGrid) {
-                        thumbnailGrid.innerHTML = '';
-                        images.forEach(image => {
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'thumbnail-wrapper';
-                            wrapper.innerHTML = `
-                                    <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
-                                    <form action="/shelter/pet-images/${image.id}" method="POST" class="delete-image-form">
-                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
-                                    </form>
-                                `;
-                            thumbnailGrid.appendChild(wrapper);
-                        });
-                    }
+                    const formattedImages = images.map(image => ({
+                        id: image.id,
+                        url: image.image_url
+                    }));
+                    loadExistingImages(formattedImages);
 
                     // --- Medical Records Display Logic ---
                     const recordsList = document.getElementById('edit-medical-records-list');
@@ -574,6 +571,13 @@
             const form = e.target;
             const formData = new FormData(form);
             formData.append('_method', 'PUT');
+
+            // Debug: Log what's being sent
+            console.log('Images to delete:', imagesToDelete);
+            console.log('Form data entries:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
 
             fetch(form.action, {
                     method: 'POST',
@@ -913,5 +917,146 @@
                     });
             });
         });
+
+        // Image Preview Functionality
+        let addSelectedFiles = [];
+        let editSelectedFiles = [];
+        let imagesToDelete = [];
+
+        // Setup image preview for Add Pet modal
+        document.getElementById('add-images').addEventListener('change', function(e) {
+            handleImagePreview(e.target.files, 'add');
+        });
+
+        // Setup image preview for Edit Pet modal
+        document.getElementById('edit-images').addEventListener('change', function(e) {
+            handleImagePreview(e.target.files, 'edit');
+        });
+
+        function handleImagePreview(files, modalType) {
+            const filesArray = Array.from(files);
+            const container = document.getElementById(`${modalType}-image-preview`);
+            
+            if (modalType === 'add') {
+                addSelectedFiles = addSelectedFiles.concat(filesArray);
+            } else {
+                editSelectedFiles = editSelectedFiles.concat(filesArray);
+            }
+            
+            displayImagePreviews(modalType);
+        }
+
+        function displayImagePreviews(modalType) {
+            const container = document.getElementById(`${modalType}-image-preview`);
+            const selectedFiles = modalType === 'add' ? addSelectedFiles : editSelectedFiles;
+            
+            container.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'image-preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview">
+                            <button type="button" class="image-remove-btn" onclick="removeImagePreview(${index}, '${modalType}')">
+                                ×
+                            </button>
+                        `;
+                        container.appendChild(previewItem);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function removeImagePreview(index, modalType) {
+            if (modalType === 'add') {
+                addSelectedFiles.splice(index, 1);
+            } else {
+                editSelectedFiles.splice(index, 1);
+            }
+            displayImagePreviews(modalType);
+            updateFileInput(modalType);
+        }
+        window.removeImagePreview = removeImagePreview;
+
+        function updateFileInput(modalType) {
+            const fileInput = document.getElementById(`${modalType}-images`);
+            const selectedFiles = modalType === 'add' ? addSelectedFiles : editSelectedFiles;
+            
+            // Create a new DataTransfer object to update the file input
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
+        }
+
+        // Clear previews when modals are closed
+        function clearImagePreviews(modalType) {
+            if (modalType === 'add') {
+                addSelectedFiles = [];
+                document.getElementById('add-image-preview').innerHTML = '';
+                document.getElementById('add-images').value = '';
+            } else {
+                editSelectedFiles = [];
+                imagesToDelete = [];
+                document.getElementById('edit-image-preview').innerHTML = '';
+                document.getElementById('edit-existing-images').innerHTML = '';
+                document.getElementById('edit-images').value = '';
+                // Remove any existing hidden deletion inputs
+                const existingDeleteInputs = document.querySelectorAll('input[name="images_to_delete[]"]');
+                existingDeleteInputs.forEach(input => input.remove());
+            }
+        }
+
+        // Load existing images for edit modal
+        function loadExistingImages(petImages) {
+            const container = document.getElementById('edit-existing-images');
+            container.innerHTML = '';
+            
+            if (petImages && petImages.length > 0) {
+                petImages.forEach((image, index) => {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'existing-image-item';
+                    imageItem.innerHTML = `
+                        <img src="${image.url}" alt="Pet Image">
+                        <button type="button" class="existing-image-remove-btn" onclick="markImageForDeletion(${image.id}, ${index})">
+                            ×
+                        </button>
+                        <input type="hidden" name="existing_images[]" value="${image.id}">
+                    `;
+                    container.appendChild(imageItem);
+                });
+            }
+        }
+
+        function markImageForDeletion(imageId, index) {
+            imagesToDelete.push(imageId);
+            const imageItems = document.querySelectorAll('.existing-image-item');
+            if (imageItems[index]) {
+                imageItems[index].remove();
+            }
+            
+            // Add hidden input to mark image for deletion
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = 'images_to_delete[]';
+            deleteInput.value = imageId;
+            document.getElementById('editPetForm').appendChild(deleteInput);
+        }
+        window.markImageForDeletion = markImageForDeletion;
+
+        // Override the existing modal close functions to clear previews
+        const originalCloseModal = window.closeModal;
+        window.closeModal = function(modal) {
+            if (modal && modal.id === 'addPetModal') {
+                clearImagePreviews('add');
+            } else if (modal && modal.id === 'editPetModal') {
+                clearImagePreviews('edit');
+            }
+            originalCloseModal(modal);
+        };
+
     </script>
 @endsection

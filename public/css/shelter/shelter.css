@@ -1509,5 +1509,29 @@ body {
     font-size: 0.875rem;
 }
 
-  color: #fbbf24;
+/* Verification Badge Styles */
+.verification-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.verification-badge:hover {
+    transform: scale(1.05);
+}
+
+.verification-badge.approved {
+    background-color: #3b82f6 !important; /* Blue */
+}
+
+.verification-badge.pending {
+    background-color: #fbbf24 !important; /* Yellow */
+}
+
+.verification-badge.not-submitted {
+    background-color: #9ca3af !important; /* Gray */
 }
