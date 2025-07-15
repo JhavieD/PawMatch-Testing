@@ -228,21 +228,20 @@ body {
    ========================= */
 
 .main-content {
-  max-width: calc(100vw - 250px);
+  max-width: 900px;
   width: 100%;
-  padding: 2rem 1rem 2rem 2.5rem;
-  display: flex;
-  justify-content: flex-start;
+  padding: 2rem 1rem;
+  margin: 0 auto;
+  display: block;
 }
 
 @media (min-width: 901px) {
   .container {
-    margin-left: 70px !important;
-    max-width: calc(100vw - 250px);
+    max-width: 700px;
     width: 100%;
-    padding: 2rem 1rem 2rem 2.5rem;
-    display: flex;
-    justify-content: flex-start;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: block;
   }
 }
 

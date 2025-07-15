@@ -503,7 +503,9 @@
             toast.textContent = message;
             toast.style.position = 'fixed';
             toast.style.top = '32px';
-            toast.style.right = '32px';
+            // toast.style.right = '32px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
             toast.style.zIndex = 9999;
             toast.style.background = type === 'success' ? '#67AE6E' : '#e74c3c';
             toast.style.color = '#fff';

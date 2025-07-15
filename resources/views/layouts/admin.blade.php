@@ -18,6 +18,15 @@
     @yield('scripts')
 
     <body>
+        <!-- Hamburger Button and Overlay -->
+        <button id="adminSidebarToggle" class="sidebar-hamburger" aria-label="Open navigation menu"
+            style="display:none;position:fixed;top:24px;left:24px;z-index:1001;background:#fff;border:none;border-radius:8px;padding:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div id="adminSidebarOverlay" class="sidebar-overlay"
+            style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:1000;opacity:0;transition:opacity 0.3s;">
+        </div>
+
         <div class="admin-layout">
             <!-- Sidebar (adopter-style for admin) -->
             <aside class="admin-sidebar" id="adminSidebar">
@@ -144,6 +153,78 @@
             });
         </script>
         <!-- <script src="{{ asset('js/app.js') }}"></script> -->
+        <script>
+            function toggleAdminSidebar(show) {
+                const sidebar = document.getElementById('adminSidebar');
+                const overlay = document.getElementById('adminSidebarOverlay');
+                const mainContent = document.querySelector('.admin-content, .content-wrapper');
+                if (show) {
+                    sidebar.style.display = 'block';
+                    setTimeout(() => {
+                        sidebar.style.transform = 'translateX(0)';
+                        sidebar.style.opacity = '1';
+                        overlay.style.display = 'block';
+                        overlay.style.opacity = '1';
+                    }, 10);
+                    document.body.style.overflow = 'hidden';
+                    if (mainContent) {
+                        mainContent.classList.add('dashboard-shifted');
+                        mainContent.style.pointerEvents = 'none';
+                    }
+                } else {
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.opacity = '0';
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        sidebar.style.display = '';
+                        overlay.style.display = 'none';
+                    }, 300);
+                    document.body.style.overflow = '';
+                    if (mainContent) {
+                        mainContent.classList.remove('dashboard-shifted');
+                        mainContent.style.pointerEvents = '';
+                    }
+                }
+            }
+            const sidebarToggle = document.getElementById('adminSidebarToggle');
+            const sidebarOverlay = document.getElementById('adminSidebarOverlay');
+            if (sidebarToggle && sidebarOverlay) {
+                sidebarToggle.addEventListener('click', () => toggleAdminSidebar(true));
+                sidebarOverlay.addEventListener('click', () => toggleAdminSidebar(false));
+            }
+
+            function handleAdminSidebarResize() {
+                const sidebar = document.getElementById('adminSidebar');
+                const sidebarToggle = document.getElementById('adminSidebarToggle');
+                const mainContent = document.querySelector('.admin-content, .content-wrapper');
+                const overlay = document.getElementById('adminSidebarOverlay');
+                if (!sidebar || !sidebarToggle || !overlay) return;
+                if (window.innerWidth <= 900) {
+                    sidebar.style.display = 'none';
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.opacity = '0';
+                    sidebarToggle.style.display = 'block';
+                    if (mainContent) {
+                        mainContent.classList.remove('dashboard-shifted');
+                        mainContent.style.pointerEvents = '';
+                    }
+                } else {
+                    sidebar.style.display = '';
+                    sidebar.style.transform = '';
+                    sidebar.style.opacity = '';
+                    sidebarToggle.style.display = 'none';
+                    overlay.style.display = 'none';
+                    overlay.style.opacity = '0';
+                    document.body.style.overflow = '';
+                    if (mainContent) {
+                        mainContent.classList.remove('dashboard-shifted');
+                        mainContent.style.pointerEvents = '';
+                    }
+                }
+            }
+            window.addEventListener('resize', handleAdminSidebarResize);
+            document.addEventListener('DOMContentLoaded', handleAdminSidebarResize);
+        </script>
         @stack('scripts')
     </body>
 
