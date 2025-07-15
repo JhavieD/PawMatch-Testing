@@ -34,7 +34,7 @@ class RescuerDashboardController extends Controller
             ->unique('sender_id')
             ->take(5)
             ->values();
-        $recentReviews = $rescuer->reviews()->latest()->take(5)->get();
+        $recentReviews = $rescuer->reviews()->with(['adopter.user'])->latest()->take(5)->get();
         $verification = $rescuer->verifications()->latest()->first();
 
         return view('rescuer.rescuer_dashboard', compact(

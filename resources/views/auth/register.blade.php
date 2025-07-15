@@ -254,19 +254,29 @@
                 </label>
                     
 
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
-                        <div class="space-y-1 text-center">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" id="adopter_upload_area">
+                        <div class="space-y-1 text-center" id="adopter_upload_content">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="flex text-sm text-gray-600">
                                 <label for="adopter_valid_id" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                    <span>Upload a file</span>
+                                    <span>Click to upload a file</span>
                                     <input id="adopter_valid_id" name="adopter_valid_id" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
                                 </label>
-                                <p class="pl-1">or drag and drop</p>
                             </div>
                             <p class="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
+                        </div>
+                        <!-- Preview Area (Hidden by default) -->
+                        <div class="hidden space-y-4" id="adopter_preview_area">
+                            <div class="text-center">
+                                <div id="adopter_preview_container" class="mx-auto mb-4"></div>
+                                <p class="text-sm font-medium text-gray-700" id="adopter_file_name"></p>
+                                <p class="text-xs text-gray-500" id="adopter_file_size"></p>
+                                <button type="button" class="mt-2 text-sm text-red-600 hover:text-red-800" onclick="clearFilePreview('adopter')">
+                                    <i class="fas fa-trash mr-1"></i>Remove file
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="field-error" id="adopter_valid_idError"></div>
@@ -327,19 +337,29 @@
                     <label for="shelter_valid_id" class="block text-sm font-medium text-gray-700">
                         Business License/ID <span class="text-red-500">*</span>
                     </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
-                        <div class="space-y-1 text-center">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" id="shelter_upload_area">
+                        <div class="space-y-1 text-center" id="shelter_upload_content">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="flex text-sm text-gray-600">
                                 <label for="shelter_valid_id" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                    <span>Upload a file</span>
+                                    <span>Click to upload a file</span>
                                     <input id="shelter_valid_id" name="shelter_valid_id" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
                                 </label>
-                                <p class="pl-1">or drag and drop</p>
                             </div>
                             <p class="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
+                        </div>
+                        <!-- Preview Area (Hidden by default) -->
+                        <div class="hidden space-y-4" id="shelter_preview_area">
+                            <div class="text-center">
+                                <div id="shelter_preview_container" class="mx-auto mb-4"></div>
+                                <p class="text-sm font-medium text-gray-700" id="shelter_file_name"></p>
+                                <p class="text-xs text-gray-500" id="shelter_file_size"></p>
+                                <button type="button" class="mt-2 text-sm text-red-600 hover:text-red-800" onclick="clearFilePreview('shelter')">
+                                    <i class="fas fa-trash mr-1"></i>Remove file
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="field-error" id="shelter_valid_idError"></div>
@@ -388,19 +408,29 @@
                     <label for="rescuer_valid_id" class="block text-sm font-medium text-gray-700">
                         Verification Document <span class="text-red-500">*</span>
                     </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
-                        <div class="space-y-1 text-center">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" id="rescuer_upload_area">
+                        <div class="space-y-1 text-center" id="rescuer_upload_content">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="flex text-sm text-gray-600">
                                 <label for="rescuer_valid_id" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                    <span>Upload a file</span>
+                                    <span>Click to upload a file</span>
                                     <input id="rescuer_valid_id" name="rescuer_valid_id" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
                                 </label>
-                                <p class="pl-1">or drag and drop</p>
                             </div>
                             <p class="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
+                        </div>
+                        <!-- Preview Area (Hidden by default) -->
+                        <div class="hidden space-y-4" id="rescuer_preview_area">
+                            <div class="text-center">
+                                <div id="rescuer_preview_container" class="mx-auto mb-4"></div>
+                                <p class="text-sm font-medium text-gray-700" id="rescuer_file_name"></p>
+                                <p class="text-xs text-gray-500" id="rescuer_file_size"></p>
+                                <button type="button" class="mt-2 text-sm text-red-600 hover:text-red-800" onclick="clearFilePreview('rescuer')">
+                                    <i class="fas fa-trash mr-1"></i>Remove file
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="field-error" id="rescuer_valid_idError"></div>
@@ -971,5 +1001,115 @@ function showGoogleSignupSection() {
         }
     }
 }
+
+// File upload preview functionality
+function setupFilePreview() {
+    const fileInputs = [
+        { input: 'adopter_valid_id', role: 'adopter' },
+        { input: 'shelter_valid_id', role: 'shelter' },
+        { input: 'rescuer_valid_id', role: 'rescuer' }
+    ];
+
+    fileInputs.forEach(({ input, role }) => {
+        const fileInput = document.getElementById(input);
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                handleFilePreview(e.target.files[0], role);
+            });
+        }
+    });
+}
+
+function handleFilePreview(file, role) {
+    if (!file) return;
+
+    const uploadContent = document.getElementById(`${role}_upload_content`);
+    const previewArea = document.getElementById(`${role}_preview_area`);
+    const previewContainer = document.getElementById(`${role}_preview_container`);
+    const fileName = document.getElementById(`${role}_file_name`);
+    const fileSize = document.getElementById(`${role}_file_size`);
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+        alert('File size must be less than 5MB');
+        clearFilePreview(role);
+        return;
+    }
+
+    // Hide upload content and show preview
+    uploadContent.classList.add('hidden');
+    previewArea.classList.remove('hidden');
+
+    // Set file info
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+
+    // Clear previous preview
+    previewContainer.innerHTML = '';
+
+    const fileType = file.type.toLowerCase();
+    
+    if (fileType.includes('pdf')) {
+        // PDF preview
+        previewContainer.innerHTML = `
+            <div class="flex flex-col items-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                <i class="fas fa-file-pdf text-red-500 text-4xl mb-2"></i>
+                <span class="text-sm text-red-700 font-medium">PDF Document</span>
+            </div>
+        `;
+    } else if (fileType.includes('image')) {
+        // Image preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewContainer.innerHTML = `
+                <div class="relative">
+                    <img src="${e.target.result}" alt="Preview" class="file-preview-image">
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // Fallback for other file types
+        previewContainer.innerHTML = `
+            <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                <i class="fas fa-file text-gray-500 text-4xl mb-2"></i>
+                <span class="text-sm text-gray-700 font-medium">Document</span>
+            </div>
+        `;
+    }
+}
+
+function clearFilePreview(role) {
+    const fileInput = document.getElementById(`${role}_valid_id`);
+    const uploadContent = document.getElementById(`${role}_upload_content`);
+    const previewArea = document.getElementById(`${role}_preview_area`);
+    
+    // Clear file input
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    
+    // Show upload content and hide preview
+    if (uploadContent) {
+        uploadContent.classList.remove('hidden');
+    }
+    if (previewArea) {
+        previewArea.classList.add('hidden');
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Initialize file preview functionality when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setupFilePreview();
+});
 </script>
 @endsection 

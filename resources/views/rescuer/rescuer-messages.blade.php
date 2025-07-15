@@ -21,10 +21,21 @@
                 <div class="conversation {{ $receiver && $partner->user_id == ($receiver->user_id ?? null) ? 'active' : '' }}"
                     onclick="window.location.href='{{ route('rescuer.messages', ['receiver_id' => $partner->user_id]) }}'">
                     <div class="conversation-header">
-                        <span class="conversation-name"> {{ $partner->name }} </span>
-                        <span class="conversation-time">
-                            {{ $partner->last_message_time ? Carbon::parse($partner->last_message_time)->diffForHumans() : 'Now' }}
-                        </span>
+                        <!-- Add profile image -->
+                        @if($partner->profile_image)
+                            <img src="{{ $partner->profile_image }}" alt="{{ $partner->name }}" 
+                                style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover;">
+                        @else
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600; margin-right: 8px; font-size: 14px;">
+                                {{ strtoupper(substr($partner->name ?? 'U', 0, 1)) }}
+                            </div>
+                        @endif
+                        <div style="flex: 1;">
+                            <span class="conversation-name"> {{ $partner->name }} </span>
+                            <span class="conversation-time">
+                                {{ $partner->last_message_time ? Carbon::parse($partner->last_message_time)->diffForHumans() : 'Now' }}
+                            </span>
+                        </div>
                     </div>
                     <div class="conversation-preview">
                         {{ Str::limit($partner->decrypted_last_message ?? 'No messages yet.', 50) }}
@@ -42,8 +53,13 @@
         <div class="chat-area">
             <div class="chat-header">
                 @if ($receiver)
-                    <img src="{{ $receiver->profile_picture_url ?? asset('images/default-profile.png') }}"
-                        alt="Profile Image" class="profile-image">
+                    @if($receiver->profile_image)
+                        <img src="{{ $receiver->profile_image }}" alt="Profile Image" class="profile-image" />
+                    @else
+                        <div class="profile-image" style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600;">
+                            {{ strtoupper(substr($receiver->name ?? 'U', 0, 1)) }}
+                        </div>
+                    @endif
                     <div class="chat-name">{{ $receiver->name }} </div>
                     <button title="Delete Message" class="delete-message-btn"><i class="fa-solid fa-trash"></i></button>
                 @else

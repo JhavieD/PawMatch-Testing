@@ -52,6 +52,7 @@ class AdopterApplicationController extends Controller
             'adopter_id' => $adopter->adopter_id,
             'pet_id' => $pet->pet_id,
             'shelter_id' => $pet->shelter_id,
+            'rescuer_id' => $pet->rescuer_id,
             'reason_for_adoption' => $validated['reason_for_adoption'],
             'living_environment' => $validated['living_arrangement'],
             'experience_with_pets' => $validated['experience_with_pets'],
