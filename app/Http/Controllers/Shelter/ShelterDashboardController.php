@@ -47,7 +47,15 @@ class ShelterDashboardController extends Controller
             ->get()
             ->pluck('max_id')
             ->map(function ($id) {
-                return Message::with('sender')->find($id);
+                $msg = Message::with('sender')->find($id);
+                if ($msg) {
+                    try {
+                        $msg->content = \Illuminate\Support\Facades\Crypt::decryptString($msg->message_content);
+                    } catch (\Exception $e) {
+                        $msg->content = $msg->message_content;
+                    }
+                }
+                return $msg;
             });
 
         // Get reviews for this shelter
@@ -57,7 +65,7 @@ class ShelterDashboardController extends Controller
         $shelterReviews = \App\Models\Adopter\AdopterReview::where('shelter_id', $shelter->shelter_id)
             ->with(['adopter.user'])
             ->orderByDesc('created_at')
-            ->take(5)
+            ->take(3)
             ->get();
 
         $recentReviews = $shelter->adopterReviews()->orderByDesc('created_at')->take(2)->get();
@@ -442,72 +450,72 @@ class ShelterDashboardController extends Controller
 
     // STRAY REPORTS METHODS added by andrea
     public function strayReports(Request $request)
-        {
-            $shelter = auth()->user()->shelter;
+    {
+        $shelter = auth()->user()->shelter;
 
-            if (!$shelter) {
-                abort(404, 'Shelter not found');
-            }
-
-            $query = \DB::table('stray_reports')
-                ->join('adopters', 'stray_reports.adopter_id', '=', 'adopters.adopter_id')
-                ->join('users', 'adopters.user_id', '=', 'users.user_id')
-                ->leftJoin('stray_report_notifications', function ($join) use ($shelter) {
-                    $join->on('stray_reports.report_id', '=', 'stray_report_notifications.report_id')
-                        ->where('stray_report_notifications.shelter_id', '=', $shelter->shelter_id);
-                })
-                ->whereNotNull('stray_report_notifications.id')
-                ->select([
-                    'stray_reports.*',
-                    \DB::raw("CONCAT(users.first_name, ' ', users.last_name) as reporter_name"),
-                    'users.email as reporter_email',
-                    'stray_report_notifications.admin_message',
-                    'stray_report_notifications.is_read',
-                    'stray_report_notifications.sent_at'
-                ])
-                ->distinct(); // to  remove duplicates
-
-            if ($request->filled('search')) {
-                $search = $request->get('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('stray_reports.location', 'LIKE', "%{$search}%")
-                        ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
-                        ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
-                });
-            }
-
-            if ($request->filled('status')) {
-                $status = $request->get('status');
-                if ($status !== 'all') {
-                    $query->where('stray_reports.status', $status);
-                }
-            }
-
-            // Exclude 'pending' reports by default
-            if (!$request->filled('status') || $request->get('status') === 'all') {
-                $query->where('stray_reports.status', '!=', 'pending');
-            }
-
-            $reports = $query->orderByDesc('stray_report_notifications.sent_at')->paginate(12);
-
-            $reports->getCollection()->transform(function ($report) {
-                if ($report->image_url) {
-                    $report->image_url = json_decode($report->image_url, true);
-                }
-                return $report;
-            });
-            return view('shelter.stray-reports', compact('reports'));
+        if (!$shelter) {
+            abort(404, 'Shelter not found');
         }
+
+        $query = \DB::table('stray_reports')
+            ->join('adopters', 'stray_reports.adopter_id', '=', 'adopters.adopter_id')
+            ->join('users', 'adopters.user_id', '=', 'users.user_id')
+            ->leftJoin('stray_report_notifications', function ($join) use ($shelter) {
+                $join->on('stray_reports.report_id', '=', 'stray_report_notifications.report_id')
+                    ->where('stray_report_notifications.shelter_id', '=', $shelter->shelter_id);
+            })
+            ->whereNotNull('stray_report_notifications.id')
+            ->select([
+                'stray_reports.*',
+                \DB::raw("CONCAT(users.first_name, ' ', users.last_name) as reporter_name"),
+                'users.email as reporter_email',
+                'stray_report_notifications.admin_message',
+                'stray_report_notifications.is_read',
+                'stray_report_notifications.sent_at'
+            ])
+            ->distinct(); // to  remove duplicates
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('stray_reports.location', 'LIKE', "%{$search}%")
+                    ->orWhere('stray_reports.description', 'LIKE', "%{$search}%")
+                    ->orWhere(\DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->get('status');
+            if ($status !== 'all') {
+                $query->where('stray_reports.status', $status);
+            }
+        }
+
+        // Exclude 'pending' reports by default
+        if (!$request->filled('status') || $request->get('status') === 'all') {
+            $query->where('stray_reports.status', '!=', 'pending');
+        }
+
+        $reports = $query->orderByDesc('stray_report_notifications.sent_at')->paginate(12);
+
+        $reports->getCollection()->transform(function ($report) {
+            if ($report->image_url) {
+                $report->image_url = json_decode($report->image_url, true);
+            }
+            return $report;
+        });
+        return view('shelter.stray-reports', compact('reports'));
+    }
     public function acceptStrayReport($reportId)
     {
         $shelter = auth()->user()->shelter;
 
         try {
             \DB::beginTransaction();
-            
+
 
             $report = StrayReports::find($reportId);
-            
+
             if (!$report) {
                 \DB::rollback();
                 return response()->json([
@@ -527,7 +535,7 @@ class ShelterDashboardController extends Controller
 
             //Store the old status before updating
             $oldStatus = $report->status;
-            
+
             if (in_array($report->status, ['pending', 'investigating'])) {
                 $report->status = 'accepted';
                 $report->updated_at = now();
@@ -552,7 +560,7 @@ class ShelterDashboardController extends Controller
                 ]);
 
             $message = "{$shelter->shelter_name} has accepted your stray animal report and will be taking action to help the animal.";
-            
+
             $report->logStatusChange($oldStatus, 'accepted', auth()->id(), $message);
 
             \DB::commit();
@@ -561,11 +569,10 @@ class ShelterDashboardController extends Controller
                 'success' => true,
                 'message' => 'Report accepted successfully'
             ]);
-            
         } catch (\Exception $e) {
             \DB::rollback();
             \Log::error('Accept stray report error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to accept report: ' . $e->getMessage()
@@ -686,4 +693,3 @@ class ShelterDashboardController extends Controller
         }
     }
 }
-

@@ -1,4 +1,63 @@
 /* =========================
+   RECENT MESSAGES CARD (content-card)
+   ========================= */
+.content-card .message-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background: none;
+}
+
+.content-card .message-item {
+  padding: 0.6rem 0 0.6rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.18s;
+  background: none;
+}
+.content-card .message-item:hover {
+  background: #f3f4f6;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.06);
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.content-card .message-item:last-child {
+  border-bottom: none;
+}
+
+.content-card .message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.1rem;
+  gap: 1.2rem;
+}
+
+.content-card .message-sender {
+  font-weight: 700;
+  color: #18181b;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.content-card .message-time {
+  font-size: 0.97em;
+  color: #888;
+  font-weight: 500;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.content-card .message-preview {
+  color: #444;
+  font-size: 0.98rem;
+  margin-top: 0.1rem;
+  margin-bottom: 0.1rem;
+  padding-left: 0.1rem;
+  word-break: break-word;
+  line-height: 1.5;
+}
+/* =========================
    GENERAL RESET & BASE
    ========================= */
 * {
@@ -475,9 +534,13 @@ body {
 
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 1.2rem;
+  gap: 1rem;
+}
+
+.card-header .spacer {
+  flex: 1 1 auto;
 }
 
 .card-header h2 {
@@ -491,15 +554,27 @@ body {
   min-width: 0;
   max-width: 100%;
   text-align: center;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 38px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: none;
+  background: #fff;
+  border: 1px solid #4a90e2;
+  color: #4a90e2;
+  transition: background 0.2s, color 0.2s, border 0.2s;
 }
 
 .card-header .btn-outline:hover {
   background: #e3f2fd;
   color: #357abd;
+  border-color: #357abd;
 }
 
 .btn-primary,

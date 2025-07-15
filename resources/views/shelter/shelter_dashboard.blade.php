@@ -105,6 +105,7 @@
                 <div class="content-card">
                     <div class="card-header">
                         <h2>Recent Pets</h2>
+                        <span class="spacer"></span>
                         <a href="{{ route('shelter.pets') }}" class="btn btn-outline">View All</a>
                     </div>
                     <ul class="pet-list">
@@ -130,6 +131,7 @@
                 <div class="content-card">
                     <div class="card-header">
                         <h2>Recent Applications</h2>
+                        <span class="spacer"></span>
                         <a href="{{ route('shelter.pet_applications') }}" class="btn btn-outline">View All</a>
                     </div>
                     <ul class="application-list">
@@ -158,27 +160,37 @@
                 <div class="content-card">
                     <div class="card-header">
                         <h2>Recent Messages</h2>
-                        <a href="{{ route('shelter.messages') }}" class="btn btn-outline">View All</a>
+                        <span class="spacer"></span>
+                        <a href="{{ route('shelter.messages') }}" class="btn btn-outline card-header-btn"
+                            aria-label="View all messages">View All</a>
                     </div>
-                    <ul class="application-list">
-                        @forelse($recentMessages as $msg)
-                            <li class="application-item">
-                                <div class="applicant-info-messages"
-                                    style="display: flex; align-items: center; gap: 3rem;">
-                                    <strong style="width: 500px;">{{ $msg->sender->name ?? 'User' }}</strong>
-                                    @if (isset($msg->pets))
-                                        <div class="pet-details">Re: {{ $msg->pets->name }} - {{ $msg->pet->breed }}
-                                        </div>
-                                    @endif
-                                    <button class="btn btn-outline- reply-btn "
-                                        onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id]) }}'">
-                                        Reply
-                                    </button>
-                                </div>
-
-                            </li>
+                    <ul class="message-list">
+                        @forelse($recentMessages->take(2) as $msg)
+                            <a href="{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id ?? $msg->sender_id]) }}"
+                                style="text-decoration: none; color: inherit;">
+                                <li class="message-item">
+                                    <div class="message-header"
+                                        style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span class="message-sender"
+                                            style="font-weight: 600;">{{ $msg->sender->name ?? 'User' }}</span>
+                                        <span class="message-time" style="font-size: 0.95em; color: #888;">
+                                            {{ $msg->sent_at ? \Carbon\Carbon::parse($msg->sent_at)->format('g:i A') : '' }}
+                                        </span>
+                                    </div>
+                                    <div class="message-preview" style="color: #444; margin-top: 0.2rem;">
+                                        {{ $msg->content ?? ($msg->message_content ?? '') }}
+                                    </div>
+                                </li>
+                            </a>
+                            @if (!$loop->last)
+                                <hr style="margin: 0.2rem 0; border: none; border-top: 1px solid #e5e7eb;" />
+                            @endif
                         @empty
-                            <li style="color: rgb(123, 123, 123);">No Recent Messages</li>
+                            <li class="message-item">
+                                <div class="message-header">
+                                    <span class="message-sender">No recent messages.</span>
+                                </div>
+                            </li>
                         @endforelse
                     </ul>
                 </div>
@@ -193,15 +205,18 @@
                         <div class="review-card">
                             <div class="review-header">
                                 <div class="reviewer-info">
-                                    @if($review->adopter && $review->adopter->user && $review->adopter->user->profile_image)
-                                    <img src="{{ $review->adopter->user->profile_image }}" alt="{{ $review->adopter->user->first_name }}" class="reviewer-image">
+                                    @if ($review->adopter && $review->adopter->user && $review->adopter->user->profile_image)
+                                        <img src="{{ $review->adopter->user->profile_image }}"
+                                            alt="{{ $review->adopter->user->first_name }}" class="reviewer-image">
                                     @else
-                                    <div class="reviewer-image" style="background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600; width: 40px; height: 40px; border-radius: 50%;">
-                                        {{ $review->adopter && $review->adopter->user ? strtoupper(substr($review->adopter->user->first_name, 0, 1)) : 'U' }}
-                                    </div>
+                                        <div class="reviewer-image"
+                                            style="background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600; width: 40px; height: 40px; border-radius: 50%;">
+                                            {{ $review->adopter && $review->adopter->user ? strtoupper(substr($review->adopter->user->first_name, 0, 1)) : 'U' }}
+                                        </div>
                                     @endif
                                     <div>
-                                        <div class="reviewer-name">{{ $review->adopter->user->first_name ?? 'User' }}</div>
+                                        <div class="reviewer-name">{{ $review->adopter->user->first_name ?? 'User' }}
+                                        </div>
                                         <div class="review-date">{{ $review->created_at->format('F d, Y') }}</div>
                                     </div>
                                 </div>
