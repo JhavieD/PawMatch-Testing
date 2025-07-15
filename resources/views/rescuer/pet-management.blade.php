@@ -240,12 +240,16 @@
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid" id="edit-image-grid">
-                                <label class="upload-box">
-                                    <input type="file" name="images[]" id="rescuer-edit-images" multiple
-                                        accept="image/*">
-                                    <span>+ Add Photos</span>
-                                </label>
-                                <div class="thumbnail-grid" id="rescuer-edit-thumbnail-grid"></div>
+                                <div class="image-container">
+                                    <label class="upload-box" id="rescuer-edit-upload-box">
+                                        <input type="file" name="images[]" id="rescuer-edit-images" multiple accept="image/*">
+                                        <span>+</span>
+                                    </label>
+                                    <!-- Existing images will be loaded here -->
+                                    <div class="existing-images" id="rescuer-edit-existing-images"></div>
+                                    <!-- Preview container for new images -->
+                                    <div class="image-preview-container" id="rescuer-edit-image-preview"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-actions">
@@ -377,10 +381,14 @@
                         <div class="image-upload">
                             <h3>Pet Images</h3>
                             <div class="image-grid">
-                                <label class="upload-box">
-                                    <input type="file" name="images[]" accept="image/*" multiple>
-                                    <span>+ Add Photos</span>
-                                </label>
+                                <div class="image-container">
+                                    <label class="upload-box" id="rescuer-add-upload-box">
+                                        <input type="file" name="images[]" id="rescuer-add-images" accept="image/*" multiple>
+                                        <span>+</span>
+                                    </label>
+                                    <!-- Preview container for new images -->
+                                    <div class="image-preview-container" id="rescuer-add-image-preview"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-actions">
@@ -423,60 +431,148 @@
         function closeModal(modal) {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
+            
+            // Clear image previews when modals are closed
+            if (modal.id === 'addPetModal') {
+                clearRescuerImagePreviews('add');
+            } else if (modal.id === 'editPetModal') {
+                clearRescuerImagePreviews('edit');
+            }
         }
 
-        document.addEventListener('submit', async (e) => {
-            if (e.target.matches('.delete-image-form')) {
-                e.preventDefault();
-
-                if (!confirm('Delete this photo?')) return;
-
-                const form = e.target;
-                const formData = new FormData(form);
-
-                try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        form.closest('.thumbnail-wrapper').remove();
-                    } else {
-                        alert('Image delete failed.');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Something went wrong.');
-                }
-            }
-        });
         // Auto reload of Pet Details
 
+        // Image Preview Functionality
+        let rescuerAddSelectedFiles = [];
+        let rescuerEditSelectedFiles = [];
+        let rescuerImagesToDelete = [];
+
+        // Setup image preview for Add Pet modal
+        document.getElementById('rescuer-add-images').addEventListener('change', function(e) {
+            handleRescuerImagePreview(e.target.files, 'add');
+        });
+
+        // Setup image preview for Edit Pet modal
         document.getElementById('rescuer-edit-images').addEventListener('change', function(e) {
-            const files = e.target.files;
-            const previewGrid = document.getElementById('rescuer-edit-thumbnail-grid');
-            previewGrid.innerHTML = '';
-            Array.from(files).forEach(file => {
+            handleRescuerImagePreview(e.target.files, 'edit');
+        });
+
+        function handleRescuerImagePreview(files, modalType) {
+            const filesArray = Array.from(files);
+            const container = document.getElementById(`rescuer-${modalType}-image-preview`);
+            
+            if (modalType === 'add') {
+                rescuerAddSelectedFiles = rescuerAddSelectedFiles.concat(filesArray);
+            } else {
+                rescuerEditSelectedFiles = rescuerEditSelectedFiles.concat(filesArray);
+            }
+            
+            displayRescuerImagePreviews(modalType);
+        }
+
+        function displayRescuerImagePreviews(modalType) {
+            const container = document.getElementById(`rescuer-${modalType}-image-preview`);
+            const selectedFiles = modalType === 'add' ? rescuerAddSelectedFiles : rescuerEditSelectedFiles;
+            
+            container.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'thumbnail-wrapper';
-                        wrapper.innerHTML = `
-                            <img src="${ev.target.result}" class="thumbnail" alt="Pet Image">
-                            <button type="button" class="delete-image-btn" title="Remove" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
+                    reader.onload = function(e) {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'image-preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview">
+                            <button type="button" class="image-remove-btn" onclick="removeRescuerImagePreview(${index}, '${modalType}')">
+                                ×
+                            </button>
                         `;
-                        wrapper.querySelector('.delete-image-btn').onclick = () => wrapper.remove();
-                        previewGrid.appendChild(wrapper);
+                        container.appendChild(previewItem);
                     };
                     reader.readAsDataURL(file);
                 }
             });
-        });
+        }
+
+        function removeRescuerImagePreview(index, modalType) {
+            if (modalType === 'add') {
+                rescuerAddSelectedFiles.splice(index, 1);
+            } else {
+                rescuerEditSelectedFiles.splice(index, 1);
+            }
+            displayRescuerImagePreviews(modalType);
+            updateRescuerFileInput(modalType);
+        }
+        window.removeRescuerImagePreview = removeRescuerImagePreview;
+
+        function updateRescuerFileInput(modalType) {
+            const fileInput = document.getElementById(`rescuer-${modalType}-images`);
+            const selectedFiles = modalType === 'add' ? rescuerAddSelectedFiles : rescuerEditSelectedFiles;
+            
+            // Create a new DataTransfer object to update the file input
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
+        }
+
+        // Clear previews when modals are closed
+        function clearRescuerImagePreviews(modalType) {
+            if (modalType === 'add') {
+                rescuerAddSelectedFiles = [];
+                document.getElementById('rescuer-add-image-preview').innerHTML = '';
+                document.getElementById('rescuer-add-images').value = '';
+            } else {
+                rescuerEditSelectedFiles = [];
+                rescuerImagesToDelete = [];
+                document.getElementById('rescuer-edit-image-preview').innerHTML = '';
+                document.getElementById('rescuer-edit-existing-images').innerHTML = '';
+                document.getElementById('rescuer-edit-images').value = '';
+                // Remove any existing hidden deletion inputs
+                const existingDeleteInputs = document.querySelectorAll('input[name="images_to_delete[]"]');
+                existingDeleteInputs.forEach(input => input.remove());
+            }
+        }
+
+        // Load existing images for edit modal
+        function loadRescuerExistingImages(petImages) {
+            const container = document.getElementById('rescuer-edit-existing-images');
+            container.innerHTML = '';
+            
+            if (petImages && petImages.length > 0) {
+                petImages.forEach((image, index) => {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-preview-item existing-image-item';
+                    imageItem.innerHTML = `
+                        <img src="${image.url}" alt="Pet Image">
+                        <button type="button" class="image-remove-btn existing-image-remove-btn" onclick="markRescuerImageForDeletion(${image.id}, ${index})">
+                            ×
+                        </button>
+                        <input type="hidden" name="existing_images[]" value="${image.id}">
+                    `;
+                    container.appendChild(imageItem);
+                });
+            }
+        }
+
+        function markRescuerImageForDeletion(imageId, index) {
+            rescuerImagesToDelete.push(imageId);
+            
+            // Find and remove the specific image item
+            const container = document.getElementById('rescuer-edit-existing-images');
+            const imageItems = container.querySelectorAll('.existing-image-item');
+            if (imageItems[index]) {
+                imageItems[index].remove();
+            }
+            
+            // Add hidden input to mark image for deletion
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = 'images_to_delete[]';
+            deleteInput.value = imageId;
+            document.getElementById('editPetForm').appendChild(deleteInput);
+        }
+        window.markRescuerImageForDeletion = markRescuerImageForDeletion;
 
         editBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -552,24 +648,16 @@
                 }
                 // --- End Medical Records Display Logic ---
 
+                // Clear any previous image previews and reset file arrays
+                clearRescuerImagePreviews('edit');
+                
+                // Load existing images for edit modal using new system
                 const images = JSON.parse(btn.getAttribute('data-images') || '[]');
-                const thumbnailGrid = document.getElementById('rescuer-edit-thumbnail-grid');
-                if (thumbnailGrid) {
-                    thumbnailGrid.innerHTML = '';
-                    images.forEach(image => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'thumbnail-wrapper';
-                        wrapper.innerHTML = `
-                        <img src="${image.image_url}" class="thumbnail" alt="Pet Image">
-                        <form action="/rescuer/pet-images/${image.id}" method="POST" class="delete-image-form">
-                            <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="delete-image-btn" title="Delete Image" style="background:none;border:none;font-size:1.2em;line-height:1;cursor:pointer;">&times;</button>
-                        </form>
-                    `;
-                        thumbnailGrid.appendChild(wrapper);
-                    });
-                }
+                const petImages = images.map(image => ({
+                    id: image.id,
+                    url: image.image_url
+                }));
+                loadRescuerExistingImages(petImages);
 
                 // Debug log
                 console.log({
