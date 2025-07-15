@@ -432,9 +432,10 @@
                     toast.textContent = message;
                     toast.style.position = 'fixed';
                     toast.style.top = '32px';
-                    toast.style.right = '32px';
+                    toast.style.left = '50%';
+                    toast.style.transform = 'translateX(-50%)';
                     toast.style.zIndex = 9999;
-                    toast.style.background = type === 'success' ? '#4a90e2' : '#e74c3c';
+                    toast.style.background = type === 'success' ? '#ED3500' : '#e74c3c';
                     toast.style.color = '#fff';
                     toast.style.padding = '14px 28px';
                     toast.style.borderRadius = '8px';

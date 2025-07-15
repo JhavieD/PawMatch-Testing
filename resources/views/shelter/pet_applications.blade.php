@@ -78,11 +78,11 @@
                                         onclick="showApplicationModal({{ $application->application_id }})">Review</button>
 
                                     @if (!in_array(strtolower($application->status), ['completed', 'cancelled']))
-                                        <button class="successfull-btn mark-completed-btn"
+                                        <button class="successfull-btn mark-completed-btn" title="Mark as Completed"
                                             data-id="{{ $application->application_id }}">
                                             <i class="fa-solid fa-circle-check" style="color:green"></i>
                                         </button>
-                                        <button class="cancelled-btn mark-cancelled-btn"
+                                        <button class="cancelled-btn mark-cancelled-btn" title="Mark as Cancelled"
                                             data-id="{{ $application->application_id }}">
                                             <i class="fa-solid fa-xmark" style="color:red"></i>
                                         </button>

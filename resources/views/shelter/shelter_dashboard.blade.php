@@ -145,7 +145,7 @@
                                         data-app-id="{{ $app->application_id }}">Review Application</button>
                                     <button
                                         onclick="window.location.href= '{{ route('shelter.messages', ['receiver_id' => $app->adopter->user->user_id]) }}'"
-                                        class="btn btn-outline">Message</button>
+                                        class="reply-btn">Message</button>
                                 </div>
                             </li>
                         @empty
@@ -163,20 +163,19 @@
                     <ul class="application-list">
                         @forelse($recentMessages as $msg)
                             <li class="application-item">
-                                <div class="applicant-info">
-                                    <strong>{{ $msg->sender->name ?? 'User' }}</strong>
+                                <div class="applicant-info-messages"
+                                    style="display: flex; align-items: center; gap: 3rem;">
+                                    <strong style="width: 500px;">{{ $msg->sender->name ?? 'User' }}</strong>
                                     @if (isset($msg->pets))
                                         <div class="pet-details">Re: {{ $msg->pets->name }} - {{ $msg->pet->breed }}
                                         </div>
                                     @endif
+                                    <button class="btn btn-outline- reply-btn "
+                                        onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id]) }}'">
+                                        Reply
+                                    </button>
                                 </div>
-                                <div class="pet-details">
-                                    {{ Str::limit($msg->content, 60) }}
-                                </div>
-                                <button class="btn btn-outline- reply-btn"
-                                    onclick="window.location.href='{{ route('shelter.messages', ['receiver_id' => $msg->sender->user_id]) }}'">
-                                    Reply
-                                </button>
+
                             </li>
                         @empty
                             <li style="color: rgb(123, 123, 123);">No Recent Messages</li>

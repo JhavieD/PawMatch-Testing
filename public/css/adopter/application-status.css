@@ -90,15 +90,15 @@ body {
 /* main */
 
 .main-content {
-  margin-left: 250px;
+  margin-left: 500px;
   padding: 2rem;
   width: 100%;
 }
 
 .container {
   max-width: 1000px;
-  margin: 2rem auto;
-  padding: 0 2rem;
+  margin: 1rem 0 auto;
+  padding: 2rem 5rem;
 }
 
 .header {
@@ -119,9 +119,16 @@ body {
 .application-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   margin-bottom: 1.5rem;
   overflow: hidden;
+  transition: box-shadow 0.3s cubic-bezier(0.075, 0.82, 0.165, 1),
+    transform 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.application-card:hover {
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.16);
+  transform: translateY(-8px) scale(1);
 }
 
 .application-header {
