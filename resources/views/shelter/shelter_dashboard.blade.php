@@ -42,6 +42,18 @@
                                             clip-rule="evenodd" />
                                     </svg>
                                 </span>
+                            @elseif ($verification && $verification->status === 'rejected')
+                                {{-- RED: Rejected --}}
+                                <a href="{{ route('shelter.profile') }}"
+                                    class="verification-badge rejected flex items-center ml-2"
+                                    title="Verification rejected"
+                                    style="background: #ef4444; border-radius: 9999px; padding: 0.25rem; text-decoration: none;">
+                                    <svg class="w-4 h-4" fill="white" viewBox="0 0 20 20" style="display: block;">
+                                        <circle cx="10" cy="10" r="10" fill="#ef4444"/>
+                                        <line x1="6" y1="6" x2="14" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                                        <line x1="14" y1="6" x2="6" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                                    </svg>
+                                </a>
                             @else
                                 {{-- GRAY: Not submitted yet --}}
                                 <a href="{{ route('shelter.profile') }}"
@@ -406,14 +418,6 @@
                     <div class="stat-item">
                         <span class="stat-number">120+</span>
                         <span class="stat-label">Pets Adopted</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">5 years</span>
-                        <span class="stat-label">Experience</span>
-                    </div>
-                </div>
-                <div class="shelter-reviews">
-                    <h4>Recent Reviews</h4>
                     <div class="reviews-list">
                         <!-- Review items will be populated dynamically -->
                     </div>
