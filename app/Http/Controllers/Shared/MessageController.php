@@ -333,13 +333,23 @@ class MessageController extends Controller
                 \Log::error('ScheduleMeet: Missing pet relationship', ['application_id' => $request->application_id]);
                 return response()->json(['success' => false, 'error' => 'Pet not found for this application.'], 422);
             }
-            if (!$application->pet->shelter || !$application->pet->shelter->user_id) {
-                \Log::error('ScheduleMeet: Missing shelter relationship', [
+            // Determine receiver: shelter or rescuer
+            $receiverUserId = null;
+            $receiverType = null;
+            if (isset($application->pet->shelter) && isset($application->pet->shelter->user_id)) {
+                $receiverUserId = $application->pet->shelter->user_id;
+                $receiverType = 'shelter';
+            } elseif (isset($application->pet->rescuer) && isset($application->pet->rescuer->user_id)) {
+                $receiverUserId = $application->pet->rescuer->user_id;
+                $receiverType = 'rescuer';
+            }
+            if (!$receiverUserId) {
+                \Log::error('ScheduleMeet: Missing shelter or rescuer relationship', [
                     'application_id' => $request->application_id,
                     'pet_id' => $application->pet->pet_id ?? null,
                     'pet' => $application->pet,
                 ]);
-                return response()->json(['success' => false, 'error' => 'Shelter not found for this pet.'], 422);
+                return response()->json(['success' => false, 'error' => 'Shelter or Rescuer not found for this pet.'], 422);
             }
 
             // Compose the auto-generated message
@@ -350,18 +360,20 @@ class MessageController extends Controller
 
             $message = \App\Models\Shared\Message::create([
                 'sender_id' => \Auth::id(),
-                'receiver_id' => $application->pet->shelter->user_id,
+                'receiver_id' => $receiverUserId,
                 'message_content' =>  \Crypt::encryptString($content),
                 'sent_at' => now(),
             ]);
 
             \Log::info('ScheduleMeet: Message created', ['message_id' => $message->message_id, 'content' => $message->message_content]);
+            // Redirect to correct messages page
+            $redirectUrl = url('/adopter/messages?receiver_id=' . $receiverUserId);
             return response()->json([
                 'success' => true,
                 'message_id' => $message->message_id,
                 'message_content' => $message->message_content,
-                'receiver_id' => $application->pet->shelter->user_id, // Add receiver_id for redirect
-                'redirect_url' => url('/adopter/messages?receiver_id=' . $application->pet->shelter->user_id)
+                'receiver_id' => $receiverUserId,
+                'redirect_url' => $redirectUrl
             ]);
         } catch (\Exception $e) {
             \Log::error('ScheduleMeet Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);

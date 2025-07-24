@@ -17,15 +17,15 @@ class AdopterApplicationController extends Controller
             abort(403, 'Adopter profile not found.');
         }
         $applications = AdoptionApplication::where('adopter_id', $adopter->adopter_id)
-            ->with(['pet.shelter'])
+            ->with(['pet.shelter', 'pet.rescuer'])
             ->orderByDesc('submitted_at')
             ->get();
 
-         // Get existing reviews for completed applications
-        $reviews = AdopterReview::where('adopter_id', $adopter->adopter_id)->get()->keyBy(function($review) {
+        // Get existing reviews for completed applications
+        $reviews = AdopterReview::where('adopter_id', $adopter->adopter_id)->get()->keyBy(function ($review) {
             return $review->shelter_id ? 'shelter_' . $review->shelter_id : 'rescuer_' . $review->rescuer_id;
         });
-        
+
         return view('adopter.application-status', compact('applications'));
     }
 
@@ -66,7 +66,7 @@ class AdopterApplicationController extends Controller
         ]);
         return response()->json(['success' => true, 'application_id' => $application->application_id]);
     }
-    
+
     public function complete($id)
     {
         $adopter = Auth::user()->adopter;
@@ -115,7 +115,7 @@ class AdopterApplicationController extends Controller
 
         // Check if a review already exists for this adopter and shelter/rescuer combination
         $existingReview = AdopterReview::where('adopter_id', $adopter->adopter_id)
-            ->where(function($query) use ($application) {
+            ->where(function ($query) use ($application) {
                 if ($application->shelter_id) {
                     $query->where('shelter_id', $application->shelter_id);
                 } elseif ($application->rescuer_id) {
@@ -152,7 +152,7 @@ class AdopterApplicationController extends Controller
         }
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Review submitted successfully',
             'review' => $review
         ]);
