@@ -203,6 +203,13 @@ class ShelterDashboardController extends Controller
 
     public function update(Request $request, $petId)
     {
+        \Log::info('Pet Update Request', [
+            'pet_id' => $petId,
+            'images_to_delete' => $request->input('images_to_delete'),
+            'has_images' => $request->hasFile('images'),
+            'image_count' => $request->hasFile('images') ? count($request->file('images')) : 0
+        ]);
+
         $pet = \App\Models\Shared\Pet::findOrFail($petId);
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -219,6 +226,7 @@ class ShelterDashboardController extends Controller
             'special_needs' => 'nullable|string',
             'compatibility' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
+            'images_to_delete.*' => 'nullable|integer|exists:pet_images,id',
             'eating_habits' => 'nullable|string',
             'suitable_for' => 'nullable|string',
         ]);
@@ -240,6 +248,44 @@ class ShelterDashboardController extends Controller
             'suitable_for',
         ]));
 
+        // Handle image deletions
+        if ($request->has('images_to_delete') && is_array($request->images_to_delete)) {
+            \Log::info('Processing image deletions', ['images_to_delete' => $request->images_to_delete]);
+            
+            foreach ($request->images_to_delete as $imageId) {
+                $image = \App\Models\Shared\PetImage::where('id', $imageId)
+                    ->where('pet_id', $pet->pet_id)
+                    ->first();
+                
+                if ($image) {
+                    \Log::info('Deleting image', ['image_id' => $imageId, 'image_url' => $image->image_url]);
+                    
+                    // Delete from S3
+                    try {
+                        $path = parse_url($image->image_url, PHP_URL_PATH);
+                        $path = ltrim($path, '/');
+                        \Storage::disk('s3')->delete($path);
+                        \Log::info('Image deleted from S3', ['path' => $path]);
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to delete image from S3: ' . $e->getMessage());
+                    }
+                    
+                    // Delete from database
+                    $image->delete();
+                    \Log::info('Image deleted from database', ['image_id' => $imageId]);
+                } else {
+                    \Log::warning('Image not found for deletion', ['image_id' => $imageId, 'pet_id' => $pet->pet_id]);
+                }
+            }
+        } else {
+            \Log::info('No images to delete or invalid format', [
+                'has_images_to_delete' => $request->has('images_to_delete'),
+                'is_array' => $request->has('images_to_delete') ? is_array($request->images_to_delete) : false,
+                'value' => $request->input('images_to_delete')
+            ]);
+        }
+
+        // Add new images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('petimages', 's3');

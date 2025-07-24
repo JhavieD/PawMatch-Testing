@@ -56,8 +56,6 @@
                                     </div>
                                 </div>
                                 <div class="user-info">
-                                    <span
-                                        class="user-name">{{ $verification->first_name . ' ' . $verification->last_name }}</span>
                                     <span class="user-email">{{ $verification->email }}</span>
                                 </div>
                             </div>
@@ -105,7 +103,7 @@
                 <div class="verification-details">
                     <div class="user-profile">
                         <div class="user-avatar-large">
-                            <img id="modalUserAvatar" src="" alt="User Avatar">
+                            <img id="modalUserAvatar" src="/images/default-profile.png" alt="Profile Picture" class="profile-img" />
                         </div>
                         <div class="user-info-detailed">
                             <h3 id="modalUserName" class="user-name"></h3>
@@ -198,6 +196,7 @@
                         });
 
                     document.getElementById('reviewSection').style.display = data.status === 'pending' ? 'block' :
+                    document.getElementById('modalUserAvatar').src = data.profile_image ? data.profile_image : '/images/default-profile.png';
                         'none';
 
                     const docContainer = document.getElementById('documentPreviewContainer');
