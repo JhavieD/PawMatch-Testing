@@ -47,7 +47,6 @@ class ShelterVerificationController extends Controller
             'facebook_link' => $request->facebook_link,
             'status' => 'pending',
             'submitted_at' => Carbon::now(),
-            'profile_image' => $user->profile_image,
         ]);
 
         return redirect()->back()->with('success', 'Your verification request has been submitted successfully.');
@@ -61,4 +60,4 @@ class ShelterVerificationController extends Controller
 
         return redirect()->back()->with('success', 'Shelter verification approved.');
     }
-} 
+}

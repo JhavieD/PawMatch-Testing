@@ -92,7 +92,8 @@
         style="background-color: #dc3545; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;">
         Reject Application
     </button>
-    <button class="message-btn"
-        style="background-color: #f1f1f1; color: #333; border: none; padding: 8px 16px; border-radius: 8px; outline: black;"
-        onclick="messageApplicant({{ $application->adopter->user->user_id }})">Message</button>
+    <button class="message-btn" id="messageApplicantBtn" data-user-id="{{ $application->adopter->user->user_id }}"
+        style="background-color: #f1f1f1; color: #333; border: none; padding: 8px 16px; border-radius: 8px; outline: black;">
+        Message
+    </button>
 </div>

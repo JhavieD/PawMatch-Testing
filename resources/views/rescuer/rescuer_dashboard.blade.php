@@ -32,7 +32,8 @@
                                 </span>
                             @elseif ($verification && $verification->status === 'pending')
                                 {{-- YELLOW: Under review --}}
-                                <span class="verification-badge pending flex items-center ml-2" title="Verification under review"
+                                <span class="verification-badge pending flex items-center ml-2"
+                                    title="Verification under review"
                                     style="background: #fbbf24; border-radius: 9999px; padding: 0.25rem;">
                                     <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"
                                         style="display: block;">
@@ -44,13 +45,14 @@
                             @elseif ($verification && $verification->status === 'rejected')
                                 {{-- RED: Rejected --}}
                                 <a href="{{ route('rescuer.profile') }}"
-                                    class="verification-badge rejected flex items-center ml-2"
-                                    title="Verification rejected"
+                                    class="verification-badge rejected flex items-center ml-2" title="Verification rejected"
                                     style="background: #ef4444; border-radius: 9999px; padding: 0.25rem; text-decoration: none;">
                                     <svg class="w-4 h-4" fill="white" viewBox="0 0 20 20" style="display: block;">
-                                        <circle cx="10" cy="10" r="10" fill="#ef4444"/>
-                                        <line x1="6" y1="6" x2="14" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                                        <line x1="14" y1="6" x2="6" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                                        <circle cx="10" cy="10" r="10" fill="#ef4444" />
+                                        <line x1="6" y1="6" x2="14" y2="14" stroke="white"
+                                            stroke-width="2.5" stroke-linecap="round" />
+                                        <line x1="14" y1="6" x2="6" y2="14" stroke="white"
+                                            stroke-width="2.5" stroke-linecap="round" />
                                     </svg>
                                 </a>
                             @else
@@ -134,8 +136,8 @@
                     <ul class="pet-list">
                         @forelse ($recentPets->take(2) as $pet)
                             <li class="pet-item">
-                                <img src="{{ $pet->image_url ?? 'https://placehold.co/60x60' }}" alt="{{ $pet->name }}"
-                                    class="pet-image-small">
+                                <img src="{{ $pet->image_url ?? 'https://placehold.co/60x60' }}"
+                                    alt="{{ $pet->name }}" class="pet-image-small">
                                 <div class="pet-info">
                                     <div class="pet-name">{{ $pet->name }}</div>
                                     <div class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years</div>
@@ -156,7 +158,34 @@
                         <h2>Recent Applications</h2>
                         <a href="{{ route('rescuer.pet_applications') }}" class="btn btn-outline">View All</a>
                     </div>
+                    @php
+                        $recentActiveApplications = $recentApplications->filter(function ($app) {
+                            $status = strtolower(trim($app->status));
+                            return in_array($status, ['pending', 'approved']);
+                        });
+                    @endphp
                     <ul class="application-list">
+                        @forelse($recentActiveApplications as $app)
+                            <li class="application-item">
+                                <div class="applicant-info">
+                                    <strong>{{ $app->adopter->user->first_name ?? 'Applicant' }}</strong> applied to
+                                    adopt <strong>{{ $app->pet->name ?? 'Pet' }}</strong>
+                                </div>
+                                <div class="pet-details">{{ $app->created_at->diffForHumans() }}</div>
+                                <div class="btn-group" style="margin-top: 0.5rem;">
+                                    <button class="btn btn-primary review-application-btn"
+                                        data-app-id="{{ $app->id ?? $app->application_id }}">Review Application</button>
+                                    <button
+                                        onclick="window.location.href= '{{ route('rescuer.messages', ['receiver_id' => $app->adopter->user->user_id]) }}'"
+                                        class="reply-btn">Message</button>
+                                </div>
+                            </li>
+                        @empty
+                            <li style="color: rgb(123, 123, 123);">No recent Applications</li>
+                        @endforelse
+                    </ul>
+                    {{-- Uncomment if you want to show all applications regardless of status --}}
+                    {{-- <ul class="application-list">
                         @forelse($recentApplications->take(2) as $app)
                             <li class="application-item">
                                 <div class="applicant-info">
@@ -182,7 +211,7 @@
                         @empty
                             <li style="color: rgb(123, 123, 123);">No Recent Applications</li>
                         @endforelse
-                    </ul>
+                    </ul> --}}
                 </div>
 
                 <!-- Recent Messages -->
@@ -218,7 +247,7 @@
                         @empty
                             <li class="message-item">
                                 <div class="message-header">
-                                    <span class="message-sender">No recent messages.</span>
+                                    <span class="empty-state">No recent messages.</span>
                                 </div>
                             </li>
                         @endforelse
@@ -275,7 +304,7 @@
     </main>
 
     {{-- add pet modal --}}
-    <div id="addPetModal" class="modal">
+    {{-- <div id="addPetModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New Pet</h2>
@@ -389,7 +418,7 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div> --}}
 
 
     <div id="rescuerModal" class="modal">
@@ -453,7 +482,8 @@
             </div>
             <div class="modal-body">
                 <label for="rejectionReason">Please provide a reason for rejection:</label>
-                <textarea id="rejectionReason" rows="4" placeholder="Enter reason here..." style="width: 100%;"></textarea>
+                <textarea id="rejectionReason" rows="4" placeholder="Enter reason here..."
+                    style=" margin-top: 1rem; width: 100%; border: 1px solid #3b82f6; border-radius: 6px; padding: 0.75rem; font-size: 1rem; resize: vertical; outline: none;"></textarea>
                 <div style="margin-top: 1rem; text-align: right;">
                     <button class="btn btn-outline" id="cancelRejectionBtn">Cancel</button>
                     <button class="btn btn-primary" id="confirmRejectionBtn">Confirm Reject</button>
@@ -586,7 +616,7 @@
             function attachActionHandlers(id) {
                 const approveBtn = document.getElementById('approveBtn');
                 const rejectBtn = document.getElementById('rejectBtn');
-                const requestInfoBtn = document.getElementById('requestInfoBtn');
+                const messageApplicantBtn = document.getElementById('messageApplicantBtn');
 
                 if (approveBtn) {
                     approveBtn.onclick = () => {
@@ -616,20 +646,10 @@
                     };
                 }
 
-                if (requestInfoBtn) {
-                    requestInfoBtn.onclick = () => {
-                        fetch(`/rescuer/applications/${id}/request-info`, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(() => {
-                                updateStatusBadge(id, 'info-requested');
-                                closeModal(modal);
-                            });
+                if (messageApplicantBtn) {
+                    const userId = messageApplicantBtn.getAttribute('data-user-id');
+                    messageApplicantBtn.onclick = () => {
+                        window.location.href = `/rescuer/messages/${userId}`;
                     };
                 }
             }

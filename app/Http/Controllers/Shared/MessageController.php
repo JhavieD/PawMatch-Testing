@@ -115,7 +115,7 @@ class MessageController extends Controller
         ], 201);
     }
 
-    public function shelterMessages(Request $request)
+    public function shelterMessages(Request $request, $receiver_id = null)
     {
         $authId = Auth::id();
         // Get all adopter user IDs who have messaged or been messaged by the shelter
@@ -173,11 +173,13 @@ class MessageController extends Controller
             ]);
         }
 
-        $receiver = $request->query('receiver_id')
-            ? User::where('user_id', $request->query('receiver_id'))->first()
+        // Use route param if present, fallback to query param
+        $selectedReceiverId = $receiver_id ?? $request->query('receiver_id');
+        $receiver = $selectedReceiverId
+            ? User::where('user_id', $selectedReceiverId)->first()
             : null;
 
-        return view('shelter.messages', compact('partners', 'receiver'));
+        return view('shelter.messages', compact('partners', 'receiver', 'selectedReceiverId'));
     }
 
     public function adopterMessages(Request $request)
@@ -244,7 +246,7 @@ class MessageController extends Controller
         return view('adopter.messages', compact('partners', 'receiver'));
     }
 
-    public function rescuerMessages(Request $request)
+    public function rescuerMessages(Request $request, $receiver_id = null)
     {
         $authId = Auth::id();
         // Get all user IDs (adopter or shelter) who have messaged or been messaged by the rescuer
@@ -268,13 +270,14 @@ class MessageController extends Controller
             ->whereIn('user_id', $partnerIds)
             ->get();
 
-        $receiver = $request->query('receiver_id')
-            ? User::where('user_id', $request->query('receiver_id'))->first()
+        // Use route param if present, fallback to query param
+        $selectedReceiverId = $receiver_id ?? $request->query('receiver_id');
+        $receiver = $selectedReceiverId
+            ? User::where('user_id', $selectedReceiverId)->first()
             : null;
 
-        $receiverId = $request->query('receiver_id');
-        if ($receiverId && !$partners->pluck('user_id')->contains((int)$receiverId)) {
-            $receiverUser = User::where('user_id', $receiverId)->first();
+        if ($selectedReceiverId && !$partners->pluck('user_id')->contains((int)$selectedReceiverId)) {
+            $receiverUser = User::where('user_id', $selectedReceiverId)->first();
             if ($receiverUser) {
                 $partners->push($receiverUser);
             }
@@ -300,7 +303,7 @@ class MessageController extends Controller
             $partner->last_message_time = $lastMessage ? $lastMessage->sent_at : null;
         }
 
-        return view('rescuer.rescuer-messages', compact('partners', 'receiver'));
+        return view('rescuer.rescuer-messages', compact('partners', 'receiver', 'selectedReceiverId'));
     }
 
     public function markAsRead(Request $request)

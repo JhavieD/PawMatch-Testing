@@ -1234,6 +1234,7 @@ body {
   transition: background 0.2s, box-shadow 0.2s;
   border-radius: 10px;
   cursor: pointer;
+  margin: 1rem 0;
 }
 .application-list .application-item:hover {
   background: #f3f6fa;
@@ -1244,7 +1245,7 @@ body {
 .application-list .application-item .btn-outline {
   min-width: 120px;
   max-width: 50%;
-  margin: 0.2rem 0.3rem;
+  margin: 2rem 0.3rem;
   text-align: center;
   border-radius: 10px;
 }
@@ -1657,12 +1658,9 @@ body {
 /* Star Rating Styles for Reviews */
 .star-gold {
   color: #fbbf24;
-  font-size: 1.1rem;
 }
-
 .star-empty {
-  color: #d1d5db;
-  font-size: 1.1rem;
+  color: #fbbf24;
 }
 
 /* Reviewer Image Styles */
@@ -1672,7 +1670,11 @@ body {
   border-radius: 50%;
   object-fit: cover;
 }
-
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .reviewer-name {
   font-weight: 500;
 }
@@ -1680,6 +1682,7 @@ body {
 .review-date {
   color: #6b7280;
   font-size: 0.875rem;
+  max-width: auto;
 }
 
 /* =========================
@@ -1744,27 +1747,27 @@ body {
 
 /* Verification Badge Styles */
 .verification-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    padding: 0.25rem;
-    text-decoration: none;
-    transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.25rem;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
 }
 
 .verification-badge:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .verification-badge.approved {
-    background-color: #3b82f6 !important; /* Blue */
+  background-color: #3b82f6 !important; /* Blue */
 }
 
 .verification-badge.pending {
-    background-color: #fbbf24 !important; /* Yellow */
+  background-color: #fbbf24 !important; /* Yellow */
 }
 
 .verification-badge.not-submitted {
-    background-color: #9ca3af !important; /* Gray */
+  background-color: #9ca3af !important; /* Gray */
 }
