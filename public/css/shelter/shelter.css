@@ -1489,25 +1489,22 @@ body {
   }
 }
 .star-gold {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 
 /* Reviewer Image Styles */
 .reviewer-image {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .reviewer-name {
-    font-weight: 500;
+  font-weight: 500;
 }
 
 .review-date {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-  color: #fbbf24;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
