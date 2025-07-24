@@ -84,6 +84,8 @@
     </div>
 </div>
 <div class="modal-actions">
+    <!-- Hidden status label for JS detection -->
+    <div class="status-label" style="display:none;">{{ strtolower($application->status) }}</div>
     <button class="approve-btn" id="approveBtn"
         style="background-color: #28a745; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;">
         Approve Application

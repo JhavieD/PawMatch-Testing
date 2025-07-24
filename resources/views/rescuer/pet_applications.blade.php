@@ -155,6 +155,34 @@
                         modal.style.display = 'block';
                         document.body.style.overflow = 'hidden';
                         attachActionHandlers(id);
+
+                        // Hide approve/reject buttons if status is cancelled or completed
+                        setTimeout(() => {
+                            // Find any element inside the modal that contains the status text
+                            const modalBody = document.getElementById('applicationModalBody');
+                            let statusText = '';
+                            // Try to find by class first
+                            const statusLabel = modalBody.querySelector('.status-label');
+                            if (statusLabel) {
+                                statusText = statusLabel.textContent.trim().toLowerCase();
+                            } else {
+                                // Fallback: search for any span or div containing status keywords
+                                const possibleStatus = Array.from(modalBody.querySelectorAll('span,div'))
+                                    .find(el => /cancelled|completed/i.test(el.textContent));
+                                if (possibleStatus) {
+                                    statusText = possibleStatus.textContent.trim().toLowerCase();
+                                }
+                            }
+                            const approveBtn = document.getElementById('approveBtn');
+                            const rejectBtn = document.getElementById('rejectBtn');
+                            if (statusText === 'cancelled' || statusText === 'completed') {
+                                if (approveBtn) approveBtn.style.display = 'none';
+                                if (rejectBtn) rejectBtn.style.display = 'none';
+                            } else {
+                                if (approveBtn) approveBtn.style.display = '';
+                                if (rejectBtn) rejectBtn.style.display = '';
+                            }
+                        }, 0);
                     });
             }
 
