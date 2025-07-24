@@ -40,7 +40,12 @@ class ShelterDashboardController extends Controller
 
         // Recent items
         $recentPets = $shelter->pets()->latest()->take(2)->get();
-        $recentApplications = $shelter->applications()->with('adopter.user')->latest()->take(2)->get();
+        $recentApplications = $shelter->applications()
+            ->with('adopter.user', 'pet')
+            ->whereIn('status', ['pending', 'approved'])
+            ->latest()
+            ->take(2)
+            ->get();
         $recentMessages = $shelter->receivedMessages()
             ->select('sender_id', \DB::raw('MAX(message_id) as max_id'))
             ->groupBy('sender_id')
@@ -88,6 +93,16 @@ class ShelterDashboardController extends Controller
     }
     public function applications()
     {
+        // If AJAX request for modal review
+        if (request()->ajax() && request()->route('id')) {
+            $applicationId = request()->route('id');
+            $application = \App\Models\Shared\AdoptionApplication::with(['adopter.user', 'pet'])->find($applicationId);
+            if ($application) {
+                return response()->view('shelter.application_modal', compact('application'));
+            } else {
+                return response('Application not found', 404);
+            }
+        }
         return view('shelter.pet_applications');
     }
 
@@ -251,15 +266,15 @@ class ShelterDashboardController extends Controller
         // Handle image deletions
         if ($request->has('images_to_delete') && is_array($request->images_to_delete)) {
             \Log::info('Processing image deletions', ['images_to_delete' => $request->images_to_delete]);
-            
+
             foreach ($request->images_to_delete as $imageId) {
                 $image = \App\Models\Shared\PetImage::where('id', $imageId)
                     ->where('pet_id', $pet->pet_id)
                     ->first();
-                
+
                 if ($image) {
                     \Log::info('Deleting image', ['image_id' => $imageId, 'image_url' => $image->image_url]);
-                    
+
                     // Delete from S3
                     try {
                         $path = parse_url($image->image_url, PHP_URL_PATH);
@@ -269,7 +284,7 @@ class ShelterDashboardController extends Controller
                     } catch (\Exception $e) {
                         \Log::warning('Failed to delete image from S3: ' . $e->getMessage());
                     }
-                    
+
                     // Delete from database
                     $image->delete();
                     \Log::info('Image deleted from database', ['image_id' => $imageId]);

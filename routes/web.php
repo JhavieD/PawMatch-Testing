@@ -141,6 +141,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
     });
 
     // -------- MESSAGES (FOR ALL POT) --------
+    Route::get('/shelter/messages/{receiver_id}', [MessageController::class, 'shelterMessages'])->name('shelter.messages.receiver');
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.fetch');
     Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
     Route::post('/messages/mark-as-read', [MessageController::class, 'markAsRead']);
@@ -155,6 +156,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/rescuer/profile', [RescuerDashboardController::class, 'profile'])->name('rescuer.profile');
         Route::get('/rescuer/pets', [RescuerDashboardController::class, 'petManagement'])->name('rescuer.pet-management');
         Route::get('/rescuer/messages', [App\Http\Controllers\Shared\MessageController::class, 'rescuerMessages'])->name('rescuer.messages');
+        Route::get('/rescuer/messages/{receiver_id}', [App\Http\Controllers\Shared\MessageController::class, 'rescuerMessages'])->name('rescuer.messages.receiver');
         Route::post('/rescuer/pets', [RescuerDashboardController::class, 'AddPetListing'])->name('rescuer.pets.create');
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');

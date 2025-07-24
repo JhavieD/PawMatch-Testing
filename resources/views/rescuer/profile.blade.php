@@ -24,7 +24,8 @@
                                 <img src="{{ $user->profile_image ?? asset('images/default-profile.png') }}" alt="Profile"
                                     class="profile-image" />
                                 <div class="upload-buttons">
-                                    <input type="file" id="profile_image" name="profile_image" style="display:none;" accept="image/*">
+                                    <input type="file" id="profile_image" name="profile_image" style="display:none;"
+                                        accept="image/*">
                                     <label for="profile_image" class="btn btn-outline">Upload New Photo</label>
                                     <button type="submit" name="remove_photo" value="1"
                                         class="btn btn-outline">Remove</button>
@@ -76,7 +77,8 @@
                         @endif
 
                         @if (!$verification || $verification->status === 'rejected')
-                            <form action="{{ route('rescuer.verification.submit') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('rescuer.verification.submit') }}" method="POST"
+                                enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group">
                                     <label for="registration_doc" class="form-label">Registration Document</label>
@@ -94,12 +96,13 @@
                                     <label for="facebook_link" class="form-label">Facebook Page Link (Optional)</label>
                                     <input type="url" name="facebook_link" id="facebook_link" class="form-input"
                                         placeholder="https://facebook.com/your-rescuer-page"
-                                    @error('facebook_link')
+                                        @error('facebook_link')
                                         <p class="error-text">{{ $message }}</p>
                                     @enderror
-                                </div>
+                                        </div>
 
-                                <button type="submit" class="btn btn-primary">Submit for Verification</button>
+                                    <button type="submit" class="btn btn-primary submit-verification">Submit for
+                                        Verification</button>
                             </form>
                         @endif
                     </div>
@@ -115,7 +118,8 @@
                             @csrf
                             <div class="form-group">
                                 <label for="current-password" class="form-label">Current Password</label>
-                                <input type="password" id="current-password" name="current_password" class="form-input" />
+                                <input type="password" id="current-password" name="current_password"
+                                    class="form-input" />
                             </div>
                             <div class="form-group">
                                 <label for="new-password" class="form-label">New Password</label>

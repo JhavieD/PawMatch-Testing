@@ -797,6 +797,11 @@ body {
   color: #92400e;
 }
 
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .status-approved,
 .status-active {
   background: #d1fae5;

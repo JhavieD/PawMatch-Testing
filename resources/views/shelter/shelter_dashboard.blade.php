@@ -45,13 +45,14 @@
                             @elseif ($verification && $verification->status === 'rejected')
                                 {{-- RED: Rejected --}}
                                 <a href="{{ route('shelter.profile') }}"
-                                    class="verification-badge rejected flex items-center ml-2"
-                                    title="Verification rejected"
+                                    class="verification-badge rejected flex items-center ml-2" title="Verification rejected"
                                     style="background: #ef4444; border-radius: 9999px; padding: 0.25rem; text-decoration: none;">
                                     <svg class="w-4 h-4" fill="white" viewBox="0 0 20 20" style="display: block;">
-                                        <circle cx="10" cy="10" r="10" fill="#ef4444"/>
-                                        <line x1="6" y1="6" x2="14" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                                        <line x1="14" y1="6" x2="6" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                                        <circle cx="10" cy="10" r="10" fill="#ef4444" />
+                                        <line x1="6" y1="6" x2="14" y2="14" stroke="white"
+                                            stroke-width="2.5" stroke-linecap="round" />
+                                        <line x1="14" y1="6" x2="6" y2="14" stroke="white"
+                                            stroke-width="2.5" stroke-linecap="round" />
                                     </svg>
                                 </a>
                             @else
@@ -136,8 +137,8 @@
                     <ul class="pet-list">
                         @forelse ($recentPets as $pet)
                             <li class="pet-item">
-                                <img src="{{ $pet->image_url ?? 'https://placehold.co/60x60' }}" alt="{{ $pet->name }}"
-                                    class="pet-image-small">
+                                <img src="{{ $pet->image_url ?? 'https://placehold.co/60x60' }}"
+                                    alt="{{ $pet->name }}" class="pet-image-small">
                                 <div class="pet-info">
                                     <div class="pet-name">{{ $pet->name }}</div>
                                     <div class="pet-details">{{ $pet->breed }} • {{ $pet->age }} years</div>
@@ -159,6 +160,35 @@
                         <span class="spacer"></span>
                         <a href="{{ route('shelter.pet_applications') }}" class="btn btn-outline">View All</a>
                     </div>
+                    {{-- Only show applications with status pending or approved --}}
+                    @php
+                        $recentActiveApplications = $recentApplications->filter(function ($app) {
+                            $status = strtolower(trim($app->status));
+                            return in_array($status, ['pending', 'approved']);
+                        });
+                    @endphp
+                    <ul class="application-list">
+                        @forelse($recentActiveApplications as $app)
+                            <li class="application-item">
+                                <div class="applicant-info">
+                                    <strong>{{ $app->adopter->user->first_name ?? 'Applicant' }}</strong> applied to
+                                    adopt <strong>{{ $app->pet->name ?? 'Pet' }}</strong>
+                                </div>
+                                <div class="pet-details">{{ $app->created_at->diffForHumans() }}</div>
+                                <div class="btn-group" style="margin-top: 0.5rem;">
+                                    <button class="btn btn-primary review-application-btn"
+                                        data-app-id="{{ $app->id ?? $app->application_id }}">Review Application</button>
+                                    <button
+                                        onclick="window.location.href= '{{ route('shelter.messages', ['receiver_id' => $app->adopter->user->user_id]) }}'"
+                                        class="reply-btn">Message</button>
+                                </div>
+                            </li>
+                        @empty
+                            <li style="color: rgb(123, 123, 123);">No recent Applications</li>
+                        @endforelse
+                    </ul>
+                    {{-- The following list is now filtered above. Uncomment if you want to show all applications. --}}
+                    {{--
                     <ul class="application-list">
                         @forelse($recentApplications as $app)
                             <li class="application-item">
@@ -169,7 +199,7 @@
                                 <div class="pet-details">{{ $app->created_at->diffForHumans() }}</div>
                                 <div class="btn-group" style="margin-top: 0.5rem;">
                                     <button class="btn btn-primary review-application-btn"
-                                        data-app-id="{{ $app->application_id }}">Review Application</button>
+                                        data-app-id="{{ $app->id ?? $app->application_id }}">Review Application</button>
                                     <button
                                         onclick="window.location.href= '{{ route('shelter.messages', ['receiver_id' => $app->adopter->user->user_id]) }}'"
                                         class="reply-btn">Message</button>
@@ -179,6 +209,7 @@
                             <li style="color: rgb(123, 123, 123);">No recent Applications</li>
                         @endforelse
                     </ul>
+                    --}}
                 </div>
 
                 <!-- Recent Messages -->
@@ -268,164 +299,6 @@
         </div>
     </main>
 
-    <!-- Add Pet Modal -->
-    <div id="addPetModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Pet</h2>
-                <button class="close-btn" type="button">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="addPetForm" method="POST" action="{{ route('shelter.pets.create') }}"
-                    enctype="multipart/form-data">
-                    @csrf
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="name">Pet Name</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="species">Species</label>
-                            <select id="species" name="species" required>
-                                <option value="">Select Species</option>
-                                <option value="dog">Dog</option>
-                                <option value="cat">Cat</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="breed">Breed</label>
-                            <input type="text" id="breed" name="breed" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="age">Age</label>
-                            <input type="number" id="age" name="age" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="gender">Gender</label>
-                            <select id="gender" name="gender" required>
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="size">Size</label>
-                            <select id="size" name="size" required>
-                                <option value="">Select Size</option>
-                                <option value="small">Small</option>
-                                <option value="medium">Medium</option>
-                                <option value="large">Large</option>
-                            </select>
-                        </div>
-                    </div>
-
-
-
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="4" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="behavior">Behavior</label>
-                        <select name="behavior" id="behavior" required>
-                            <option value="">Select Behavior</option>
-                            <option value="Calm and Relaxed">Calm and Relaxed</option>
-                            <option value="Playful and Energetic">Playful and Energetic</option>
-                            <option value="Independent">Independent</option>
-                            <option value="Protective">Protective</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="daily_activity">Daily Activity</label>
-                        <select name="daily_activity" id="daily_activity" required>
-                            <option value="">Select Activity Level</option>
-                            <option value="Low">Low</option>
-                            <option value="Moderate">Moderate</option>
-                            <option value="High">High</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="special_needs">Special Needs</label>
-                        <select name="special_needs" id="special_needs" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="compatibility">Compatibility</label>
-                        <select name="compatibility" id="compatibility">
-                            <option value="">Select Option</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit-eating_habits">Eating Habits</label>
-                        <select name="eating_habits" id="edit-eating_habits" required>
-                            <option value="">Select Eating Habits</option>
-                            <option value="Balanced Diet">Balanced Diet</option>
-                            <option value="Portion Control">Portion Control</option>
-                            <option value="Consistent Feeding Schedule">Consistent Feeding Schedule</option>
-                        </select>
-                    </div>
-
-                    <div class="image-upload">
-                        <h3>Pet Images</h3>
-                        <div class="image-grid">
-                            <label class="upload-box">
-                                <input type="file" name="images[]" accept="image/*" multiple>
-                                <span>+ Add Photos</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="submit" class="btn btn-primary">Add Pet</button>
-                        <button type="button" class="btn btn-outline" onclick="closeModal(addPetModal)">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- Add this modal HTML at the end of the body -->
-    <div id="shelterModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Shelter Information</h2>
-                <span class="close">&times;</span>
-            </div>
-            <div class="shelter-info">
-                <div class="shelter-header">
-                    <img src="shelter-logo.jpg" alt="Shelter Logo" class="shelter-logo">
-                    <div class="shelter-details">
-                        <h3 class="shelter-name">Shelter Name</h3>
-                        <div class="shelter-rating">
-                            <span class="rating-stars">★★★★★</span>
-                            <span class="rating-number">4.8</span>
-                            <span class="total-reviews">(45 reviews)</span>
-                        </div>
-                        <p class="shelter-location">Los Angeles, CA</p>
-                    </div>
-                </div>
-                <div class="shelter-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">120+</span>
-                        <span class="stat-label">Pets Adopted</span>
-                    <div class="reviews-list">
-                        <!-- Review items will be populated dynamically -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Application Review Modal -->
     <div id="applicationModal" class="modal">
         <div class="modal-content">
@@ -434,9 +307,7 @@
                 <button class="close-btn" type="button">&times;</button>
             </div>
             <div class="modal-body" id="applicationModalBody">
-
                 <!-- Application details will be loaded here via AJAX -->
-
             </div>
         </div>
     </div>
@@ -450,7 +321,8 @@
             </div>
             <div class="modal-body">
                 <label for="rejectionReason">Please provide a reason for rejection:</label>
-                <textarea id="rejectionReason" rows="4" placeholder="Enter reason here..." style="width: 100%;"></textarea>
+                <textarea id="rejectionReason" rows="4" placeholder="Enter reason here..."
+                    style="margin-top: 1rem; width: 100%; border: 1px solid #dbdbdb; border-radius: 6px; padding: 0.75rem; font-size: 1rem; resize: vertical; outline: none;"></textarea>
                 <div style="margin-top: 1rem; text-align: right;">
                     <button class="btn btn-outline" id="cancelRejectionBtn">Cancel</button>
                     <button class="btn btn-primary" id="confirmRejectionBtn">Confirm Reject</button>
@@ -459,10 +331,8 @@
         </div>
     </div>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Modal functions that must be global ---
             function showApplicationModal(id) {
                 fetch(`/shelter/applications/${id}/review`)
                     .then(response => response.text())
@@ -585,7 +455,7 @@
             function attachActionHandlers(id) {
                 const approveBtn = document.getElementById('approveBtn');
                 const rejectBtn = document.getElementById('rejectBtn');
-                const requestInfoBtn = document.getElementById('requestInfoBtn');
+                const messageApplicantBtn = document.getElementById('messageApplicantBtn');
 
                 if (approveBtn) {
                     approveBtn.onclick = () => {
@@ -615,20 +485,10 @@
                     };
                 }
 
-                if (requestInfoBtn) {
-                    requestInfoBtn.onclick = () => {
-                        fetch(`/shelter/applications/${id}/request-info`, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(() => {
-                                updateStatusBadge(id, 'info-requested');
-                                closeModal(modal);
-                            });
+                if (messageApplicantBtn) {
+                    const userId = messageApplicantBtn.getAttribute('data-user-id');
+                    messageApplicantBtn.onclick = () => {
+                        window.location.href = `/shelter/messages/${userId}`;
                     };
                 }
             }
@@ -662,7 +522,7 @@
                 }
             }
 
-            // Shelter modal logic (optional, for completeness)
+            // shelter modal logic (optional, for completeness)
             function openShelterModal(shelterId) {
                 const modal = document.getElementById('shelterModal');
                 modal.style.display = 'block';
@@ -680,7 +540,7 @@
                     rating: 4.8,
                     totalReviews: 45,
                     location: "Los Angeles, CA",
-                    adoptions: 120,
+                    rescues: 120,
                     experience: "5 years",
                     reviews: [{
                         name: "John Doe",
@@ -689,7 +549,7 @@
                         content: "Amazing experience adopting from this shelter."
                     }]
                 };
-                updateModalContent(shelterData);
+                // updateModalContent(shelterData); // Implement as needed
             }
             document.querySelector('.close')?.addEventListener('click', closeShelterModal);
             window.addEventListener('click', (event) => {
