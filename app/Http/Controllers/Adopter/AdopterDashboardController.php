@@ -37,15 +37,19 @@ class AdopterDashboardController extends Controller
                 ->take(3)
                 ->get() : collect();
 
-            // Get recent messages (show last 3 messages involving the adopter)
+            // Get recent messages (show last 3 unique conversation partners)
             $recentMessages = Message::with('sender')
                 ->where(function ($q) use ($user) {
                     $q->where('sender_id', $user->user_id)
                         ->orWhere('receiver_id', $user->user_id);
                 })
                 ->orderByDesc('sent_at')
-                ->take(3)
                 ->get()
+                ->unique(function ($msg) use ($user) {
+                    // Group by the other user in the conversation
+                    return $msg->sender_id == $user->user_id ? $msg->receiver_id : $msg->sender_id;
+                })
+                ->take(3)
                 ->map(function ($msg) {
                     // Decrypt message content if encrypted, fallback to raw if not
                     try {
@@ -54,7 +58,8 @@ class AdopterDashboardController extends Controller
                         $msg->content = $msg->message_content;
                     }
                     return $msg;
-                });
+                })
+                ->values();
 
             return [
                 'favoritePets' => $favoritePets,

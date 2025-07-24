@@ -25,3 +25,33 @@
         </div>
     </div>
 </div>
+<script>
+    // Call this function when you open the application modal, passing the application ID
+    function setApplicationModalAppId(appId) {
+        var scheduleBtn = document.getElementById('modal-action-btn');
+        if (scheduleBtn) {
+            scheduleBtn.setAttribute('data-application-id', appId);
+        }
+        // Optionally set a global variable for legacy code
+        window.currentApplicationId = appId;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var scheduleBtn = document.getElementById('modal-action-btn');
+        if (scheduleBtn) {
+            scheduleBtn.addEventListener('click', function() {
+                var appId = scheduleBtn.getAttribute('data-application-id') || window
+                    .currentApplicationId;
+                if (!appId) {
+                    alert('Application ID not found.');
+                    return;
+                }
+                if (typeof openScheduleMeetModalModal === 'function') {
+                    openScheduleMeetModalModal(appId);
+                } else {
+                    alert('Schedule Meet modal function not found.');
+                }
+            });
+        }
+    });
+</script>

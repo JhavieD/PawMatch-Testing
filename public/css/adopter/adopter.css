@@ -254,6 +254,21 @@ body {
   color: #065f46;
 }
 
+.status-completed {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-cancelled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
 .message-item {
   cursor: pointer;
   transition: background 0.2s ease;

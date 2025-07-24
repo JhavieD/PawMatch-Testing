@@ -425,6 +425,11 @@
                 actionBtn.style.display = 'none';
             }
 
+            // Set application ID for schedule meet modal compatibility
+            if (typeof setApplicationModalAppId === 'function') {
+                setApplicationModalAppId(card.getAttribute('data-application-id'));
+            }
+
             // Show modal
             document.getElementById('application-modal-overlay').style.display = 'flex';
 

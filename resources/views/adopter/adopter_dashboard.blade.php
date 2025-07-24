@@ -108,7 +108,36 @@
                         @forelse($recentMessages as $message)
                             <li class="message-item">
                                 <div class="message-header">
-                                    <span class="message-sender">{{ $message->sender->name ?? 'Unknown Sender' }}</span>
+                                    <span class="message-sender">
+                                        @php
+                                            // Always show the other party's name (shelter or rescuer), never the adopter's own name
+                                            $otherUser =
+                                                $message->sender->user_id == $user->user_id
+                                                    ? $message->receiver
+                                                    : $message->sender;
+                                            $displayName = null;
+                                            if (
+                                                isset($otherUser->shelterProfile) &&
+                                                !empty($otherUser->shelterProfile->shelter_name)
+                                            ) {
+                                                $displayName = $otherUser->shelterProfile->shelter_name;
+                                            } elseif (
+                                                isset($otherUser->rescuerProfile) &&
+                                                !empty($otherUser->rescuerProfile->rescuer_name)
+                                            ) {
+                                                $displayName = $otherUser->rescuerProfile->rescuer_name;
+                                            } elseif (!empty($otherUser->first_name) || !empty($otherUser->last_name)) {
+                                                $displayName = trim(
+                                                    ($otherUser->first_name ?? '') .
+                                                        ' ' .
+                                                        ($otherUser->last_name ?? ''),
+                                                );
+                                            } else {
+                                                $displayName = $otherUser->name ?? 'Unknown Shelter/Rescuer';
+                                            }
+                                        @endphp
+                                        {{ $displayName }}
+                                    </span>
                                     <span class="message-time">{{ $message->created_at->format('g:i A') }}</span>
                                 </div>
                                 <div class="message-preview">
