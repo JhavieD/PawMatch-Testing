@@ -286,7 +286,7 @@
                                         @if ($i <= $review->rating)
                                             <span class="star-gold">★</span>
                                         @else
-                                            <span class="star-empty">★</span>
+                                            <span class="star-empty">☆</span>
                                         @endif
                                     @endfor
                                 </div>

@@ -204,6 +204,29 @@
                 const approveBtn = document.getElementById('approveBtn');
                 const rejectBtn = document.getElementById('rejectBtn');
                 const requestInfoBtn = document.getElementById('requestInfoBtn');
+                const messageBtn = document.getElementById('messageApplicantBtn');
+
+                // Hide approve/reject buttons if status is cancelled or completed
+                const modalBody = document.getElementById('applicationModalBody');
+                let statusText = '';
+                const statusLabel = modalBody ? modalBody.querySelector('.status-label') : null;
+                if (statusLabel) {
+                    statusText = statusLabel.textContent.trim().toLowerCase();
+                } else if (modalBody) {
+                    // Fallback: search for any span or div containing status keywords
+                    const possibleStatus = Array.from(modalBody.querySelectorAll('span,div'))
+                        .find(el => /cancelled|completed/i.test(el.textContent));
+                    if (possibleStatus) {
+                        statusText = possibleStatus.textContent.trim().toLowerCase();
+                    }
+                }
+                if (statusText === 'cancelled' || statusText === 'completed') {
+                    if (approveBtn) approveBtn.style.display = 'none';
+                    if (rejectBtn) rejectBtn.style.display = 'none';
+                } else {
+                    if (approveBtn) approveBtn.style.display = '';
+                    if (rejectBtn) rejectBtn.style.display = '';
+                }
 
                 if (approveBtn) {
                     approveBtn.onclick = () => {
@@ -236,18 +259,10 @@
                     };
                 }
 
-                if (requestInfoBtn) {
-                    requestInfoBtn.onclick = () => {
-                        fetch(`/rescuer/applications/${id}/request-info`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        }).then(res => res.json()).then(() => {
-                            updateStatusBadge(id, 'info-requested');
-                            closeModal(modal);
-                        });
+                if (messageBtn) {
+                    messageBtn.onclick = function() {
+                        const userId = this.getAttribute('data-user-id');
+                        window.location.href = '/rescuer/messages?receiver_id=' + userId;
                     };
                 }
             }
@@ -330,7 +345,10 @@
                             })
                             .then(res => res.json())
                             .then(data => {
-                                if (data.success) updateStatusBadge(id, 'completed');
+                                if (data.success) {
+                                    updateStatusBadge(id, 'completed');
+                                    location.reload();
+                                }
                             });
                     });
                 });
@@ -346,7 +364,10 @@
                             })
                             .then(res => res.json())
                             .then(data => {
-                                if (data.success) updateStatusBadge(id, 'cancelled');
+                                if (data.success) {
+                                    updateStatusBadge(id, 'cancelled');
+                                    location.reload();
+                                }
                             });
                     });
                 });
