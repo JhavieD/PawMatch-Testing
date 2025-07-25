@@ -440,12 +440,14 @@ body {
 
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.95rem;
   font-weight: 500;
   margin-left: 0.1rem;
   text-transform: capitalize;
+  white-space: nowrap;
+  word-break: normal;
 }
 .status-pending {
   background: #fef9c3;
@@ -769,9 +771,10 @@ body {
   overflow-y: auto;
   border: 1.5px solid #e5eaf3;
   animation: modal-content-pop 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-
   scrollbar-width: thin;
   scrollbar-color: #b6c6e3 #fafdff;
+  word-break: break-word;
+  overflow-x: hidden;
 }
 
 .modal-content::-webkit-scrollbar {
@@ -859,9 +862,12 @@ body {
   color: #1a1a1a;
   border-radius: 5px;
   padding: 0.5rem;
-  white-space: nowrap;
-  display: inline-block;
-  min-width: 100%;
+  white-space: pre-line;
+  word-break: break-word;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .questionnaire {
