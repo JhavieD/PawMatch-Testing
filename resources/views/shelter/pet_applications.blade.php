@@ -188,29 +188,28 @@
             const statusLabel = modalBody ? modalBody.querySelector('.status-label') : null;
             if (statusLabel) {
                 statusText = statusLabel.textContent.trim().toLowerCase();
-            } else if (modalBody) {
-                // Fallback: search for any span or div containing status keywords
-                const possibleStatus = Array.from(modalBody.querySelectorAll('span,div'))
-                    .find(el => /cancelled|completed/i.test(el.textContent));
-                if (possibleStatus) {
-                    statusText = possibleStatus.textContent.trim().toLowerCase();
-                }
             }
-            // Final fallback: check for status badge in modal
+            // Fallback: check for status badge in modal
             if (!statusText && modalBody) {
                 const badge = modalBody.querySelector('.status-badge');
                 if (badge) {
                     statusText = badge.textContent.trim().toLowerCase();
                 }
             }
+            // Fallback: search for any span or div containing status keywords
+            if (!statusText && modalBody) {
+                const possibleStatus = Array.from(modalBody.querySelectorAll('span,div'))
+                    .find(el => /cancelled|completed/i.test(el.textContent));
+                if (possibleStatus) {
+                    statusText = possibleStatus.textContent.trim().toLowerCase();
+                }
+            }
             if (statusText === 'completed' || statusText === 'cancelled') {
                 if (approveBtn) approveBtn.style.display = 'none';
                 if (rejectBtn) rejectBtn.style.display = 'none';
-                if (messageBtn) messageBtn.style.display = '';
             } else {
-                if (approveBtn) approveBtn.style.display = 'none';
-                if (rejectBtn) rejectBtn.style.display = 'none';
-                if (messageBtn) messageBtn.style.display = '';
+                if (approveBtn) approveBtn.style.display = '';
+                if (rejectBtn) rejectBtn.style.display = '';
             }
 
             if (approveBtn) {

@@ -1,3 +1,8 @@
+.info-item p:has(.status-badge) {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+}
 * {
   margin: 0;
   padding: 0;
@@ -440,12 +445,14 @@ body {
 
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.08rem 0.35rem;
   border-radius: 9999px;
   font-size: 0.95rem;
   font-weight: 500;
   margin-left: 0.1rem;
   text-transform: capitalize;
+  white-space: nowrap;
+  word-break: normal;
 }
 .status-pending {
   background: #fef9c3;
@@ -464,7 +471,7 @@ body {
   background: #e0e7ff;
   color: #3730a3;
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.08rem 0.35rem;
   font-size: 0.8rem;
   font-weight: 500;
   text-transform: capitalize;
@@ -474,7 +481,7 @@ body {
   background: #e5e5e5;
   color: #6b7280;
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.08rem 0.35rem;
   font-size: 0.8rem;
   font-weight: 500;
   text-transform: capitalize;
@@ -859,9 +866,12 @@ body {
   color: #1a1a1a;
   border-radius: 5px;
   padding: 0.5rem;
-  white-space: nowrap;
-  display: inline-block;
-  min-width: 100%;
+  white-space: pre-line;
+  word-break: break-word;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .questionnaire {
