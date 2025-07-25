@@ -15,7 +15,7 @@ class RescuerDashboardController extends Controller
 
         $availablePets = $rescuer->pets()->where('adoption_status', 'available')->count();
         $pendingApplications = $rescuer->applications()->where('status', 'pending')->count();
-        $successfulAdoptions = $rescuer->applications()->where('status', 'approved')->count();
+        $successfulAdoptions = $rescuer->applications()->where('status', 'completed')->count();
         $newMessages = $rescuer->messages()->where('is_read', false)->count();
         $averageRating = $rescuer->reviews()->avg('rating') ?? 0;
         $totalReviews = $rescuer->reviews()->count();

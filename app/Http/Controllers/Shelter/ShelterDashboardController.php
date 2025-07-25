@@ -33,7 +33,7 @@ class ShelterDashboardController extends Controller
         // statistics
         $availablePets = $shelter->pets()->where('adoption_status', 'available')->count();
         $pendingApplications = $shelter->applications()->where('status', 'pending')->count();
-        $successfulAdoptions = $shelter->applications()->where('status', 'approved')->count();
+        $successfulAdoptions = $shelter->applications()->where('status', 'completed')->count();
         $newMessages = $shelter->receivedMessages()->where('is_read', false)->count();
         $averageRating = round($shelter->adopterReviews()->avg('rating'), 1);
         $totalReviews = $shelter->adopterReviews()->count();

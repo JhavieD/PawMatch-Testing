@@ -179,14 +179,38 @@
             const approveBtn = document.getElementById('approveBtn');
             const rejectBtn = document.getElementById('rejectBtn');
             const requestInfoBtn = document.getElementById('requestInfoBtn');
-            // Get the status from the badge
-            const badge = document.querySelector(`.status-badge[data-id="${id}"]`);
-            const status = badge ? badge.innerText.trim().toLowerCase() : '';
-            if (status === 'completed' || status === 'cancelled') {
+            const messageBtn = document.getElementById('messageApplicantBtn');
+
+            // Get the status from the modal content (status-label or badge in modal)
+            const modalBody = document.getElementById('applicationModalBody');
+            let statusText = '';
+            // Try to get from .status-label in modal
+            const statusLabel = modalBody ? modalBody.querySelector('.status-label') : null;
+            if (statusLabel) {
+                statusText = statusLabel.textContent.trim().toLowerCase();
+            } else if (modalBody) {
+                // Fallback: search for any span or div containing status keywords
+                const possibleStatus = Array.from(modalBody.querySelectorAll('span,div'))
+                    .find(el => /cancelled|completed/i.test(el.textContent));
+                if (possibleStatus) {
+                    statusText = possibleStatus.textContent.trim().toLowerCase();
+                }
+            }
+            // Final fallback: check for status badge in modal
+            if (!statusText && modalBody) {
+                const badge = modalBody.querySelector('.status-badge');
+                if (badge) {
+                    statusText = badge.textContent.trim().toLowerCase();
+                }
+            }
+            if (statusText === 'completed' || statusText === 'cancelled') {
                 if (approveBtn) approveBtn.style.display = 'none';
                 if (rejectBtn) rejectBtn.style.display = 'none';
-                if (requestInfoBtn) requestInfoBtn.style.display = 'none';
-                return;
+                if (messageBtn) messageBtn.style.display = '';
+            } else {
+                if (approveBtn) approveBtn.style.display = 'none';
+                if (rejectBtn) rejectBtn.style.display = 'none';
+                if (messageBtn) messageBtn.style.display = '';
             }
 
             if (approveBtn) {
@@ -198,7 +222,7 @@
                                 'Content-Type': 'application/json',
                                 'Accept': 'application/json'
                             },
-                            body: JSON.stringify({}) // sending empty body to avoid Laravel errors
+                            body: JSON.stringify({})
                         })
                         .then(res => {
                             if (!res.ok) throw new Error('Failed to approve');
@@ -232,6 +256,13 @@
                         updateStatusBadge(id, 'info-requested');
                         closeModal(modal);
                     });
+                };
+            }
+
+            if (messageBtn) {
+                messageBtn.onclick = function() {
+                    const userId = this.getAttribute('data-user-id');
+                    window.location.href = '/shelter/messages?receiver_id=' + userId;
                 };
             }
         }
@@ -311,7 +342,10 @@
                         })
                         .then(res => res.json())
                         .then(data => {
-                            if (data.success) updateStatusBadge(id, 'completed');
+                            if (data.success) {
+                                updateStatusBadge(id, 'completed');
+                                location.reload();
+                            }
                         });
                 });
             });
@@ -327,7 +361,10 @@
                         })
                         .then(res => res.json())
                         .then(data => {
-                            if (data.success) updateStatusBadge(id, 'cancelled');
+                            if (data.success) {
+                                updateStatusBadge(id, 'cancelled');
+                                location.reload();
+                            }
                         });
                 });
             });
