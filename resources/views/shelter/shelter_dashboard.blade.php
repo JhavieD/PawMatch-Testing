@@ -183,6 +183,9 @@
                                         class="reply-btn">Message</button>
                                 </div>
                             </li>
+                            @if (!$loop->last)
+                                <hr style="margin: 0.2rem 0; border: none; border-top: 1px solid #e5e7eb;" />
+                            @endif
                         @empty
                             <li style="color: rgb(123, 123, 123);">No recent Applications</li>
                         @endforelse
@@ -244,7 +247,8 @@
                         @empty
                             <li class="message-item">
                                 <div class="message-header">
-                                    <span class="message-sender">No recent messages.</span>
+                                    <span class="message-sender" style="color: #b0b6be; font-weight: 500;">No recent
+                                        messages.</span>
                                 </div>
                             </li>
                         @endforelse
@@ -281,7 +285,7 @@
                                         @if ($i <= $review->rating)
                                             <span class="star-gold">★</span>
                                         @else
-                                            <span class="star-empty">★</span>
+                                            <span class="star-empty">☆</span>
                                         @endif
                                     @endfor
                                 </div>

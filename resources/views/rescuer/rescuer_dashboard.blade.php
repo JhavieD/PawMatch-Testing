@@ -180,6 +180,9 @@
                                         class="reply-btn">Message</button>
                                 </div>
                             </li>
+                            @if (!$loop->last)
+                                <hr style="margin: 0.2rem 0; border: none; border-top: 1px solid #e5e7eb;" />
+                            @endif
                         @empty
                             <li style="color: rgb(123, 123, 123);">No recent Applications</li>
                         @endforelse
