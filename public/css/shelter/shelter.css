@@ -1249,7 +1249,7 @@ body {
        EMPTY STATE
        ========================= */
 .empty-state {
-  color: #9ca3af;
+  color: #b0b6be;
   font-size: 1rem;
   text-align: left;
   padding: 0.5rem 0;
@@ -1286,9 +1286,12 @@ body {
      ========================= */
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   margin: 1rem 0;
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .info-item label {
@@ -1304,9 +1307,11 @@ body {
   color: #1a1a1a;
   border-radius: 5px;
   padding: 0.5rem;
-  white-space: nowrap;
-  display: inline-block;
-  min-width: 100%;
+  white-space: normal;
+  display: block;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .application-info h3 {
