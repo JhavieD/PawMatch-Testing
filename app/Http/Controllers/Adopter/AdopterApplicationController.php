@@ -21,6 +21,17 @@ class AdopterApplicationController extends Controller
             ->orderByDesc('submitted_at')
             ->get();
 
+        // Add adoption fee to each application
+        foreach ($applications as $application) {
+            if ($application->pet->shelter) {
+                $application->adoption_fee = $application->pet->shelter->adoption_fee ?? 0;
+            } elseif ($application->pet->rescuer) {
+                $application->adoption_fee = $application->pet->rescuer->adoption_fee ?? 0;
+            } else {
+                $application->adoption_fee = 0;
+            }
+        }
+
         // Get existing reviews for completed applications
         $reviews = AdopterReview::where('adopter_id', $adopter->adopter_id)->get()->keyBy(function ($review) {
             return $review->shelter_id ? 'shelter_' . $review->shelter_id : 'rescuer_' . $review->rescuer_id;

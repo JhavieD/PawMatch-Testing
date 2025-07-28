@@ -57,11 +57,22 @@
                         <i class="fas fa-paw"></i>
                         <span>Stray Reports</span>
                     </a>
+                    <a href="{{ route('admin.transactions') }}"
+                        class="nav-item {{ request()->routeIs('admin.transactions') ? 'active' : '' }}">
+                        <i class="fas fa-list"></i>
+                        <span>All Transactions</span>
+                    </a>
+                    <a href="{{ route('admin.payouts') }}"
+                        class="nav-item {{ request()->routeIs('admin.payouts') ? 'active' : '' }}">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Pending Payouts</span>
+                    </a>
                     <a href="{{ route('admin.settings') }}"
                         class="nav-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                         <i class="fas fa-cog"></i>
                         <span>Settings</span>
                     </a>
+                    
                 </nav>
                 <form method="POST" action="{{ route('logout') }}" style="margin-top:2rem;">
                     @csrf

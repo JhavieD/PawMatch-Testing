@@ -21,6 +21,8 @@
                             data-pet-image="{{ $application->pet->image_url ?? asset('images/default-pet.png') }}"
                             data-shelter-name="{{ $application->pet->shelter->shelter_name ?? '' }}"
                             data-status="{{ ucfirst($application->status) }}" data-status-raw="{{ $application->status }}"
+                            data-payment-status="{{ $application->payment_status }}"
+                            data-payment-amount="{{ $application->adoption_fee ?? 0 }}"
                             data-rejection-reason="{{ $application->rejection_reason }}"
                             data-submitted-at="{{ $application->submitted_at }}"
                             data-reviewed-at="{{ $application->reviewed_at }}"
@@ -45,11 +47,13 @@
                                     <div class="progress-line"
                                         style="left: 32px; width: {{ $application->status === 'rejected'
                                             ? 'calc(62% - 32px)'
-                                            : ($application->status === 'approved'
-                                                ? 'calc(61% - 32px)'
-                                                : ($application->reviewed_at
-                                                    ? 'calc(33% - 32px)'
-                                                    : '0')) }};">
+                                            : ($application->status === 'approved' && $application->payment_status === 'paid'
+                                                ? 'calc(95% - 32px)'
+                                                : ($application->status === 'approved'
+                                                    ? 'calc(70% - 32px)'
+                                                    : ($application->reviewed_at
+                                                        ? 'calc(33% - 32px)'
+                                                        : '0'))) }};">
                                     </div>
 
                                     <div class="progress-step">
@@ -73,8 +77,16 @@
                                     </div>
                                     <div class="progress-step">
                                         <div
-                                            class="step-icon {{ $application->status === 'completed' ? 'completed' : ($application->status === 'approved' ? 'current' : '') }}">
-                                            4</div>
+                                            class="step-icon {{ $application->status === 'completed' ? 'completed' : ($application->status === 'approved' && $application->payment_status === 'paid' ? 'completed' : ($application->status === 'approved' ? 'current' : '')) }}">
+                                            {{ $application->status === 'approved' && $application->payment_status === 'paid' ? '✓' : '4' }}</div>
+                                        <div class="step-label">
+                                            {{ $application->status === 'approved' && $application->payment_status === 'paid' ? 'Payment Complete' : 'Payment' }}
+                                        </div>
+                                    </div>
+                                    <div class="progress-step">
+                                        <div
+                                            class="step-icon {{ $application->status === 'completed' ? 'completed' : ($application->status === 'approved' && $application->payment_status === 'paid' ? 'current' : '') }}">
+                                            5</div>
                                         <div class="step-label">Meet & Greet</div>
                                     </div>
                                 </div>
@@ -96,10 +108,24 @@
                                                 {{ $application->approved_at ? \Carbon\Carbon::parse($application->approved_at)->format('M d, Y h:i A') : '' }}
                                             </div>
                                             <div class="timeline-content">
-                                                Application approved! Schedule a meet & greet with
-                                                {{ $application->pet->name }}.
+                                                Application approved! 
+                                                @if($application->payment_status === 'paid')
+                                                    Payment completed. Ready to schedule meet & greet with {{ $application->pet->name }}.
+                                                @else
+                                                    Payment required to proceed with adoption of {{ $application->pet->name }}.
+                                                @endif
                                             </div>
                                         </li>
+                                        @if($application->payment_status === 'paid')
+                                        <li class="timeline-item">
+                                            <div class="timeline-date">
+                                                {{ $application->payment_date ? \Carbon\Carbon::parse($application->payment_date)->format('M d, Y h:i A') : '' }}
+                                            </div>
+                                            <div class="timeline-content">
+                                                Adoption fee payment completed successfully.
+                                            </div>
+                                        </li>
+                                        @endif
                                     @elseif($application->status === 'rejected')
                                         @if ($application->reviewed_at)
                                             <li class="timeline-item">
@@ -134,10 +160,23 @@
                                 </ul>
                                 @if ($application->status === 'approved')
                                     <div class="action-buttons" style="margin-top: 2rem;">
-                                        <a href="#" class="btn btn-primary schedule-meet-btn"
-                                            data-app-id="{{ $application->application_id }}">
-                                            Schedule Meet & Greet
-                                        </a>
+                                        @if($application->payment_status === 'paid')
+                                            <a href="#" class="btn btn-primary schedule-meet-btn"
+                                                data-app-id="{{ $application->application_id }}">
+                                                Schedule Meet & Greet
+                                            </a>
+                                        @else
+                                            <button type="button" 
+                                                    class="btn btn-primary pay-adoption-fee-btn"
+                                                    data-application-id="{{ $application->application_id }}">
+                                                Pay Adoption Fee
+                                            </button>
+                                            <div class="payment-info mt-2">
+                                                <small class="text-gray-600">
+                                                    Adoption Fee: ₱{{ number_format($application->adoption_fee ?? 0, 2) }}
+                                                </small>
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             </div>
@@ -417,10 +456,28 @@
             document.getElementById('modal-application-details').innerHTML = card.querySelector('.adopter-answers')
                 ?.outerHTML || '';
 
-            // Show/hide action button
+            // Show/hide action button and set correct text
             const actionBtn = document.getElementById('modal-action-btn');
+            const paymentStatus = card.getAttribute('data-payment-status');
+            const paymentAmount = card.getAttribute('data-payment-amount');
+            const applicationId = card.getAttribute('data-application-id');
+            
             if (statusRaw === 'approved') {
                 actionBtn.style.display = '';
+                actionBtn.setAttribute('data-application-id', applicationId);
+                
+                if (paymentStatus === 'paid') {
+                    actionBtn.textContent = 'Schedule Meet & Greet';
+                    actionBtn.className = 'btn btn-primary btn-block';
+                } else {
+                    actionBtn.textContent = 'Pay Adoption Fee';
+                    actionBtn.className = 'btn btn-primary btn-block';
+                    // Add payment amount info
+                    const paymentInfo = document.createElement('div');
+                    paymentInfo.className = 'payment-info mt-2';
+                    paymentInfo.innerHTML = `<small class="text-gray-600">Adoption Fee: ₱${parseFloat(paymentAmount || 0).toFixed(2)}</small>`;
+                    actionBtn.parentNode.appendChild(paymentInfo);
+                }
             } else {
                 actionBtn.style.display = 'none';
             }
@@ -455,17 +512,19 @@
 
 
 
-        // Attach to modal button
-        const scheduleBtns = document.querySelectorAll('.btn.btn-primary, #modal-action-btn');
-        scheduleBtns.forEach(btn => {
-            if (btn.textContent.includes('Schedule Meet & Greet')) {
-                btn.onclick = function(e) {
-                    e.preventDefault();
-                    e.stopPropagation(); // Prevents application modal from opening
-                    openScheduleMeetModal(this.getAttribute('data-application-id'));
-                };
-            }
+        // Attach to payment buttons
+        const payButtons = document.querySelectorAll('.pay-adoption-fee-btn');
+        payButtons.forEach(btn => {
+            btn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevents application modal from opening
+                const appId = this.getAttribute('data-application-id');
+                window.location.href = `/payment/${appId}`;
+            };
         });
+
+        // The modal-action-btn is handled by the application-modal component
+        // No need for global click handler here
 
         function submitScheduleMeet(e) {
             e.preventDefault();

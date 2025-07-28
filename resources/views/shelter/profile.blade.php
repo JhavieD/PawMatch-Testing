@@ -64,6 +64,47 @@
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
                 </div>
+            </div>
+
+            <!-- Payment Settings -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Payment Settings</h2>
+                    <p class="card-subtitle">Configure your adoption fees and bank details for payouts</p>
+                </div>
+                <div class="card-content">
+                    <form method="POST" action="{{ route('shelter.payment.update') }}">
+                        @csrf
+                        <div class="form-group">
+                            <label for="adoption_fee" class="form-label">Default Adoption Fee (PHP)</label>
+                            <input type="number" id="adoption_fee" name="adoption_fee" class="form-input" 
+                                   value="{{ $shelter->adoption_fee ?? 0 }}" min="0" step="0.01" />
+                            <small class="form-hint">This will be the default fee for all your pets. You can override this for individual pets.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bank_name" class="form-label">Bank Name</label>
+                            <input type="text" id="bank_name" name="bank_name" class="form-input" 
+                                   value="{{ $shelter->bank_name ?? '' }}" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bank_account_name" class="form-label">Account Name</label>
+                            <input type="text" id="bank_account_name" name="bank_account_name" class="form-input" 
+                                   value="{{ $shelter->bank_account_name ?? '' }}" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bank_account_number" class="form-label">Account Number</label>
+                            <input type="text" id="bank_account_number" name="bank_account_number" class="form-input" 
+                                   value="{{ $shelter->bank_account_number ?? '' }}" />
+                            <small class="form-hint">This is where you'll receive your 80% share of adoption fees.</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Update Payment Settings</button>
+                    </form>
+                </div>
+            </div>
                 <!-- Verification Settings -->
                 <div class="settings-card">
                     <div class="card-header">

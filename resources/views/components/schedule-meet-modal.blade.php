@@ -60,6 +60,7 @@
         });
         document.getElementById('scheduleMeetForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('Schedule meet form submitted');
             var form = e.target;
             var appId = document.getElementById('scheduleMeetApplicationId').value;
             var date = form.date.value;
@@ -67,13 +68,17 @@
             var message = form.message.value;
             var errorDiv = document.getElementById('scheduleMeetError');
             errorDiv.style.display = 'none';
+            
+            console.log('Form data:', { appId, date, time, message });
             try {
+                console.log('Sending request to /adopter/schedule-meet');
                 const response = await fetch('/adopter/schedule-meet', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                            .getAttribute('content')
+                            ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            : '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
                         application_id: appId,
@@ -82,6 +87,7 @@
                         meet_message: message
                     })
                 });
+                console.log('Response status:', response.status);
                 if (!response.ok) {
                     const data = await response.json();
                     errorDiv.textContent = data.error || data.message || 'An error occurred.';

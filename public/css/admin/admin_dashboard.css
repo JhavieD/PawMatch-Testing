@@ -1212,3 +1212,82 @@ body {
     padding: 1rem 0.5rem 1rem 0.5rem;
   }
 }
+
+/* Transaction List Styles */
+.transaction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transaction-amount {
+  font-weight: 600;
+  color: #059669;
+  margin-left: 0.5rem;
+}
+
+.status-paid {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Chart Container Styles */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+/* Payout List Styles */
+.payout-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.payout-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.payout-item:hover {
+  background-color: #f9fafb;
+}
+
+.payout-item:last-child {
+  border-bottom: none;
+}
+
+.payout-info {
+  flex: 1;
+}
+
+.payout-name {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.payout-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.payout-amount {
+  font-weight: 600;
+  color: #059669;
+  font-size: 1rem;
+}

@@ -36,94 +36,197 @@
         </div>
     </div>
 
-    <!-- Content Grid -->
-    <div class="content-grid">
-        <!-- Pending User Approvals -->
+    <!-- Payment Stats Grid -->
+    <div class="stats-grid" style="margin-top: 2rem;">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+            </div>
+            <div class="stat-value">₱{{ number_format($totalRevenue, 2) }}</div>
+            <div class="stat-title">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+            </div>
+            <div class="stat-value">₱{{ number_format($totalCommission, 2) }}</div>
+            <div class="stat-title">Commission Earned</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+            </div>
+            <div class="stat-value">₱{{ number_format($pendingPayouts, 2) }}</div>
+            <div class="stat-title">Pending Payouts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-percentage"></i></div>
+            </div>
+            <div class="stat-value">{{ $successRate }}%</div>
+            <div class="stat-title">Payment Success Rate</div>
+        </div>
+    </div>
+
+    <!-- Charts and Content Grid -->
+    <div class="content-grid" style="grid-template-columns: 1fr 1fr; margin-top: 2rem;">
+        <!-- Revenue Chart -->
         <div class="content-card">
             <div class="card-header">
-                <h2>Pending User Approvals</h2>
-                <a href="{{ route('admin.verifications') }}" class="btn btn-outline">View All</a>
+                <h2>Monthly Revenue</h2>
             </div>
-            @if (isset($pendingApprovals) && count($pendingApprovals) > 0)
-                <ul class="user-list">
-                    @foreach ($pendingApprovals as $approval)
+            <div class="chart-container" style="height: 300px; position: relative;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Provider Payouts -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>Provider Payouts</h2>
+            </div>
+            <div class="payout-list">
+                @if(isset($payoutSummary))
+                    @foreach($payoutSummary['shelters'] ?? [] as $shelterPayout)
+                    <div class="payout-item">
+                        <div class="payout-info">
+                            <div class="payout-name">{{ $shelterPayout->shelter->shelter_name ?? 'Unknown Shelter' }}</div>
+                            <div class="payout-count">{{ $shelterPayout->transaction_count }} transactions</div>
+                        </div>
+                        <div class="payout-amount">₱{{ number_format($shelterPayout->total_payout, 2) }}</div>
+                    </div>
+                    @endforeach
+                    
+                    @foreach($payoutSummary['rescuers'] ?? [] as $rescuerPayout)
+                    <div class="payout-item">
+                        <div class="payout-info">
+                            <div class="payout-name">{{ $rescuerPayout->rescuer->organization_name ?? 'Unknown Rescuer' }}</div>
+                            <div class="payout-count">{{ $rescuerPayout->transaction_count }} transactions</div>
+                        </div>
+                        <div class="payout-amount">₱{{ number_format($rescuerPayout->total_payout, 2) }}</div>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="payout-item">
+                        <div class="payout-info">
+                            <div class="payout-name">No payouts available</div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="content-grid" style="grid-template-columns: 1fr; margin-top: 2rem;">
+        <div class="content-card">
+            <div class="card-header">
+                <h2>Recent Transactions</h2>
+                <a href="{{ route('admin.transactions') }}" class="btn btn-outline">View All</a>
+            </div>
+            @if (isset($recentTransactions) && count($recentTransactions) > 0)
+                <ul class="transaction-list">
+                    @foreach ($recentTransactions as $transaction)
                         <li class="list-item">
                             <div class="item-info">
                                 <div class="item-title">
-                                    {{ $approval->first_name }} {{ $approval->last_name }}
-                                    <span class="verification-type">({{ ucfirst($approval->type) }})</span>
+                                    {{ $transaction->application->pet->name ?? 'Unknown Pet' }}
+                                    <span class="transaction-amount">₱{{ number_format($transaction->total_amount, 2) }}</span>
                                 </div>
-                                <div class="item-subtitle">{{ $approval->email }}</div>
-                                @if ($approval->type === 'shelter')
-                                    <div class="item-subtitle">{{ $approval->organization_name }}</div>
-                                @endif
-                            </div>
-                            <!-- Work in Progress -->
-                            <div class="flex gap-2">
-                                <form action="{{ route('admin.verifications.approve', $approval->verification_id) }}"
-                                    method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary btn-sm">Approve</button>
-                                </form>
-                                <form action="{{ route('admin.verifications.reject', $approval->verification_id) }}"
-                                    method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                                </form>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <div class="list-item">
-                    <div class="item-info">
-                        <div class="item-subtitle">No pending approvals</div>
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        <!-- Recent Stray Reports -->
-        <div class="content-card">
-            <div class="card-header">
-                <h2>Recent Stray Reports</h2>
-                <a href="{{ route('admin.stray-reports') }}" class="btn btn-outline">View All</a>
-            </div>
-            @if (isset($recentReports) && count($recentReports) > 0)
-                <ul class="report-list">
-                    @foreach ($recentReports as $report)
-                        <li class="list-item">
-                            <div class="item-info">
-                               <div class="item-title">Stray Animal Report</div>
-                                <div class="item-subtitle">{{ $report->location }}</div>
-                                <div class="item-subtitle">Reported
-                                    {{ \Carbon\Carbon::parse($report->reported_at)->diffForHumans() }}</div>
+                                <div class="item-subtitle">{{ $transaction->provider_name ?? 'Unknown Provider' }}</div>
+                                <div class="item-subtitle">{{ $transaction->payment_date ? $transaction->payment_date->format('M d, Y H:i') : 'N/A' }}</div>
                             </div>
                             <div class="btn-group">
-                                <span class="status status-{{ $report->status }}">{{ ucfirst($report->status) }}</span>
-                                <button class="btn btn-outline"
-                                    onclick="window.location.href='{{ route('admin.stray-reports') }}?search={{ $report->report_id }}'">
-                                    View
+                                <span class="status status-{{ $transaction->payment_status }}">
+                                    {{ ucfirst($transaction->payment_status) }}
+                                </span>
+                                <button class="btn btn-outline" onclick="viewTransactionDetails({{ $transaction->transaction_id }})">
+                                    View Details
                                 </button>
                             </div>
                         </li>
                     @endforeach
                 </ul>
             @else
-                <ul class="report-list">
+                <ul class="transaction-list">
                     <li class="list-item">
                         <div class="item-info">
-                            <div class="item-subtitle">No recent stray reports</div>
+                            <div class="item-subtitle">No recent transactions</div>
                         </div>
                     </li>
                 </ul>
             @endif
         </div>
     </div>
+
+    <!-- Transaction Details Modal -->
+    <div id="transactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Transaction Details</h2>
+                <button onclick="closeTransactionModal()" class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="transactionDetails">
+                    <!-- Transaction details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Revenue Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('revenueChart');
+            if (ctx) {
+                const revenueChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($monthlyRevenue['months'] ?? []),
+                        datasets: [{
+                            label: 'Total Revenue',
+                            data: @json($monthlyRevenue['revenue'] ?? []),
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.1
+                        }, {
+                            label: 'Commission',
+                            data: @json($monthlyRevenue['commission'] ?? []),
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₱' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ₱' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
         function approveVerification(verificationId, type) {
             if (confirm('Are you sure you want to approve this verification?')) {
                 const url = type === 'shelter' ?
@@ -183,5 +286,54 @@
                     });
             }
         }
+
+        // Transaction Details Modal
+        function viewTransactionDetails(transactionId) {
+            
+            // Show loading state
+            document.getElementById('transactionDetails').innerHTML = '<p>Loading...</p>';
+            document.getElementById('transactionModal').style.display = 'flex';
+            
+            // Add CSRF token to headers
+            const headers = {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+            
+            fetch(`/admin/transactions/${transactionId}/details`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('transactionDetails').innerHTML = data.html;
+                    } else {
+                        document.getElementById('transactionDetails').innerHTML = '<p>Error loading transaction details</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading transaction details:', error);
+                    document.getElementById('transactionDetails').innerHTML = '<p>Error loading transaction details: ' + error.message + '</p>';
+                });
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('transactionModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('transactionModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTransactionModal();
+            }
+        });
     </script>
 @endpush

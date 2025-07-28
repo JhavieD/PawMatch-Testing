@@ -40,15 +40,19 @@
         var scheduleBtn = document.getElementById('modal-action-btn');
         if (scheduleBtn) {
             scheduleBtn.addEventListener('click', function() {
+                console.log('Modal action button clicked');
                 var appId = scheduleBtn.getAttribute('data-application-id') || window
                     .currentApplicationId;
+                console.log('Application ID:', appId);
                 if (!appId) {
                     alert('Application ID not found.');
                     return;
                 }
                 if (typeof openScheduleMeetModalModal === 'function') {
+                    console.log('Calling openScheduleMeetModalModal');
                     openScheduleMeetModalModal(appId);
                 } else {
+                    console.error('openScheduleMeetModalModal function not found');
                     alert('Schedule Meet modal function not found.');
                 }
             });
