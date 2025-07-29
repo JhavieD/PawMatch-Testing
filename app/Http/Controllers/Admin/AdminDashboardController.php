@@ -20,6 +20,7 @@ use App\Http\Controllers\Shared\Controller;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\Shared\StrayReportStatusLog;
 use App\Models\Shared\MayaTransaction;
+use App\Models\ActivityLog;
 
 
 class AdminDashboardController extends Controller
@@ -53,9 +54,9 @@ class AdminDashboardController extends Controller
         $payoutSummary = $this->getPayoutSummary();
 
         return view('admin.admin_dashboard', compact(
-            'totalUsers', 
-            'activeAdoptions', 
-            'pendingReports', 
+            'totalUsers',
+            'activeAdoptions',
+            'pendingReports',
             'investigatingReports',
             'newUsersToday',
             'totalRevenue',
@@ -80,14 +81,14 @@ class AdminDashboardController extends Controller
         // Search by adopter name or pet name
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('adopter.user', function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('adopter.user', function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%");
                 })
-                ->orWhereHas('pet', function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                });
+                    ->orWhereHas('pet', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -103,9 +104,9 @@ class AdminDashboardController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -146,11 +147,11 @@ class AdminDashboardController extends Controller
         // Search by pet name or shelter name
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhereHas('shelter', function($q) use ($search) {
-                      $q->where('shelter_name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('shelter', function ($q) use ($search) {
+                        $q->where('shelter_name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -199,7 +200,7 @@ class AdminDashboardController extends Controller
                 'rescuers' => User::where('role', 'rescuer')->count(),
                 'new_this_month' => User::whereMonth('created_at', Carbon::now()->month)->count(),
             ],
-            
+
             // Pet statistics
             'pet_stats' => [
                 'total' => Pet::count(),
@@ -210,7 +211,7 @@ class AdminDashboardController extends Controller
                     ->groupBy('species')
                     ->get(),
             ],
-            
+
             // Application statistics
             'application_stats' => [
                 'total' => AdoptionApplication::count(),
@@ -250,7 +251,7 @@ class AdminDashboardController extends Controller
     {
         $totalApplications = AdoptionApplication::count();
         $approvedApplications = AdoptionApplication::where('status', 'approved')->count();
-        
+
         return $totalApplications > 0 ? round(($approvedApplications / $totalApplications) * 100, 2) : 0;
     }
 
@@ -263,8 +264,8 @@ class AdminDashboardController extends Controller
         ]);
 
         $users = User::whereIn('id', $request->user_ids)
-                    ->where('role', '!=', 'admin')
-                    ->get();
+            ->where('role', '!=', 'admin')
+            ->get();
 
         switch ($request->action) {
             case 'activate':
@@ -289,7 +290,7 @@ class AdminDashboardController extends Controller
     public function getUserActivity($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Get user's activity log (you'll need to implement activity logging)
         $activities = [
             [
@@ -317,7 +318,7 @@ class AdminDashboardController extends Controller
     {
         $users = User::all();
         $csvFileName = 'users_' . date('Y-m-d_His') . '.csv';
-        
+
         $headers = [
             "Content-type" => "text/csv",
             "Content-Disposition" => "attachment; filename=$csvFileName",
@@ -328,7 +329,7 @@ class AdminDashboardController extends Controller
 
         $columns = ['ID', 'Name', 'Email', 'Role', 'Status', 'Joined Date'];
 
-        $callback = function() use ($users, $columns) {
+        $callback = function () use ($users, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
@@ -412,7 +413,7 @@ class AdminDashboardController extends Controller
     {
         return view('admin.profile', [
             'user' => auth()->user()
-        ]);    
+        ]);
     }
 
     /**
@@ -484,10 +485,10 @@ class AdminDashboardController extends Controller
         // Filter by search term
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('report_id', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -517,12 +518,12 @@ class AdminDashboardController extends Controller
                 ->orderBy('created_at', 'asc')
                 ->select('admin_actions.*', 'users.first_name', 'users.last_name')
                 ->get()
-                ->map(function($action) {
+                ->map(function ($action) {
                     return [
                         'date' => \Carbon\Carbon::parse($action->created_at)->format('M d, Y g:i A'),
                         'content' => $action->reason,
-                        'author' => ($action->first_name && $action->last_name) 
-                            ? $action->first_name . ' ' . $action->last_name 
+                        'author' => ($action->first_name && $action->last_name)
+                            ? $action->first_name . ' ' . $action->last_name
                             : 'Admin',
                     ];
                 });
@@ -581,7 +582,7 @@ class AdminDashboardController extends Controller
 
             // Get the appropriate message with better fallback handling
             $message = null;
-            
+
             if (isset($statusMessages[$oldStatus]) && isset($statusMessages[$oldStatus][$newStatus])) {
                 $message = $statusMessages[$oldStatus][$newStatus];
             } else {
@@ -607,7 +608,7 @@ class AdminDashboardController extends Controller
             // Update the report status
             $report->status = $newStatus;
             $report->save();
-       
+
             $report->logStatusChange($oldStatus, $newStatus, auth()->id(), $message);
 
             return response()->json([
@@ -615,7 +616,6 @@ class AdminDashboardController extends Controller
                 'message' => 'Status updated successfully',
                 'new_status' => $newStatus
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Status update error: ' . $e->getMessage());
             return response()->json([
@@ -633,16 +633,16 @@ class AdminDashboardController extends Controller
         }
 
         $timeline = StrayReportStatusLog::with('changedBy')
-            ->where('adopter_id', $report->report_id) 
+            ->where('adopter_id', $report->report_id)
             ->orderBy('changed_at', 'desc')
             ->get()
-            ->map(function($log) {
+            ->map(function ($log) {
                 return [
                     'date' => $log->changed_at->format('M d, Y g:i A'),
                     'content' => $log->notes,
-                    'author' => $log->changedBy ? 
-                        ($log->changedBy->first_name && $log->changedBy->last_name ? 
-                            $log->changedBy->first_name . ' ' . $log->changedBy->last_name : 
+                    'author' => $log->changedBy ?
+                        ($log->changedBy->first_name && $log->changedBy->last_name ?
+                            $log->changedBy->first_name . ' ' . $log->changedBy->last_name :
                             'Admin') : 'System',
                     'status_change' => $log->old_status . ' → ' . $log->new_status
                 ];
@@ -821,7 +821,7 @@ class AdminDashboardController extends Controller
             ->first();
 
         $user = User::find($verification->submitted_by);
-        
+
         return redirect()->back()->with('success', 'Verification status updated.');
     }
 
@@ -832,31 +832,33 @@ class AdminDashboardController extends Controller
             $report = StrayReports::findOrFail($reportId);
             $reportLocation = strtolower($report->location);
             $locationKeywords = [];
-            
+
             $parts = preg_split('/[,|]/', $reportLocation);
             foreach ($parts as $part) {
                 $cleaned = trim($part);
-                
+
                 if (preg_match('/\b(\w+(?:\s+\w+)?)\s+(city|town|municipality)\b/i', $cleaned, $matches)) {
                     $cityName = strtolower(trim($matches[1]));
-                    if (strlen($cityName) > 2) { 
+                    if (strlen($cityName) > 2) {
                         $locationKeywords[] = $cityName;
                     }
                 }
-                
+
                 $words = preg_split('/\s+/', $cleaned);
                 foreach ($words as $word) {
                     $word = strtolower(trim($word));
-                    
-                    if (strlen($word) > 4 && 
-                        !in_array($word, ['street', 'barangay', 'subdivision', 'village', 'city', 'town', 'municipality', 'province'])) {
+
+                    if (
+                        strlen($word) > 4 &&
+                        !in_array($word, ['street', 'barangay', 'subdivision', 'village', 'city', 'town', 'municipality', 'province'])
+                    ) {
                         $locationKeywords[] = $word;
                     }
                 }
             }
-            
+
             $locationKeywords = array_unique(array_filter($locationKeywords));
-            
+
             // Find shelters - INCLUDE ALL SHELTERS (verified and unverified)
             $shelters = \DB::table('shelters')
                 ->join('users', 'shelters.user_id', '=', 'users.user_id')
@@ -865,7 +867,7 @@ class AdminDashboardController extends Controller
                     'shelters.shelter_name',
                     'shelters.location',
                     'shelters.contact_info',
-                    'shelters.verified', 
+                    'shelters.verified',
                     'users.email',
                     'users.first_name',
                     'users.last_name'
@@ -873,33 +875,33 @@ class AdminDashboardController extends Controller
                 ->get();
 
             // Sort shelters by location relevance with verification status
-            $sortedShelters = $shelters->map(function($shelter) use ($locationKeywords) {
+            $sortedShelters = $shelters->map(function ($shelter) use ($locationKeywords) {
                 $shelterLocation = strtolower($shelter->location);
                 $matchScore = 0;
-                
+
                 foreach ($locationKeywords as $keyword) {
                     if (strpos($shelterLocation, $keyword) !== false) {
                         $matchScore += 1;
                     }
-                    
+
                     // Enhanced matching for cities
                     if (preg_match('/\b(\w+(?:\s+\w+)?)\s+(city|town|municipality)\b/i', $shelterLocation, $shelterMatches)) {
                         $shelterCityName = strtolower(trim($shelterMatches[1]));
                         if ($keyword === $shelterCityName) {
-                            $matchScore += 3; 
+                            $matchScore += 3;
                         }
                     }
                 }
-                
+
                 $shelter->match_score = $matchScore;
                 $shelter->distance_text = $matchScore >= 2 ? 'Same Area' : 'Different Area';
-                
+
                 // ADD VERIFICATION STATUS TO SHELTER NAME
                 $shelter->display_name = $shelter->shelter_name . ($shelter->verified ? '' : ' (Unverified)');
                 $shelter->verification_status = $shelter->verified ? 'verified' : 'unverified';
-                
+
                 return $shelter;
-            })->sortByDesc(function($shelter) {
+            })->sortByDesc(function ($shelter) {
                 // PRIORITIZE VERIFIED SHELTERS, THEN BY MATCH SCORE
                 return ($shelter->verified ? 1000 : 0) + $shelter->match_score;
             });
@@ -908,7 +910,6 @@ class AdminDashboardController extends Controller
                 'success' => true,
                 'shelters' => $sortedShelters->values()->all()
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -927,7 +928,7 @@ class AdminDashboardController extends Controller
             ]);
 
             $report = StrayReports::findOrFail($reportId);
-            
+
             if ($report->status === 'investigating') {
                 return response()->json([
                     'success' => false,
@@ -946,7 +947,7 @@ class AdminDashboardController extends Controller
 
             $shelterList = implode(', ', $shelterNames);
 
-            $message = count($shelterNames) === 1 
+            $message = count($shelterNames) === 1
                 ? "The stray animal report is now being handled by {$shelterList}. They have been notified and will work to help the animal you reported. Thank you for caring."
                 : "The stray animal report is now being handled by our partner shelters: {$shelterList}. They have been notified and will coordinate to help the animal you reported. Thank you for making a difference.";
 
@@ -962,7 +963,7 @@ class AdminDashboardController extends Controller
 
             // Create admin action with professional message
             \DB::table('admin_actions')->insert([
-                'action_type' => 'status_update', 
+                'action_type' => 'status_update',
                 'target_report_id' => $report->report_id,
                 'reason' => $message,
                 'admin_id' => auth()->id(),
@@ -974,7 +975,6 @@ class AdminDashboardController extends Controller
                 'success' => true,
                 'message' => 'Report submitted to shelters successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -1035,11 +1035,11 @@ class AdminDashboardController extends Controller
             ]);
 
             $report = StrayReports::findOrFail($id);
-            
+
             // Determine the new status - flagged reports are automatically cancelled
             $newStatus = 'cancelled';  // Always set to cancelled when flagged
             $oldStatus = $report->status;
-            
+
             $report->update([
                 'status' => $newStatus, // Always cancelled when flagged
                 'is_flagged' => true,
@@ -1053,7 +1053,7 @@ class AdminDashboardController extends Controller
             DB::table('admin_actions')->insert([
                 'action_type' => 'status_update',
                 'target_report_id' => $report->report_id,
-                'reason' => $request->boolean('is_duplicate', false) 
+                'reason' => $request->boolean('is_duplicate', false)
                     ? "Report marked as duplicate and cancelled: {$request->flag_reason}"
                     : "Report flagged and cancelled: {$request->flag_reason}",
                 'admin_id' => auth()->id(),
@@ -1062,12 +1062,11 @@ class AdminDashboardController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => $request->boolean('is_duplicate', false) 
+                'message' => $request->boolean('is_duplicate', false)
                     ? 'Report marked as duplicate and cancelled successfully'
                     : 'Report flagged and cancelled successfully',
                 'new_status' => $newStatus
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Flag report error: ' . $e->getMessage());
             return response()->json([
@@ -1091,7 +1090,7 @@ class AdminDashboardController extends Controller
     {
         $total = \App\Models\Shared\MayaTransaction::count();
         $successful = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')->count();
-        
+
         return $total > 0 ? round(($successful / $total) * 100, 2) : 0;
     }
 
@@ -1186,7 +1185,7 @@ class AdminDashboardController extends Controller
     {
         try {
             $transaction = MayaTransaction::findOrFail($transactionId);
-            
+
             // Check if transaction is eligible for payout
             if ($transaction->payment_status !== 'paid') {
                 return response()->json([
@@ -1245,7 +1244,7 @@ class AdminDashboardController extends Controller
             if (!config('maya.disbursement.test_mode', false)) {
                 $payoutDelay = config('maya.disbursement.payout_delay_hours', 24);
                 $payoutTime = $transaction->payment_date->addHours($payoutDelay);
-                
+
                 if (now()->lt($payoutTime)) {
                     return response()->json([
                         'success' => false,
@@ -1269,7 +1268,6 @@ class AdminDashboardController extends Controller
                     'message' => 'Failed to process payout - check logs for details'
                 ]);
             }
-
         } catch (\Exception $e) {
             \Log::error("Payout processing error: " . $e->getMessage());
             return response()->json([
@@ -1291,5 +1289,13 @@ class AdminDashboardController extends Controller
             ->get();
 
         return view('admin.pending-payouts', compact('pendingPayouts'));
+    }
+
+    public function getUserActivityLogs($userId)
+    {
+        $logs = \App\Models\ActivityLog::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get(['action', 'created_at']);
+        return response()->json($logs);
     }
 }

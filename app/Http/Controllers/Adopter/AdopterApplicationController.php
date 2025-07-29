@@ -84,6 +84,11 @@ class AdopterApplicationController extends Controller
             'status' => 'pending',
             'submitted_at' => now(),
         ]);
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Submitted an adoption application',
+        ]);
         return response()->json(['success' => true, 'application_id' => $application->application_id]);
     }
 

@@ -142,6 +142,11 @@ class AdopterDashboardController extends Controller
 
         $this->clearDashboardCache($user->user_id);
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Updated profile information',
+        ]);
+
         return back()->with('success', 'Profile updated!');
     }
 
@@ -157,6 +162,12 @@ class AdopterDashboardController extends Controller
         }
         $user->password = \Hash::make($request->new_password);
         $user->save();
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Changed password',
+        ]);
+
         return back()->with('success', 'Password updated!');
     }
 

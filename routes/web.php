@@ -98,6 +98,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::post('/admin/stray-reports/{id}/unflag', [AdminDashboardController::class, 'unflagReport'])->name('admin.stray-reports.unflag');
         // User Management
         Route::get('/admin/users/{user}', [AdminDashboardController::class, 'showUser'])->name('admin.users.show');
+        Route::get('/admin/users/{user}/activity-logs', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'getUserActivityLogs']);
         Route::post('/admin/users', [AdminDashboardController::class, 'storeUser'])->name('admin.users.store');
         Route::put('/admin/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('admin.users.update');
         Route::delete('/admin/users/{user}', [AdminDashboardController::class, 'deleteUser'])->name('admin.users.delete');
@@ -120,11 +121,11 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/shelter/messages', [MessageController::class, 'shelterMessages'])->name('shelter.messages');
         Route::get('/shelter/profile', [ShelterDashboardController::class, 'profile'])->name('shelter.profile');
         Route::post('/shelter/profile/update', [ShelterDashboardController::class, 'updateProfile'])->name('shelter.profile.update');
-        
+
         // Payment history routes for shelter
         Route::get('/shelter/transaction-history', [PaymentController::class, 'paymentHistory'])->name('shelter.transaction-history');
         Route::get('/payment/transaction/{transactionId}/details', [PaymentController::class, 'getTransactionDetails'])->name('payment.transaction.details');
-        
+
         // Payment settings routes for shelter
         Route::post('/shelter/payment/update', [PaymentSettingsController::class, 'updateShelterPayment'])->name('shelter.payment.update');
         Route::post('/shelter/profile/password', [ShelterDashboardController::class, 'updatePassword'])->name('shelter.profile.password');
@@ -171,10 +172,10 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::post('/rescuer/profile/update', [RescuerDashboardController::class, 'updateProfile'])->name('rescuer.profile.update');
         Route::post('/rescuer/profile/password', [RescuerDashboardController::class, 'updatePassword'])->name('rescuer.profile.password');
         Route::post('/rescuer/profile/delete', [RescuerDashboardController::class, 'deleteAccount'])->name('rescuer.profile.delete');
-        
+
         // Payment history routes for rescuer
         Route::get('/rescuer/transaction-history', [PaymentController::class, 'paymentHistory'])->name('rescuer.transaction-history');
-        
+
         // Payment settings routes for rescuer
         Route::post('/rescuer/payment/update', [PaymentSettingsController::class, 'updateRescuerPayment'])->name('rescuer.payment.update');
 
@@ -230,7 +231,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::post('/adopter/schedule-meet', [App\Http\Controllers\Shared\MessageController::class, 'scheduleMeet'])->name('adopter.schedule-meet');
         Route::post('/adopter/review', [AdopterReviewController::class, 'store'])->name('adopter.review.store');
         Route::get('/adopter/review/check', [AdopterReviewController::class, 'checkExistingReview'])->name('adopter.review.check');
-        
+
         // Payment routes
         Route::get('/payment/{applicationId}', [PaymentController::class, 'showPaymentForm'])->name('payment.show');
         Route::post('/payment/{applicationId}/process', [PaymentController::class, 'processPayment'])->name('payment.process');
@@ -238,11 +239,9 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::get('/payment/{applicationId}/failure', [PaymentController::class, 'paymentFailure'])->name('payment.failure');
         Route::get('/payment/{applicationId}/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
         Route::get('/payment/{applicationId}/status', [PaymentController::class, 'checkPaymentStatus'])->name('payment.status');
-        
+
         // Payment history routes for adopter
         Route::get('/adopter/transaction-history', [PaymentController::class, 'paymentHistory'])->name('adopter.transaction-history');
-        
-
     });
 
     // -------- SHARED ROUTES (FOR ALL AUTHENTICATED USERS) --------
@@ -306,8 +305,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{notification}/read', [App\Http\Controllers\Shared\NotificationController::class, 'markAsRead']);
     Route::delete('/notifications/{notification}', [App\Http\Controllers\Shared\NotificationController::class, 'destroy']);
     Route::delete('/notifications', [App\Http\Controllers\Shared\NotificationController::class, 'clearAll']);
-    
-
 });
 
 // =====================
@@ -329,16 +326,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/{user}/ban', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'banUser'])->name('users.ban');
     Route::post('/users/{user}/unban', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'unbanUser'])->name('users.unban');
     Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'deleteUser'])->name('users.delete');
-    
+
     // Payment Dashboard Routes
     Route::get('/transactions', [App\Http\Controllers\Admin\PaymentDashboardController::class, 'transactions'])->name('transactions');
     Route::get('/payouts', [App\Http\Controllers\Admin\AdminDashboardController::class, 'getPendingPayouts'])->name('payouts');
     Route::post('/payouts/{transactionId}/process', [App\Http\Controllers\Admin\AdminDashboardController::class, 'processManualPayout'])->name('payouts.process');
     Route::get('/payouts/stats', [App\Http\Controllers\Admin\AdminDashboardController::class, 'getPayoutStats'])->name('payouts.stats');
     Route::get('/transactions/{transactionId}/details', [App\Http\Controllers\Admin\PaymentDashboardController::class, 'getTransactionDetails'])->name('transactions.details');
-    
-
-
 });
 
 //MGA MESSED UP NA NAGLOGIN AS USER DYAN

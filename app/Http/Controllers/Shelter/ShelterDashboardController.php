@@ -220,6 +220,7 @@ class ShelterDashboardController extends Controller
 
     public function update(Request $request, $petId)
     {
+        $shelter = auth()->user()->shelter;
         \Log::info('Pet Update Request', [
             'pet_id' => $petId,
             'images_to_delete' => $request->input('images_to_delete'),
@@ -336,6 +337,7 @@ class ShelterDashboardController extends Controller
         if ($request->expectsJson()) {
             return response()->json(['success' => true]);
         }
+
 
         return redirect()->route('shelter.pets')->with('success', 'Pet updated successfully!');
     }
@@ -465,6 +467,12 @@ class ShelterDashboardController extends Controller
             // Optionally set user's profile_image to null
             $user->update(['profile_image' => null]);
         }
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Updated profile information',
+        ]);
+
         $this->clearDashboardCache($user->user_id);
 
         return back()->with('success', 'Profile updated!');
@@ -485,6 +493,11 @@ class ShelterDashboardController extends Controller
         $user->password = \Hash::make($request->new_password);
         $user->save();
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Changed password',
+        ]);
+
         return back()->with('success', 'Password updated!');
     }
 
@@ -493,6 +506,11 @@ class ShelterDashboardController extends Controller
         $user = auth()->user();
         auth()->logout();
         $user->delete();
+
+        \App\Models\ActivityLog::create([
+            'user_id' => $user->user_id,
+            'action' => 'Deleted account',
+        ]);
         return redirect('/')->with('success', 'Account deleted.');
     }
 

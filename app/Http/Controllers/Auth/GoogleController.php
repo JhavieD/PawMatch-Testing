@@ -25,6 +25,12 @@ class GoogleController extends Controller
         $user = User::where('email', $googleUser->getEmail())->first();
         if ($user) {
             Auth::login($user, true);
+
+            \App\Models\ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'Logged in to the system',
+            ]);
+
             return redirect()->route('dashboard'); // or your intended route
         }
 
@@ -44,6 +50,8 @@ class GoogleController extends Controller
             'email' => $googleUser->getEmail(),
             'phone_number' => $phone,
         ]);
+
+
         return redirect()->route('register');
     }
-} 
+}
