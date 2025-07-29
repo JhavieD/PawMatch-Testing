@@ -39,6 +39,11 @@ class ShelterApplicationController extends Controller
         $application->status = 'approved';
         $application->save();
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Approved Adoption application ID ' . $application->id,
+        ]);
+
         // Send notification to adopter
         if ($application->adopter && $application->adopter->user) {
             \App\Models\Notification::create([
@@ -70,20 +75,25 @@ class ShelterApplicationController extends Controller
         $application->rejection_reason = $rejectionReason; // Make sure this column exists in your DB
         $application->save();
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Rejected Adoption Application ID ' . $application->id,
+        ]);
+
         return response()->json(['message' => 'Application rejected successfully.']);
     }
 
     // Request more info from applicant
-    public function requestInfo(Request $request, $id)
-    {
-        $application = AdoptionApplication::findOrFail($id);
-        $application->status = 'info-requested';
-        $application->reviewed_at = now();
-        $application->save();
+    // public function requestInfo(Request $request, $id)
+    // {
+    //     $application = AdoptionApplication::findOrFail($id);
+    //     $application->status = 'info-requested';
+    //     $application->reviewed_at = now();
+    //     $application->save();
 
 
-        return response()->json(['message' => 'Information request sent successfully.']);
-    }
+    //     return response()->json(['message' => 'Information request sent successfully.']);
+    // }
 
     // Return applications for a specific pet as JSON (for modal)
     public function forPet($petId)
@@ -114,6 +124,12 @@ class ShelterApplicationController extends Controller
         $application = AdoptionApplication::findOrFail($id);
         $application->status = 'completed';
         $application->save();
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Completed Adoption Application ID ' . $application->id,
+        ]);
+
         return response()->json(['success' => true]);
     }
 
@@ -122,6 +138,12 @@ class ShelterApplicationController extends Controller
         $application = AdoptionApplication::findOrFail($id);
         $application->status = 'cancelled';
         $application->save();
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Cancelled Adoption Application ID ' . $application->id,
+        ]);
+
         return response()->json(['success' => true]);
     }
 }

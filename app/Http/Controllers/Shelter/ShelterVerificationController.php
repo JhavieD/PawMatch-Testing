@@ -49,6 +49,12 @@ class ShelterVerificationController extends Controller
             'submitted_at' => Carbon::now(),
         ]);
 
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'submitted shelter verification ID ' . $verification->id,
+        ]);
+
         return redirect()->back()->with('success', 'Your verification request has been submitted successfully.');
     }
     public function approve($id, Request $request)
@@ -57,6 +63,11 @@ class ShelterVerificationController extends Controller
         $verification->status = 'approved';
         $verification->notes = $request->input('notes');
         $verification->save();
+
+        \App\Models\ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'approved shelter verification ID ' . $verification->id,
+        ]);
 
         return redirect()->back()->with('success', 'Shelter verification approved.');
     }

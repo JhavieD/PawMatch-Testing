@@ -59,6 +59,11 @@ class AdoptionApplicationController extends Controller
         $application->status = 'approved';
         $application->save();
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Approved Adoption Application ' . $application->id,
+        ]);
+
         return response()->json(['success' => true]);
     }
 
@@ -70,6 +75,11 @@ class AdoptionApplicationController extends Controller
         $application->rejection_reason = $request->input('rejection_reason');
         $application->save();
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Rejected Adoption Application ' . $application->id,
+        ]);
+
         return response()->json(['success' => true]);
     }
 
@@ -78,6 +88,11 @@ class AdoptionApplicationController extends Controller
         $application = AdoptionApplication::findOrFail($id);
         $application->status = 'completed';
         $application->save();
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Completed Adoption Application ' . $application->id,
+        ]);
         return response()->json(['success' => true]);
     }
 
@@ -86,6 +101,11 @@ class AdoptionApplicationController extends Controller
         $application = AdoptionApplication::findOrFail($id);
         $application->status = 'cancelled';
         $application->save();
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Cancelled Adoption Application ' . $application->id,
+        ]);
+
         return response()->json(['success' => true]);
     }
 }

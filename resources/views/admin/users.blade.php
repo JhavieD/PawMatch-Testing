@@ -191,8 +191,10 @@
                     </div>
                 </div>
 
+
                 <div class="tab-navigation">
-                    <button class="tab-button active" onclick="switchTab('info')">Information</button>
+                    <button class="tab-button active" onclick="switchTab(event, 'info')">Information</button>
+                    <button class="tab-button" onclick="switchTab(event, 'activity')">Activity Log</button>
                 </div>
 
                 <div id="infoTab" class="tab-content active">
@@ -213,6 +215,24 @@
                             <div class="info-label">Joined</div>
                             <div class="info-value" id="viewUserJoined">Jan 1, 2024</div>
                         </div>
+                    </div>
+                </div>
+                <div id="activityTab" class="tab-content" style="display:none;">
+                    <div style="max-height:300px; overflow-y:auto;">
+                        <table class="activity-log-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">Action</th>
+                                    <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">Date & Time
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityLogList">
+                                <tr>
+                                    <td colspan="2">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -253,6 +273,7 @@
 
         // View User Modal Functions
         function viewUser(userId) {
+            currentUserId = userId;
             fetch(`{{ url('admin/users') }}/${userId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -288,6 +309,20 @@
                         avatarElement.textContent = data.initials;
                     }
 
+                    // Reset activity tab
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('active');
+                        tab.style.display = 'none';
+                    });
+
+                    document.querySelectorAll('.tab-button').forEach(button => {
+                        button.classList.remove('active');
+                    });
+
+                    document.getElementById('infoTab').classList.add('active');
+                    document.getElementById('infoTab').style.display = 'block';
+                    document.querySelector('.tab-button[onclick*="info"]').classList.add('active');
+
                     document.getElementById('viewUserModal').style.display = 'flex';
                 })
                 .catch(error => {
@@ -300,10 +335,11 @@
             document.getElementById('viewUserModal').style.display = 'none';
         }
 
-        function switchTab(tabName) {
+        function switchTab(event, tabName) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
+                tab.style.display = 'none';
             });
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('active');
@@ -311,7 +347,34 @@
 
             // Show selected tab
             document.getElementById(tabName + 'Tab').classList.add('active');
+            document.getElementById(tabName + 'Tab').style.display = 'block';
             event.target.classList.add('active');
+
+            if (tabName === 'activity' && currentUserId) {
+                loadActivityLogs(currentUserId);
+            }
+        }
+
+        function loadActivityLogs(userId) {
+            const logList = document.getElementById('activityLogList');
+            logList.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
+            fetch(`/admin/users/${userId}/activity-logs`)
+                .then(response => response.json())
+                .then(logs => {
+                    if (logs.length === 0) {
+                        logList.innerHTML = `<tr><td colspan="2">No activity logs found.</td></tr>`;
+                    } else {
+                        logList.innerHTML = logs.map(log =>
+                            `<tr>
+                        <td style="padding:8px; border-bottom:1px solid #f3f3f3;">${log.action}</td>
+                        <td style="padding:8px; border-bottom:1px solid #f3f3f3; color:#888;">${new Date(log.created_at).toLocaleString()}</td>
+                    </tr>`
+                        ).join('');
+                    }
+                })
+                .catch(() => {
+                    logList.innerHTML = `<tr><td colspan="2">Error loading activity logs.</td></tr>`;
+                });
         }
 
         // Ban User Modal Functions

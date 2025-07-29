@@ -50,6 +50,11 @@ class ReportStrayController extends Controller
             'reported_at' => now(),
         ]);
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Reported a stray animal',
+        ]);
+
         // Create initial status log entry - Fix: use empty string instead of null for old_status
         StrayReportStatusLog::create([
             'adopter_id' => $report->report_id, // Store report_id in adopter_id field

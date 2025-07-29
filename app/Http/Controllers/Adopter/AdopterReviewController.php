@@ -20,11 +20,11 @@ class AdopterReviewController extends Controller
 
         $adopter = Auth::user()->adopter;
         $application = AdoptionApplication::findOrFail($request->application_id);
-        
+
         // Check if a review already exists for this adopter and shelter/rescuer combination
         $existingReview = AdopterReview::where('adopter_id', $adopter->adopter_id)
             ->where('application_id', $application->application_id) // <-- add this line
-            ->where(function($query) use ($application) {
+            ->where(function ($query) use ($application) {
                 if ($application->shelter_id) {
                     $query->where('shelter_id', $application->shelter_id);
                 } elseif ($application->rescuer_id) {
@@ -49,6 +49,11 @@ class AdopterReviewController extends Controller
             'review' => $request->review,
         ]);
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Submitted a review',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Review submitted successfully!'
@@ -59,10 +64,10 @@ class AdopterReviewController extends Controller
     {
         $adopter = Auth::user()->adopter;
         $application = AdoptionApplication::findOrFail($request->application_id);
-        
+
         $existingReview = AdopterReview::where('adopter_id', $adopter->adopter_id)
             ->where('application_id', $application->application_id) // <-- add this line
-            ->where(function($query) use ($application) {
+            ->where(function ($query) use ($application) {
                 if ($application->shelter_id) {
                     $query->where('shelter_id', $application->shelter_id);
                 } elseif ($application->rescuer_id) {
