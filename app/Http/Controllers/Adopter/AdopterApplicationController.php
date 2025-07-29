@@ -40,6 +40,7 @@ class AdopterApplicationController extends Controller
             'pet_id' => 'required|exists:pets,pet_id',
             'reason_for_adoption' => 'required|string',
             'living_arrangement' => 'required|string',
+            'living_arrangement_other' => 'nullable|string',
             'experience_with_pets' => 'required|string',
             'household_members' => 'required',
             'allergies' => 'required',
@@ -47,6 +48,14 @@ class AdopterApplicationController extends Controller
             'other_pets_details' => 'nullable|string',
             'can_provide_vet_care' => 'required',
         ]);
+
+        if (
+            isset($validated['living_arrangement']) &&
+            $validated['living_arrangement'] === 'Other' &&
+            !empty($validated['living_arrangement_other'])
+        ) {
+            $validated['living_arrangement'] = $validated['living_arrangement_other'];
+        }
         $pet = \App\Models\Shared\Pet::find($validated['pet_id']);
         $application = AdoptionApplication::create([
             'adopter_id' => $adopter->adopter_id,

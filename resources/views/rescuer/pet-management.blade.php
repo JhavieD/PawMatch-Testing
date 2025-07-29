@@ -61,6 +61,7 @@
                                     data-adoption_status="{{ $pet->adoption_status }}"
                                     data-behavior="{{ $pet->behavior }}" data-daily_activity="{{ $pet->daily_activity }}"
                                     data-special_needs="{{ $pet->special_needs }}"
+                                    data-special_needs_details="{{ $pet->special_needs_details }}"
                                     data-compatibility="{{ $pet->compatibility }}"
                                     data-images='@json($pet->images)'
                                     data-eating_habits="{{ $pet->eating_habits }}"
@@ -187,7 +188,13 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="edit-daily_activity">Daily Activity</label>
+                            <label for="daily_activity" style="display: flex; align-items: center; gap: 6px;">
+                                Daily Activity
+                                <span style="cursor: help; color: #767676; font-size: 1em;"
+                                    title="Low: Minimal exercise needed. Moderate: Regular walks/play. High: Needs lots of activity;">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </span>
+                            </label>
                             <select name="daily_activity" id="edit-daily_activity" required>
                                 <option value="">Select Activity Level</option>
                                 <option value="Low">Low</option>
@@ -202,6 +209,8 @@
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </select>
+                            <input type="text" id="edit-special_needs_details" name="special_needs_details"
+                                placeholder="Describe special needs..." style="display:none; margin-top:8px;" />
                         </div>
                         <div class="form-group">
                             <label for="edit-compatibility">Compatibility</label>
@@ -242,7 +251,8 @@
                             <div class="image-grid" id="edit-image-grid">
                                 <div class="image-container">
                                     <label class="upload-box" id="rescuer-edit-upload-box">
-                                        <input type="file" name="images[]" id="rescuer-edit-images" multiple accept="image/*">
+                                        <input type="file" name="images[]" id="rescuer-edit-images" multiple
+                                            accept="image/*">
                                         <span>+</span>
                                     </label>
                                     <!-- Existing images will be loaded here -->
@@ -329,7 +339,13 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="daily_activity">Daily Activity</label>
+                            <label for="daily_activity" style="display: flex; align-items: center; gap: 6px;">
+                                Daily Activity
+                                <span style="cursor: help; color: #767676; font-size: 1em;"
+                                    title="Low: Minimal exercise needed. Moderate: Regular walks/play. High: Needs lots of activity;">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </span>
+                            </label>
                             <select name="daily_activity" id="daily_activity" required>
                                 <option value="">Select Activity Level</option>
                                 <option value="Low">Low</option>
@@ -344,6 +360,8 @@
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </select>
+                            <input type="text" id="special_needs_details" name="special_needs_details"
+                                placeholder="Describe special needs..." style="display:none; margin-top:8px;" />
                         </div>
                         <div class="form-group">
                             <label for="compatibility">Compatibile with elders</label>
@@ -383,7 +401,8 @@
                             <div class="image-grid">
                                 <div class="image-container">
                                     <label class="upload-box" id="rescuer-add-upload-box">
-                                        <input type="file" name="images[]" id="rescuer-add-images" accept="image/*" multiple>
+                                        <input type="file" name="images[]" id="rescuer-add-images" accept="image/*"
+                                            multiple>
                                         <span>+</span>
                                     </label>
                                     <!-- Preview container for new images -->
@@ -428,10 +447,20 @@
         const editBtns = document.querySelectorAll('.edit-pet-btn');
         const addPetBtn = document.querySelector('.add-pet-btn');
 
+        document.getElementById('edit-special_needs').addEventListener('change', function() {
+            const detailsInput = document.getElementById('edit-special_needs_details');
+            detailsInput.style.display = this.value === 'Yes' ? '' : 'none';
+        });
+
+        document.getElementById('special_needs').addEventListener('change', function() {
+            const detailsInput = document.getElementById('special_needs_details');
+            detailsInput.style.display = this.value === 'Yes' ? '' : 'none';
+        });
+
         function closeModal(modal) {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
-            
+
             // Clear image previews when modals are closed
             if (modal.id === 'addPetModal') {
                 clearRescuerImagePreviews('add');
@@ -460,22 +489,22 @@
         function handleRescuerImagePreview(files, modalType) {
             const filesArray = Array.from(files);
             const container = document.getElementById(`rescuer-${modalType}-image-preview`);
-            
+
             if (modalType === 'add') {
                 rescuerAddSelectedFiles = rescuerAddSelectedFiles.concat(filesArray);
             } else {
                 rescuerEditSelectedFiles = rescuerEditSelectedFiles.concat(filesArray);
             }
-            
+
             displayRescuerImagePreviews(modalType);
         }
 
         function displayRescuerImagePreviews(modalType) {
             const container = document.getElementById(`rescuer-${modalType}-image-preview`);
             const selectedFiles = modalType === 'add' ? rescuerAddSelectedFiles : rescuerEditSelectedFiles;
-            
+
             container.innerHTML = '';
-            
+
             selectedFiles.forEach((file, index) => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -509,7 +538,7 @@
         function updateRescuerFileInput(modalType) {
             const fileInput = document.getElementById(`rescuer-${modalType}-images`);
             const selectedFiles = modalType === 'add' ? rescuerAddSelectedFiles : rescuerEditSelectedFiles;
-            
+
             // Create a new DataTransfer object to update the file input
             const dt = new DataTransfer();
             selectedFiles.forEach(file => dt.items.add(file));
@@ -538,7 +567,7 @@
         function loadRescuerExistingImages(petImages) {
             const container = document.getElementById('rescuer-edit-existing-images');
             container.innerHTML = '';
-            
+
             if (petImages && petImages.length > 0) {
                 petImages.forEach((image, index) => {
                     const imageItem = document.createElement('div');
@@ -557,14 +586,14 @@
 
         function markRescuerImageForDeletion(imageId, index) {
             rescuerImagesToDelete.push(imageId);
-            
+
             // Find and remove the specific image item
             const container = document.getElementById('rescuer-edit-existing-images');
             const imageItems = container.querySelectorAll('.existing-image-item');
             if (imageItems[index]) {
                 imageItems[index].remove();
             }
-            
+
             // Add hidden input to mark image for deletion
             const deleteInput = document.createElement('input');
             deleteInput.type = 'hidden';
@@ -590,6 +619,7 @@
                 const behavior = btn.getAttribute('data-behavior');
                 const dailyActivity = btn.getAttribute('data-daily_activity');
                 const specialNeeds = btn.getAttribute('data-special_needs');
+                const specialNeedsDetails = btn.getAttribute('data-special_needs_details') || '';
                 const compatibility = btn.getAttribute('data-compatibility');
                 const eatingHabits = btn.getAttribute('data-eating_habits');
                 const suitableFor = btn.getAttribute('data-suitable_for');
@@ -606,12 +636,16 @@
                 document.getElementById('edit-behavior').value = behavior;
                 document.getElementById('edit-daily_activity').value = dailyActivity;
                 document.getElementById('edit-special_needs').value = specialNeeds;
+                document.getElementById('edit-special_needs_details').value = specialNeedsDetails;
+                document.getElementById('edit-special_needs_details').style.display =
+                    specialNeeds === 'Yes' ? '' : 'none';
                 document.getElementById('edit-compatibility').value = compatibility;
                 document.getElementById('edit-eating_habits').value = eatingHabits;
                 if (document.getElementById('edit-suitable_for')) {
                     document.getElementById('edit-suitable_for').value = suitableFor || '';
                 }
                 document.getElementById('editPetForm').action = `/rescuer/pets/${petId}`;
+
 
 
                 // --- Medical Records Display Logic (shelter style) ---
@@ -650,7 +684,7 @@
 
                 // Clear any previous image previews and reset file arrays
                 clearRescuerImagePreviews('edit');
-                
+
                 // Load existing images for edit modal using new system
                 const images = JSON.parse(btn.getAttribute('data-images') || '[]');
                 const petImages = images.map(image => ({
