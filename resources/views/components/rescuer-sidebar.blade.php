@@ -30,6 +30,11 @@
             <i class="fas fa-envelope"></i>
             <span>Messages</span>
         </a>
+        <a href="{{ route('rescuer.transaction-history') }}"
+            class="nav-item {{ request()->routeIs('rescuer.transaction-history') ? 'active' : '' }}">
+            <i class="fas fa-credit-card"></i>
+            <span>Transaction History</span>
+        </a>
         <a href="{{ route('rescuer.profile') }}"
             class="nav-item {{ request()->routeIs('rescuer.profile') ? 'active' : '' }}">
             <i class="fas fa-user"></i>

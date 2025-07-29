@@ -28,6 +28,10 @@ class Shelter extends Model
         'verified_by',
         'verified_at',
         'avg_adopter_rating',
+        'adoption_fee',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
         'email_notifications',
         'application_updates',
         'marketing_communications'

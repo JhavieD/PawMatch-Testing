@@ -24,6 +24,10 @@ class Rescuer extends Model
         'organization_name',
         'location',
         'verified',
+        'adoption_fee',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
     ];
 
     protected $casts = [

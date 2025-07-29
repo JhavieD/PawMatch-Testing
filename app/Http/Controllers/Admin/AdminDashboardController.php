@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Shared\User;
 use App\Models\Shared\Pet;
 use App\Models\Shared\AdoptionApplication;
-use App\Models\Shelter;
-use App\Models\Adopter;
-use App\Models\Rescuer;
+use App\Models\Shelter\Shelter;
+use App\Models\Adopter\Adopter;
+use App\Models\Rescuer\Rescuer;
 use App\Models\Shared\StrayReports;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +19,7 @@ use Illuminate\Validation\Rules;
 use App\Http\Controllers\Shared\Controller;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\Shared\StrayReportStatusLog;
+use App\Models\Shared\MayaTransaction;
 
 
 class AdminDashboardController extends Controller
@@ -31,11 +32,25 @@ class AdminDashboardController extends Controller
         $investigatingReports = StrayReports::where('status', 'investigating')->count();
         $newUsersToday = User::whereDate('created_at', today())->count();
 
-        // Recent activity
-        $recentReports = StrayReports::with('adopter.user')
-            ->orderByDesc('reported_at')
+        // Payment statistics
+        $totalRevenue = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')->sum('total_amount');
+        $totalCommission = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')->sum('pawmatch_commission');
+        $pendingPayouts = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')
+            ->where('payout_status', 'pending')
+            ->sum('provider_amount');
+        $successRate = $this->calculatePaymentSuccessRate();
+
+        // Recent transactions
+        $recentTransactions = \App\Models\Shared\MayaTransaction::with(['application.pet', 'shelter', 'rescuer', 'adopter.user'])
+            ->orderBy('payment_date', 'desc')
             ->limit(5)
             ->get();
+
+        // Monthly revenue data
+        $monthlyRevenue = $this->getMonthlyRevenue();
+
+        // Payout summary
+        $payoutSummary = $this->getPayoutSummary();
 
         return view('admin.admin_dashboard', compact(
             'totalUsers', 
@@ -43,7 +58,13 @@ class AdminDashboardController extends Controller
             'pendingReports', 
             'investigatingReports',
             'newUsersToday',
-            'recentReports'
+            'totalRevenue',
+            'totalCommission',
+            'pendingPayouts',
+            'successRate',
+            'recentTransactions',
+            'monthlyRevenue',
+            'payoutSummary'
         ));
     }
 
@@ -1064,5 +1085,211 @@ class AdminDashboardController extends Controller
     {
         // You can load relationships as needed, e.g. $user->load('adopter', 'shelter', 'rescuer');
         return response()->json($user);
+    }
+
+    private function calculatePaymentSuccessRate()
+    {
+        $total = \App\Models\Shared\MayaTransaction::count();
+        $successful = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')->count();
+        
+        return $total > 0 ? round(($successful / $total) * 100, 2) : 0;
+    }
+
+    private function getMonthlyRevenue()
+    {
+        $months = [];
+        $revenue = [];
+        $commission = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $monthName = $date->format('M Y');
+            $months[] = $monthName;
+
+            $monthRevenue = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')
+                ->whereYear('payment_date', $date->year)
+                ->whereMonth('payment_date', $date->month)
+                ->sum('total_amount');
+
+            $monthCommission = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')
+                ->whereYear('payment_date', $date->year)
+                ->whereMonth('payment_date', $date->month)
+                ->sum('pawmatch_commission');
+
+            $revenue[] = $monthRevenue;
+            $commission[] = $monthCommission;
+        }
+
+        return [
+            'months' => $months,
+            'revenue' => $revenue,
+            'commission' => $commission
+        ];
+    }
+
+    private function getPayoutSummary()
+    {
+        $shelters = MayaTransaction::where('payment_status', 'paid')
+            ->where('payout_status', 'pending')
+            ->whereNotNull('shelter_id')
+            ->with('shelter')
+            ->get()
+            ->groupBy('shelter_id')
+            ->map(function ($transactions) {
+                return (object) [
+                    'shelter' => $transactions->first()->shelter,
+                    'transaction_count' => $transactions->count(),
+                    'total_payout' => $transactions->sum('provider_amount')
+                ];
+            })
+            ->values();
+
+        $rescuers = MayaTransaction::where('payment_status', 'paid')
+            ->where('payout_status', 'pending')
+            ->whereNotNull('rescuer_id')
+            ->with('rescuer')
+            ->get()
+            ->groupBy('rescuer_id')
+            ->map(function ($transactions) {
+                return (object) [
+                    'rescuer' => $transactions->first()->rescuer,
+                    'transaction_count' => $transactions->count(),
+                    'total_payout' => $transactions->sum('provider_amount')
+                ];
+            })
+            ->values();
+
+        return [
+            'shelters' => $shelters,
+            'rescuers' => $rescuers
+        ];
+    }
+
+    /**
+     * Get payout statistics
+     */
+    public function getPayoutStats()
+    {
+        return [
+            'total_payouts' => MayaTransaction::where('payout_status', 'completed')->count(),
+            'pending_payouts' => MayaTransaction::where('payout_status', 'pending')->count(),
+            'failed_payouts' => MayaTransaction::where('payout_status', 'failed')->count(),
+            'total_amount_paid' => MayaTransaction::where('payout_status', 'completed')->sum('provider_amount'),
+            'pending_amount' => MayaTransaction::where('payout_status', 'pending')->sum('provider_amount'),
+        ];
+    }
+
+    /**
+     * Process manual payout for a transaction
+     */
+    public function processManualPayout($transactionId)
+    {
+        try {
+            $transaction = MayaTransaction::findOrFail($transactionId);
+            
+            // Check if transaction is eligible for payout
+            if ($transaction->payment_status !== 'paid') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaction payment is not completed'
+                ]);
+            }
+
+            if ($transaction->payout_status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaction is not eligible for payout'
+                ]);
+            }
+
+            // Check if disbursement is enabled
+            if (!config('maya.disbursement.enabled')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maya disbursement is disabled'
+                ]);
+            }
+
+            // Check if auto payout is enabled
+            if (!config('maya.disbursement.auto_payout')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Auto payout is disabled'
+                ]);
+            }
+
+            // Get provider details
+            $provider = null;
+            if ($transaction->shelter_id) {
+                $provider = Shelter::find($transaction->shelter_id);
+            } elseif ($transaction->rescuer_id) {
+                $provider = Rescuer::find($transaction->rescuer_id);
+            }
+
+            if (!$provider) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Provider not found'
+                ]);
+            }
+
+            // Check bank details
+            if (empty($provider->bank_name) || empty($provider->bank_account_number) || empty($provider->bank_account_name)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Provider bank details are incomplete'
+                ]);
+            }
+
+            // Check payout delay (skip in test mode)
+            if (!config('maya.disbursement.test_mode', false)) {
+                $payoutDelay = config('maya.disbursement.payout_delay_hours', 24);
+                $payoutTime = $transaction->payment_date->addHours($payoutDelay);
+                
+                if (now()->lt($payoutTime)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Payout not yet eligible. Available after: " . $payoutTime->format('M d, Y H:i')
+                    ]);
+                }
+            }
+
+            // Process payout using the disbursement service
+            $disbursementService = app(\App\Services\MayaDisbursementService::class);
+            $result = $disbursementService->processPayout($transaction);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payout processed successfully'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to process payout - check logs for details'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error("Payout processing error: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing payout: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get pending payouts for admin
+     */
+    public function getPendingPayouts()
+    {
+        $pendingPayouts = MayaTransaction::where('payment_status', 'paid')
+            ->where('payout_status', 'pending')
+            ->with(['application.pet', 'shelter', 'rescuer', 'adopter.user'])
+            ->orderBy('payment_date', 'asc')
+            ->get();
+
+        return view('admin.pending-payouts', compact('pendingPayouts'));
     }
 }

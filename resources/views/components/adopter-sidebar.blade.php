@@ -33,6 +33,10 @@
             <i class="fas fa-envelope"></i>
             <span>Messages</span>
         </a>
+        <a href="{{ route('adopter.transaction-history') }}" class="nav-item {{ request()->routeIs('adopter.transaction-history') ? 'active' : '' }}">
+            <i class="fas fa-credit-card"></i>
+            <span>Payment History</span>
+        </a>
         <a href="{{ route('adopter.profile') }}" class="nav-item {{ request()->routeIs('adopter.profile') ? 'active' : '' }}">
             <i class="fas fa-user"></i>
             <span>Profile</span>

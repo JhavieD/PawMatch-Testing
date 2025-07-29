@@ -1,0 +1,288 @@
+/* Shelter Transaction History Specific Styles */
+.transaction-history-content {
+  margin-left: 350px;
+  max-width: 1400px;
+  width: 100%;
+}
+
+.transaction-history-content .content-wrapper {
+  max-width: 1400px !important;
+  width: 100% !important;
+}
+
+.transaction-history-content .content-card {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.total-earnings-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100% !important;
+  min-width: 100% !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.data-table {
+  width: 100% !important;
+  min-width: 1200px !important;
+  border-collapse: collapse;
+  background: white;
+  table-layout: fixed;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #3b82f6;
+  border-bottom: 2px solid #e9ecef;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.data-table th:nth-child(1) { width: 12% !important; } /* Date */
+.data-table th:nth-child(2) { width: 18% !important; } /* Pet */
+.data-table th:nth-child(3) { width: 22% !important; } /* Adopter */
+.data-table th:nth-child(4) { width: 18% !important; } /* Amount */
+.data-table th:nth-child(5) { width: 10% !important; } /* Status */
+.data-table th:nth-child(6) { width: 10% !important; } /* Actions */
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.transaction-row:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.date-cell .date-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-cell .date {
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+
+.date-cell .time {
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.pet-cell .pet-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pet-cell .pet-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pet-cell .pet-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pet-cell .pet-details {
+  flex: 1;
+}
+
+.pet-cell .pet-name {
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.pet-cell .pet-breed {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.adopter-cell .adopter-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.adopter-cell .adopter-name {
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.adopter-cell .adopter-email {
+  color: #6c757d;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.amount-cell .amount-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.amount-cell .total-amount {
+  font-weight: 700;
+  color: #212529;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.amount-cell .your-share {
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-failed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.btn-view-details {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-view-details:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.pagination-container {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #dee2e6;
+  margin-bottom: 16px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8fafc;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #3b82f6;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.modal-body {
+  padding: 1.5rem;
+} 
