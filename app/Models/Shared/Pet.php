@@ -28,6 +28,7 @@ class Pet extends Model
         'daily_activity',
         'eating_habits',
         'special_needs',
+        'special_needs_details',
         'compatibility',
         'suitable_for',
         'description'

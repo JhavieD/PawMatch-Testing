@@ -158,6 +158,7 @@ class ShelterDashboardController extends Controller
             'behavior' => 'nullable|string',
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
+            'special_needs_details' => 'nullable|string',
             'compatibility' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'eating_habits' => 'nullable|string',
@@ -165,6 +166,7 @@ class ShelterDashboardController extends Controller
         ]);
         $data['adoption_status'] = 'available';
         $data['shelter_id'] = $shelter->shelter_id;
+        $data['special_needs_details'] = $request->input('special_needs_details');
 
         // Remove medical_history from $data to avoid array-to-string error
         unset($data['medical_history']);
@@ -239,6 +241,7 @@ class ShelterDashboardController extends Controller
             'behavior' => 'nullable|string',
             'daily_activity' => 'nullable|string',
             'special_needs' => 'nullable|string',
+            'special_needs_details' => 'nullable|string',
             'compatibility' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5024',
             'images_to_delete.*' => 'nullable|integer|exists:pet_images,id',
@@ -258,6 +261,7 @@ class ShelterDashboardController extends Controller
             'behavior',
             'daily_activity',
             'special_needs',
+            'special_needs_details',
             'compatibility',
             'eating_habits',
             'suitable_for',

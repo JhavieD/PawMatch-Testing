@@ -226,7 +226,29 @@
                     </div>
                     <div class="form-group">
                         <label for="living_arrangement">Living Arrangement</label>
-                        <input type="text" name="living_arrangement" id="living_arrangement" required>
+                        <div style="position: relative;">
+                            <select name="living_arrangement" id="living_arrangement" required
+                                style="width: 100%; appearance: none; padding-right: 2em;">
+                                <option value="">Select</option>
+                                <option value="Apartment Living">Apartment Living</option>
+                                <option value="House with yard">House with yard</option>
+                                <option value="House without a yard">House without a yard</option>
+                                <option value="Condominium">Condominium</option>
+                                <option value="Farm/Rural property">Farm/Rural property</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <i class="fa-solid fa-caret-down"
+                                style="
+                            position: absolute;
+                            right: 1em;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            pointer-events: none;
+                            color: #888;
+                        "></i>
+                        </div>
+                        <input type="text" name="living_arrangement_other" id="living_arrangement_other"
+                            placeholder="Please specify" style="display:none; margin-top:8px;" />
                     </div>
                     <div class="form-group">
                         <label for="experience_with_pets">Experience with Pets</label>
@@ -477,6 +499,20 @@
         const adoptionPetId = document.getElementById('adoptionPetId');
         const hasOtherPets = document.getElementById('has_other_pets');
         const otherPetsDetailsGroup = document.getElementById('otherPetsDetailsGroup');
+
+        const livingArrangement = document.getElementById('living_arrangement');
+        const livingArrangementOther = document.getElementById('living_arrangement_other');
+
+        livingArrangement.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                livingArrangementOther.style.display = 'block';
+                livingArrangementOther.required = true;
+            } else {
+                livingArrangementOther.style.display = 'none';
+                livingArrangementOther.required = false;
+                livingArrangementOther.value = '';
+            }
+        });
 
         closeAdoptionModal.addEventListener('click', function() {
             adoptionModal.style.display = 'none';
