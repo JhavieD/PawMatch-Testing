@@ -21,13 +21,13 @@
                 <input type="email" class="form-control" id="contact_email" name="contact_email"
                     value="{{ $settings['contact_email']->value ?? '' }}">
             </div>
-            <h4>System Settings</h4>
+            <!-- <h4>System Settings</h4>
             <div class="form-check mb-3">
                 <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications"
                     value="1"
                     {{ !empty($settings['email_notifications']) && $settings['email_notifications']->value == '1' ? 'checked' : '' }}>
                 <label class="form-check-label" for="email_notifications">Enable Email Notifications</label>
-            </div>
+            </div> -->
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     </div>

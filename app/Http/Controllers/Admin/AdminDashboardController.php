@@ -28,10 +28,119 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $totalUsers = User::count();
-        $activeAdoptions = AdoptionApplication::where('status', 'approved')->count();
+        $adoptionPipeline = [
+            'pending'  => AdoptionApplication::where('status', 'pending')->count(),
+            'approved' => AdoptionApplication::where('status', 'approved')->count(),
+            'rejected' => AdoptionApplication::where('status', 'rejected')->count(),
+        ];
         $pendingReports = StrayReports::where('status', 'pending')->count();
         $investigatingReports = StrayReports::where('status', 'investigating')->count();
         $newUsersToday = User::whereDate('created_at', today())->count();
+
+        // --- Analytical Reports ---
+
+    // 1. Pet Inventory Report
+        $petInventory = [
+            'total'      => \App\Models\Shared\Pet::count(),
+            'available'  => \App\Models\Shared\Pet::where('adoption_status', 'available')->count(),
+            'in_process' => \App\Models\Shared\Pet::where('adoption_status', 'in_process')->count(),
+            'adopted'    => \App\Models\Shared\Pet::where('adoption_status', 'adopted')->count(),
+            'avg_stay'   => round(
+                \App\Models\Shared\Pet::where('adoption_status', 'adopted')
+                    ->join('adoption_applications', 'pets.pet_id', '=', 'adoption_applications.pet_id')
+                    ->where('adoption_applications.status', 'approved')
+                    ->selectRaw('AVG(DATEDIFF(adoption_applications.updated_at, pets.created_at)) as avg_days')
+                    ->value('avg_days') ?? 0, 1
+            ),
+        ];
+
+        // 2. Communication & Response Rate Report
+        $messages = \DB::table('messages')->get();
+        $commReport = [
+            'avg_response_time' => $messages->whereNotNull('is_read')->avg(function($msg) {
+                return isset($msg->created_at, $msg->updated_at) ? \Carbon\Carbon::parse($msg->updated_at)->diffInMinutes($msg->created_at) : null;
+            }) ? round($messages->whereNotNull('is_read')->avg(function($msg) {
+                return isset($msg->created_at, $msg->updated_at) ? \Carbon\Carbon::parse($msg->updated_at)->diffInMinutes($msg->created_at) : null;
+            }), 1) . ' min' : 'N/A',
+            'unanswered' => $messages->where('is_read', false)->count(),
+            'peak_time'  => $messages->count()
+                ? $messages->groupBy(function($msg) { return \Carbon\Carbon::parse($msg->created_at)->format('H'); })
+                    ->sortByDesc(function($group) { return count($group); })->keys()->first() . ':00'
+                : 'N/A',
+        ];
+
+        // 3. Shelter Reputation & Feedback Report
+        $reviews = \DB::table('adopter_reviews')->get();
+        $feedbackReport = [
+            'avg_rating' => $reviews->avg('rating') ? round($reviews->avg('rating'), 2) : 'N/A',
+            'positive'   => $reviews->where('rating', '>=', 4)->count(),
+            'negative'   => $reviews->where('rating', '<=', 2)->count(),
+        ];
+
+        // 4. Stray Reports Managed
+        $strayReports = \App\Models\Shared\StrayReports::all();
+        $strayReport = [
+            'total'             => $strayReports->count(),
+            'top_area'          => $strayReports->count()
+                ? $strayReports->groupBy('location')->sortByDesc(function($group) { return count($group); })->keys()->first()
+                : 'N/A',
+        ];
+
+        // 5. Pet Demographics Report
+        $petDemographics = [
+            'by_species' => \App\Models\Shared\Pet::select('species', \DB::raw('count(*) as total'))
+                ->groupBy('species')->orderByDesc('total')->get(),
+            'by_breed' => \App\Models\Shared\Pet::select('breed', \DB::raw('count(*) as total'))
+                ->groupBy('breed')->orderByDesc('total')->limit(5)->get(),
+            'by_age_group' => [
+                '0-2'   => \App\Models\Shared\Pet::whereBetween('age', [0, 2])->count(),
+                '3-6'   => \App\Models\Shared\Pet::whereBetween('age', [3, 6])->count(),
+                '7-10'  => \App\Models\Shared\Pet::whereBetween('age', [7, 10])->count(),
+                '11+'   => \App\Models\Shared\Pet::where('age', '>=', 11)->count(),
+            ],
+            'by_gender' => \App\Models\Shared\Pet::select('gender', \DB::raw('count(*) as total'))
+                ->groupBy('gender')->get(),
+            'by_size' => \App\Models\Shared\Pet::select('size', \DB::raw('count(*) as total'))
+                ->groupBy('size')->get(),
+            'special_needs' => [
+                'with'    => \App\Models\Shared\Pet::where('special_needs', 'Yes')->count(),
+                'without' => \App\Models\Shared\Pet::where('special_needs', 'No')->count(),
+            ],
+            'top_breeds' => \App\Models\Shared\Pet::select('breed', \DB::raw('count(*) as total'))
+                ->groupBy('breed')->orderByDesc('total')->limit(3)->get(),
+            'top_species' => \App\Models\Shared\Pet::select('species', \DB::raw('count(*) as total'))
+                ->groupBy('species')->orderByDesc('total')->limit(3)->get(),
+        ];
+
+        // 6.7. Rescuer & Shelter Performance Report
+        $rescuerVerifications = [
+            'approved' => \App\Models\Rescuer\RescuerVerification::where('status', 'approved')->count(),
+            'rejected' => \App\Models\Rescuer\RescuerVerification::where('status', 'rejected')->count(),
+        ];
+        $shelterVerifications = [
+            'approved' => \App\Models\Shelter\ShelterVerification::where('status', 'approved')->count(),
+            'rejected' => \App\Models\Shelter\ShelterVerification::where('status', 'rejected')->count(),
+        ];
+
+        $mostSavedPets = \DB::table('saved_pets')
+            ->select('pet_id', \DB::raw('count(*) as total'))
+            ->groupBy('pet_id')->orderByDesc('total')->limit(5)->get();
+
+        $usersMostSaved = \DB::table('saved_pets')
+            ->select('adopter_id', \DB::raw('count(*) as total'))
+            ->groupBy('adopter_id')->orderByDesc('total')->limit(5)->get();
+
+        $savedTrendsByBreed = \DB::table('saved_pets')
+            ->join('pets', 'saved_pets.pet_id', '=', 'pets.pet_id')
+            ->select('pets.breed', \DB::raw('count(*) as total'))
+            ->groupBy('pets.breed')->orderByDesc('total')->limit(5)->get();
+
+        $savedPetsReport = [
+            'most_saved_pets' => $mostSavedPets,
+            'users_most_saved' => $usersMostSaved,
+            'saved_trends_by_breed' => $savedTrendsByBreed,
+        ];
+        // --- End Analytical Reports ---
 
         // Payment statistics
         $totalRevenue = \App\Models\Shared\MayaTransaction::where('payment_status', 'paid')->sum('total_amount');
@@ -53,9 +162,13 @@ class AdminDashboardController extends Controller
         // Payout summary
         $payoutSummary = $this->getPayoutSummary();
 
+        $rescuerShelterPerformance = [
+            'rescuer_verifications' => $rescuerVerifications,
+            'shelter_verifications' => $shelterVerifications,
+            // Add other metrics as needed
+        ];
         return view('admin.admin_dashboard', compact(
             'totalUsers',
-            'activeAdoptions',
             'pendingReports',
             'investigatingReports',
             'newUsersToday',
@@ -65,7 +178,15 @@ class AdminDashboardController extends Controller
             'successRate',
             'recentTransactions',
             'monthlyRevenue',
-            'payoutSummary'
+            'payoutSummary',
+            'petInventory',
+            'commReport',
+            'feedbackReport',
+            'strayReport',
+            'adoptionPipeline',
+            'petDemographics',
+            'rescuerShelterPerformance',
+            'savedPetsReport'
         ));
     }
 
