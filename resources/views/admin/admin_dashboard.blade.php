@@ -13,12 +13,20 @@
             <div class="stat-value">{{ $totalUsers }}</div>
             <div class="stat-title">Total Users</div>
         </div>
+        
         <div class="stat-card">
             <div class="stat-header">
                 <div class="stat-icon"><i class="fa-solid fa-paw"></i></div>
             </div>
-            <div class="stat-value">{{ $activeAdoptions }}</div>
-            <div class="stat-title">Active Adoptions</div>
+            <div class="stat-value">
+                {{ $adoptionPipeline['pending'] + $adoptionPipeline['approved'] + $adoptionPipeline['rejected'] }}
+            </div>
+            <div class="stat-title">Adoption Applications</div>
+            <div class="stat-desc" style="font-size: 0.9em;">
+                Pending: {{ $adoptionPipeline['pending'] }}<br>
+                Approved: {{ $adoptionPipeline['approved'] }}<br>
+                Rejected: {{ $adoptionPipeline['rejected'] }}
+            </div>
         </div>
         <div class="stat-card">
             <div class="stat-header">
@@ -35,6 +43,105 @@
             <div class="stat-title">New Users Today</div>
         </div>
     </div>
+
+    <!-- Analytical Reports Grid -->
+    
+    <div class="stats-grid" style="margin-top: 2rem;">
+    <!-- Pet Inventory Report -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-dog"></i></div>
+        </div>
+        <div class="stat-value">{{ $petInventory['total'] ?? 0 }}</div>
+        <div class="stat-title">Total Pets Listed</div>
+        <div class="stat-desc" style="font-size: 0.9em;">
+            Avail: {{ $petInventory['available'] ?? 0 }},
+            In Process: {{ $petInventory['in_process'] ?? 0 }},
+            Adopted: {{ $petInventory['adopted'] ?? 0 }}<br>
+            Avg Stay: {{ $petInventory['avg_stay'] ?? 0 }} days<br>
+        </div>
+    </div>
+
+    <!-- Communication & Response Rate Report -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
+        </div>
+        <div class="stat-value">{{ $commReport['avg_response_time'] ?? 'N/A' }}</div>
+        <div class="stat-title">Avg Response Time</div>
+        <div class="stat-desc" style="font-size: 0.9em;">
+            Unanswered: {{ $commReport['unanswered'] ?? 0 }}<br>
+            Peak: {{ $commReport['peak_time'] ?? 'N/A' }}
+        </div>
+    </div>
+
+    <!-- Shelter Reputation & Feedback Report -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+        </div>
+        <div class="stat-value">{{ $feedbackReport['avg_rating'] ?? 'N/A' }}</div>
+        <div class="stat-title">Avg Shelter Rating</div>
+        <div class="stat-desc" style="font-size: 0.9em;">
+            Positive: {{ $feedbackReport['positive'] ?? 0 }},
+            Negative: {{ $feedbackReport['negative'] ?? 0 }}<br>
+        </div>
+    </div>
+
+    <!-- Stray Reports Managed -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-dove"></i></div>
+        </div>
+        <div class="stat-value">{{ $strayReport['total'] ?? 0 }}</div>
+        <div class="stat-title">Stray Reports Managed</div>
+        <div class="stat-desc" style="font-size: 0.9em;">
+            Top Area: {{ $strayReport['top_area'] ?? 'N/A' }}
+        </div>
+    </div>
+
+    <!-- Pet Demographics Report -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-paw"></i></div>
+        </div>
+    <div class="stat-title">Pet Demographics</div>
+    <div class="stat-desc">
+        @foreach($petDemographics['by_species'] as $row)
+            {{ $row->species }}: {{ $row->total }}<br>
+        @endforeach
+        Top Breeds:
+        @foreach($petDemographics['top_breeds'] as $row)
+            {{ $row->breed }} ({{ $row->total }})<br>
+        @endforeach
+    </div>
+    </div>
+
+    <!-- Rescuer Verifications Report -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div>
+        </div>
+        <div class="stat-title">Rescuer Verifications</div>
+        <div class="stat-desc" style="font-size: 0.9em;">
+            Approved: {{ $rescuerShelterPerformance['rescuer_verifications']['approved'] ?? 0 }}<br>
+            Rejected: {{ $rescuerShelterPerformance['rescuer_verifications']['rejected'] ?? 0 }}
+        </div>
+    </div>
+
+    <!-- Shelter Verifications Report -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div>
+        </div>
+        <div class="stat-title">Shelter Verifications</div>
+        <div class="stat-desc" style="font-size: 0.9em;">
+            Approved: {{ $rescuerShelterPerformance['shelter_verifications']['approved'] ?? 0 }}<br>
+            Rejected: {{ $rescuerShelterPerformance['shelter_verifications']['rejected'] ?? 0 }}
+        </div>
+    </div>
+</div>
+<!-- End Analytical Reports Grid -->
 
     <!-- Payment Stats Grid -->
     <div class="stats-grid" style="margin-top: 2rem;">
