@@ -110,6 +110,7 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         // Settings Management
         Route::post('/admin/settings/toggle-maintenance', [AdminDashboardController::class, 'toggleMaintenance'])->name('admin.toggle-maintenance');
         Route::get('/admin/settings', [AdminDashboardController::class, 'settings'])->name('admin.settings');
+        Route::get('/admin/pets/export-csv', [AdminDashboardController::class, 'exportPetsCsv'])->name('admin.pets.export_csv');
     });
 
     // -------- SHELTER --------
@@ -149,6 +150,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::post('/shelter/stray-reports/{reportId}/accept', [ShelterDashboardController::class, 'acceptStrayReport'])->name('shelter.stray-reports.accept');
         Route::post('/shelter/stray-reports/{reportId}/resolve', [ShelterDashboardController::class, 'resolveStrayReport'])->name('shelter.stray-reports.resolve');
         Route::post('/shelter/stray-reports/{reportId}/return-pending', [ShelterDashboardController::class, 'returnStrayReportToPending'])->name('shelter.stray-reports.return-pending');
+
+        Route::get('/shelter/pets/export-csv', [ShelterDashboardController::class, 'exportPetsCsv'])->name('shelter.pets.export_csv');
     });
 
     // -------- MESSAGES (FOR ALL POT) --------
@@ -195,6 +198,8 @@ Route::middleware(['auth', 'check.user.status'])->group(function () {
         Route::match(['put', 'patch'], '/rescuer/pets/{pet}', [RescuerDashboardController::class, 'update'])->name('rescuer.pets.update');
         Route::delete('/rescuer/pets/{pet}', [RescuerDashboardController::class, 'destroy'])->name('rescuer.pets.destroy');
         Route::delete('/rescuer/pet-images/{id}', [RescuerDashboardController::class, 'deleteImage'])->name('rescuer.pet-images.destroy');
+    
+        Route::get('/rescuer/pets/export-csv', [RescuerDashboardController::class, 'exportPetsCsv'])->name('rescuer.pets.export_csv');
     });
 
     // -------- ADOPTER --------

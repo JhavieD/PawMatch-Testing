@@ -29,6 +29,9 @@
                 <label class="form-check-label" for="email_notifications">Enable Email Notifications</label>
             </div> -->
             <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ route('admin.pets.export_csv') }}" class="btn btn-primary" target="_blank">
+                Export Pets Report (CSV)
+            </a>
         </form>
     </div>
 @endsection

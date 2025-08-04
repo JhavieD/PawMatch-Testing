@@ -15,6 +15,9 @@
                         <span class="add-icon">&#43;</span>
                         Add New Pet
                     </button>
+                    <a href="{{ route('rescuer.pets.export_csv') }}" class="btn btn-primary" target="_blank">
+                        Export Pets Report (CSV)
+                    </a>
                 </div>
             </div>
             <div class="search-bar">
