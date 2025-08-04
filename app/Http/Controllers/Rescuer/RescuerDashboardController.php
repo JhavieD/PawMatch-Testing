@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Rescuer\RescuerVerification;
 use App\Http\Controllers\Shared\Controller;
 use App\Models\Shared\AdoptionApplication;
+use Illuminate\Support\Facades\Response;
+use App\Models\Shared\Pet;
 
 class RescuerDashboardController extends Controller
 {
@@ -412,5 +414,56 @@ class RescuerDashboardController extends Controller
             return response()->view('rescuer.rescuer-application_modal', compact('application'));
         }
         return view('rescuer.rescuer-application_modal', compact('application'));
+    }
+    
+    public function exportPetsCsv()
+    {
+        $rescuerId = auth()->user()->rescuer->rescuer_id ?? null;
+        if (!$rescuerId) {
+            abort(403, 'Rescuer not found.');
+        }
+
+        $pets = Pet::with(['adoptionApplication.adopter.user'])
+            ->where('rescuer_id', $rescuerId)
+            ->get();
+
+        $csvHeader = [
+            'Pet ID', 'Pet Name', 'Species', 'Breed', 'Age', 'Status',
+            'Adopted By', 'Adopter Email'
+        ];
+
+        $rows = [];
+        foreach ($pets as $pet) {
+            $adopter = $pet->adoptionApplication && $pet->adoptionApplication->adopter && $pet->adoptionApplication->adopter->user
+                ? $pet->adoptionApplication->adopter->user->first_name . ' ' . $pet->adoptionApplication->adopter->user->last_name
+                : '';
+            $adopterEmail = $pet->adoptionApplication && $pet->adoptionApplication->adopter && $pet->adoptionApplication->adopter->user
+                ? $pet->adoptionApplication->adopter->user->email
+                : '';
+            $rows[] = [
+                $pet->pet_id,
+                $pet->name,
+                $pet->species,
+                $pet->breed,
+                $pet->age,
+                $pet->adoption_status,
+                $adopter,
+                $adopterEmail
+            ];
+        }
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $csvHeader);
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::make($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="rescuer_pets_report.csv"',
+        ]);
     }
 }

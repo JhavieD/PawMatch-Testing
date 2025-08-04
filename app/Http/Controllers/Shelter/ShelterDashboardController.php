@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 use App\Models\Shared\Message;
 use App\Models\Shared\User;
 use App\Http\Controllers\Shared\Controller;
 use App\Models\Shared\StrayReportStatusLog;
 use App\Models\Shared\StrayReports;
+use App\Models\Shared\Pet;
 
 
 class ShelterDashboardController extends Controller
@@ -774,5 +776,56 @@ class ShelterDashboardController extends Controller
             \Log::error('Return to pending error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to return report to pending: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function exportPetsCsv()
+    {
+        $shelterId = auth()->user()->shelter->shelter_id ?? null;
+        if (!$shelterId) {
+            abort(403, 'Shelter not found.');
+        }
+
+        $pets = Pet::with(['adoptionApplication.adopter.user'])
+            ->where('shelter_id', $shelterId)
+            ->get();
+
+        $csvHeader = [
+            'Pet ID', 'Pet Name', 'Species', 'Breed', 'Age', 'Status',
+            'Adopted By', 'Adopter Email'
+        ];
+
+        $rows = [];
+        foreach ($pets as $pet) {
+            $adopter = $pet->adoptionApplication && $pet->adoptionApplication->adopter && $pet->adoptionApplication->adopter->user
+                ? $pet->adoptionApplication->adopter->user->first_name . ' ' . $pet->adoptionApplication->adopter->user->last_name
+                : '';
+            $adopterEmail = $pet->adoptionApplication && $pet->adoptionApplication->adopter && $pet->adoptionApplication->adopter->user
+                ? $pet->adoptionApplication->adopter->user->email
+                : '';
+            $rows[] = [
+                $pet->pet_id,
+                $pet->name,
+                $pet->species,
+                $pet->breed,
+                $pet->age,
+                $pet->adoption_status,
+                $adopter,
+                $adopterEmail
+            ];
+        }
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $csvHeader);
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::make($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="shelter_pets_report.csv"',
+        ]);
     }
 }

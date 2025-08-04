@@ -57,4 +57,9 @@ class Pet extends Model
     {
         return $this->images->first()->image_url ?? null;
     }
+    public function adoptionApplication()
+    {
+        return $this->hasOne(\App\Models\Shared\AdoptionApplication::class, 'pet_id', 'pet_id')
+            ->where('status', 'approved');
+    }
 }

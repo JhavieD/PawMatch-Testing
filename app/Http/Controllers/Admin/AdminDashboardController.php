@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Models\Shared\StrayReportStatusLog;
 use App\Models\Shared\MayaTransaction;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Response;
 
 
 class AdminDashboardController extends Controller
@@ -1418,5 +1419,52 @@ class AdminDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get(['action', 'created_at']);
         return response()->json($logs);
+    }
+
+    public function exportPetsCsv()
+    {
+        $pets = \App\Models\Shared\Pet::with(['shelter', 'rescuer', 'adoptionApplication.adopter.user'])->get();
+
+        $csvHeader = [
+            'Pet ID', 'Pet Name', 'Species', 'Breed', 'Age', 'Status',
+            'Shelter', 'Rescuer', 'Adopted By', 'Adopter Email'
+        ];
+
+        $rows = [];
+        foreach ($pets as $pet) {
+            $adopter = $pet->adoptionApplication && $pet->adoptionApplication->adopter && $pet->adoptionApplication->adopter->user
+                ? $pet->adoptionApplication->adopter->user->first_name . ' ' . $pet->adoptionApplication->adopter->user->last_name
+                : '';
+            $adopterEmail = $pet->adoptionApplication && $pet->adoptionApplication->adopter && $pet->adoptionApplication->adopter->user
+                ? $pet->adoptionApplication->adopter->user->email
+                : '';
+            $rows[] = [
+                $pet->pet_id,
+                $pet->name,
+                $pet->species,
+                $pet->breed,
+                $pet->age,
+                $pet->adoption_status,
+                $pet->shelter->shelter_name ?? '',
+                $pet->rescuer->organization_name ?? '',
+                $adopter,
+                $adopterEmail
+            ];
+        }
+
+        // Create CSV content
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $csvHeader);
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::make($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="pets_report.csv"',
+        ]);
     }
 }
