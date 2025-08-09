@@ -203,6 +203,11 @@ class RescuerDashboardController extends Controller
         }
         $this->clearDashboardCache($user->user_id);
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Updated profile information',
+        ]);
+
         return back()->with('success', 'Profile updated!');
     }
 
@@ -415,7 +420,7 @@ class RescuerDashboardController extends Controller
         }
         return view('rescuer.rescuer-application_modal', compact('application'));
     }
-    
+
     public function exportPetsCsv()
     {
         $rescuerId = auth()->user()->rescuer->rescuer_id ?? null;
@@ -428,8 +433,14 @@ class RescuerDashboardController extends Controller
             ->get();
 
         $csvHeader = [
-            'Pet ID', 'Pet Name', 'Species', 'Breed', 'Age', 'Status',
-            'Adopted By', 'Adopter Email'
+            'Pet ID',
+            'Pet Name',
+            'Species',
+            'Breed',
+            'Age',
+            'Status',
+            'Adopted By',
+            'Adopter Email'
         ];
 
         $rows = [];
