@@ -40,7 +40,7 @@ class AdminDashboardController extends Controller
 
         // --- Analytical Reports ---
 
-    // 1. Pet Inventory Report
+        // 1. Pet Inventory Report
         $petInventory = [
             'total'      => \App\Models\Shared\Pet::count(),
             'available'  => \App\Models\Shared\Pet::where('adoption_status', 'available')->count(),
@@ -51,22 +51,27 @@ class AdminDashboardController extends Controller
                     ->join('adoption_applications', 'pets.pet_id', '=', 'adoption_applications.pet_id')
                     ->where('adoption_applications.status', 'approved')
                     ->selectRaw('AVG(DATEDIFF(adoption_applications.updated_at, pets.created_at)) as avg_days')
-                    ->value('avg_days') ?? 0, 1
+                    ->value('avg_days') ?? 0,
+                1
             ),
         ];
 
         // 2. Communication & Response Rate Report
         $messages = \DB::table('messages')->get();
         $commReport = [
-            'avg_response_time' => $messages->whereNotNull('is_read')->avg(function($msg) {
+            'avg_response_time' => $messages->whereNotNull('is_read')->avg(function ($msg) {
                 return isset($msg->created_at, $msg->updated_at) ? \Carbon\Carbon::parse($msg->updated_at)->diffInMinutes($msg->created_at) : null;
-            }) ? round($messages->whereNotNull('is_read')->avg(function($msg) {
+            }) ? round($messages->whereNotNull('is_read')->avg(function ($msg) {
                 return isset($msg->created_at, $msg->updated_at) ? \Carbon\Carbon::parse($msg->updated_at)->diffInMinutes($msg->created_at) : null;
             }), 1) . ' min' : 'N/A',
             'unanswered' => $messages->where('is_read', false)->count(),
             'peak_time'  => $messages->count()
-                ? $messages->groupBy(function($msg) { return \Carbon\Carbon::parse($msg->created_at)->format('H'); })
-                    ->sortByDesc(function($group) { return count($group); })->keys()->first() . ':00'
+                ? $messages->groupBy(function ($msg) {
+                    return \Carbon\Carbon::parse($msg->created_at)->format('H');
+                })
+                ->sortByDesc(function ($group) {
+                    return count($group);
+                })->keys()->first() . ':00'
                 : 'N/A',
         ];
 
@@ -83,7 +88,9 @@ class AdminDashboardController extends Controller
         $strayReport = [
             'total'             => $strayReports->count(),
             'top_area'          => $strayReports->count()
-                ? $strayReports->groupBy('location')->sortByDesc(function($group) { return count($group); })->keys()->first()
+                ? $strayReports->groupBy('location')->sortByDesc(function ($group) {
+                    return count($group);
+                })->keys()->first()
                 : 'N/A',
         ];
 
@@ -1417,7 +1424,17 @@ class AdminDashboardController extends Controller
     {
         $logs = \App\Models\ActivityLog::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
-            ->get(['action', 'created_at']);
+            ->paginate(10); // 10 logs per page
+
+        return response()->json($logs);
+    }
+
+    public function activityLogs($userId)
+    {
+        $logs = ActivityLog::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10); // 10 logs per page
+
         return response()->json($logs);
     }
 
@@ -1426,8 +1443,16 @@ class AdminDashboardController extends Controller
         $pets = \App\Models\Shared\Pet::with(['shelter', 'rescuer', 'adoptionApplication.adopter.user'])->get();
 
         $csvHeader = [
-            'Pet ID', 'Pet Name', 'Species', 'Breed', 'Age', 'Status',
-            'Shelter', 'Rescuer', 'Adopted By', 'Adopter Email'
+            'Pet ID',
+            'Pet Name',
+            'Species',
+            'Breed',
+            'Age',
+            'Status',
+            'Shelter',
+            'Rescuer',
+            'Adopted By',
+            'Adopter Email'
         ];
 
         $rows = [];

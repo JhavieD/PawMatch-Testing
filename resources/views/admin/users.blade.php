@@ -233,6 +233,13 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div id="activityLogPagination" style="margin-top: 10px; text-align: right; display: none;">
+                            <button id="activityLogPrev" class="btn btn-outline" style="margin-right: 5px;"
+                                onclick="changeActivityLogPage(-1)">Prev</button>
+                            <span id="activityLogPageInfo"></span>
+                            <button id="activityLogNext" class="btn btn-outline" style="margin-left: 5px;"
+                                onclick="changeActivityLogPage(1)">Next</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -270,6 +277,8 @@
 @push('scripts')
     <script>
         let currentUserId = null;
+        let activityLogCurrentPage = 1;
+        let activityLogLastPage = 1;
 
         // View User Modal Functions
         function viewUser(userId) {
@@ -311,22 +320,21 @@
 
                     // Reset activity tab
                     document.querySelectorAll('.tab-content').forEach(tab => {
-                        tab.classList.remove('active');
                         tab.style.display = 'none';
                     });
-
                     document.querySelectorAll('.tab-button').forEach(button => {
                         button.classList.remove('active');
                     });
-
                     document.getElementById('infoTab').classList.add('active');
                     document.getElementById('infoTab').style.display = 'block';
-                    document.querySelector('.tab-button[onclick*="info"]').classList.add('active');
-
                     document.getElementById('viewUserModal').style.display = 'flex';
+
+                    // Reset activity log pagination
+                    activityLogCurrentPage = 1;
+                    activityLogLastPage = 1;
+                    document.getElementById('activityLogPagination').style.display = 'none';
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     alert('Error loading user details');
                 });
         }
@@ -344,37 +352,56 @@
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('active');
             });
-
             // Show selected tab
             document.getElementById(tabName + 'Tab').classList.add('active');
             document.getElementById(tabName + 'Tab').style.display = 'block';
             event.target.classList.add('active');
-
             if (tabName === 'activity' && currentUserId) {
-                loadActivityLogs(currentUserId);
+                activityLogCurrentPage = 1;
+                loadActivityLogs(currentUserId, activityLogCurrentPage);
             }
         }
 
-        function loadActivityLogs(userId) {
+        function loadActivityLogs(userId, page = 1) {
             const logList = document.getElementById('activityLogList');
             logList.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
-            fetch(`/admin/users/${userId}/activity-logs`)
+            fetch(`/admin/users/${userId}/activity-logs?page=${page}`)
                 .then(response => response.json())
-                .then(logs => {
-                    if (logs.length === 0) {
-                        logList.innerHTML = `<tr><td colspan="2">No activity logs found.</td></tr>`;
+                .then(data => {
+                    logList.innerHTML = '';
+                    if (data.data && data.data.length > 0) {
+                        data.data.forEach(log => {
+                            logList.innerHTML +=
+                                `<tr><td style='padding:8px;'>${log.action}</td><td style='padding:8px;'>${new Date(log.created_at).toLocaleString()}</td></tr>`;
+                        });
                     } else {
-                        logList.innerHTML = logs.map(log =>
-                            `<tr>
-                        <td style="padding:8px; border-bottom:1px solid #f3f3f3;">${log.action}</td>
-                        <td style="padding:8px; border-bottom:1px solid #f3f3f3; color:#888;">${new Date(log.created_at).toLocaleString()}</td>
-                    </tr>`
-                        ).join('');
+                        logList.innerHTML = `<tr><td colspan='2'>No activity logs found.</td></tr>`;
+                    }
+                    // Pagination controls
+                    activityLogCurrentPage = data.current_page;
+                    activityLogLastPage = data.last_page;
+                    const paginationDiv = document.getElementById('activityLogPagination');
+                    const pageInfo = document.getElementById('activityLogPageInfo');
+                    if (activityLogLastPage > 1) {
+                        paginationDiv.style.display = 'block';
+                        pageInfo.textContent = `Page ${activityLogCurrentPage} of ${activityLogLastPage}`;
+                        document.getElementById('activityLogPrev').disabled = activityLogCurrentPage === 1;
+                        document.getElementById('activityLogNext').disabled = activityLogCurrentPage ===
+                            activityLogLastPage;
+                    } else {
+                        paginationDiv.style.display = 'none';
                     }
                 })
                 .catch(() => {
-                    logList.innerHTML = `<tr><td colspan="2">Error loading activity logs.</td></tr>`;
+                    logList.innerHTML = `<tr><td colspan='2'>Failed to load activity logs.</td></tr>`;
+                    document.getElementById('activityLogPagination').style.display = 'none';
                 });
+        }
+
+        function changeActivityLogPage(delta) {
+            let newPage = activityLogCurrentPage + delta;
+            if (newPage < 1 || newPage > activityLogLastPage) return;
+            loadActivityLogs(currentUserId, newPage);
         }
 
         // Ban User Modal Functions

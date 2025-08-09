@@ -34,7 +34,7 @@ class RescuerVerificationController extends Controller
         if ($existingVerification) {
             return redirect()->back()->with('error', 'You already have a pending verification request.');
         }
-        
+
 
         $path = $request->file('registration_doc')->store('rescuer-verifications', 's3', 'public');
 
@@ -47,9 +47,14 @@ class RescuerVerificationController extends Controller
             'submitted_at' => Carbon::now(),
         ]);
 
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Uploaded rescuer verification document',
+        ]);
+
         return redirect()->back()->with('success', 'Your verification request has been submitted successfully.');
     }
-    
+
     public function approveVerification($id, Request $request)
     {
         $verification = RescuerVerification::findOrFail($id);
