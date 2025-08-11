@@ -258,4 +258,92 @@ class MayaPaymentService
     {
         return $this->config['test_wallets'] ?? [];
     }
+
+    /**
+     * Create a Maya Checkout session for a general donation
+     */
+    public function createDonationCheckout(\App\Models\Shared\Donation $donation)
+    {
+        try {
+            $amount = $donation->amount;
+            $checkoutData = [
+                'totalAmount' => [
+                    'value' => $amount,
+                    'currency' => 'PHP'
+                ],
+                'requestReferenceNumber' => 'DONATION-' . $donation->donation_id . '-' . time(),
+                'items' => [
+                    [
+                        'name' => 'PawMatch Donation',
+                        'quantity' => 1,
+                        'code' => 'DONATION',
+                        'amount' => [
+                            'value' => $amount,
+                            'currency' => 'PHP'
+                        ],
+                        'totalAmount' => [
+                            'value' => $amount,
+                            'currency' => 'PHP'
+                        ]
+                    ]
+                ],
+                'redirectUrl' => [
+                    'success' => route('donation.success', ['donation_id' => $donation->donation_id]),
+                    'failure' => route('donation.failure', ['donation_id' => $donation->donation_id]),
+                    'cancel' => route('donation.cancel', ['donation_id' => $donation->donation_id])
+                ],
+                'buyer' => [
+                    'firstName' => $donation->donor_name ?? 'Donor',
+                    'email' => $donation->donor_email ?? '',
+                    'phone' => optional($donation->user)->phone_number ?? ''
+                ],
+                'paymentMethod' => [
+                    'enabledPaymentMethods' => ['CARD', 'MAYA_WALLET', 'QR_CODE']
+                ]
+            ];
+
+            \Log::info('Maya Donation Checkout Request', [
+                'donation_id' => $donation->donation_id,
+                'checkout_data' => $checkoutData,
+                'url' => $this->baseUrl . '/checkout/v1/checkouts'
+            ]);
+
+            $response = \Http::withHeaders([
+                'Authorization' => 'Basic ' . base64_encode($this->publicKey . ':' . $this->secretKey),
+                'Content-Type' => 'application/json'
+            ])->post($this->baseUrl . '/checkout/v1/checkouts', $checkoutData);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                return [
+                    'success' => true,
+                    'checkout_id' => $data['checkoutId'] ?? null,
+                    'redirect_url' => $data['redirectUrl'] ?? null,
+                ];
+            }
+
+            \Log::error('Maya Donation Checkout creation failed', [
+                'donation_id' => $donation->donation_id,
+                'response' => $response->json(),
+                'status' => $response->status()
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Failed to create checkout session',
+                'details' => $response->json()
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Maya Donation Checkout exception', [
+                'donation_id' => $donation->donation_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Payment service error: ' . $e->getMessage()
+            ];
+        }
+    }
 } 

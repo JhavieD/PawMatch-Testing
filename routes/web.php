@@ -40,6 +40,7 @@ use App\Models\Rescuer\Rescuer;
 // Payment Controllers
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentSettingsController;
+use App\Http\Controllers\DonationController;
 // Models
 use App\Models\Shared\AdoptionApplication;
 
@@ -51,6 +52,11 @@ Route::get('/faq', fn() => view('faq'))->name('faq');
 Route::get('/terms', fn() => view('terms'))->name('terms');
 Route::get('/about', fn() => view('about'))->name('about');
 Route::get('/report-stray', fn() => view('report-stray'))->name('report-stray');
+Route::get('/donate', [DonationController::class, 'showForm'])->name('donate');
+Route::post('/donate/process', [DonationController::class, 'process'])->name('donation.process');
+Route::get('/donate/success', [DonationController::class, 'success'])->name('donation.success');
+Route::get('/donate/failure', [DonationController::class, 'failure'])->name('donation.failure');
+Route::get('/donate/cancel', [DonationController::class, 'cancel'])->name('donation.cancel');
 Route::get('/public-pet-listings', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'publicIndex'])->name('public.pet-listings');
 Route::get('/public-pet-details/{pet}', [App\Http\Controllers\Adopter\AdopterPetListingsController::class, 'publicPetDetails'])->name('public.pet-details');
 
@@ -359,6 +365,7 @@ Route::get('/debug-session', function () {
 // Maya webhook routes
 Route::post('/api/maya/webhook', [App\Http\Controllers\PaymentController::class, 'handleWebhook'])->name('maya.webhook');
 Route::post('/api/maya/disbursement-webhook', [App\Http\Controllers\DisbursementWebhookController::class, 'handle'])->name('maya.disbursement-webhook');
+Route::post('/api/maya/donation-webhook', [App\Http\Controllers\DonationController::class, 'webhook'])->name('maya.donation-webhook');
 
 // Test webhook endpoint (development only)
 if (app()->environment('local')) {

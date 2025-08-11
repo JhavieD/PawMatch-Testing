@@ -40,8 +40,44 @@
             <a href="{{ route('adopter.report-stray') }}" id="report-now-btn">Report Now</a>
         </div>
     </section>
+
+    <!-- Floating Donate Button -->
+    <a href="{{ route('donate') }}" class="floating-donate-btn" aria-label="Donate">Donate</a>
     @section('styles')
     <link rel="stylesheet" href="{{ asset('css/shared/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/marketing.css') }}">
+    <style>
+      .floating-donate-btn {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 1000;
+        background: #FFC107;
+        color: #1a1a1a;
+        border-radius: 9999px;
+        padding: 12px 18px;
+        font-weight: 600;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        text-decoration: none;
+        transition: transform .1s ease, box-shadow .2s ease, background .2s ease;
+      }
+      .floating-donate-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+        background: #ffca2c;
+      }
+      #donate-cta .cta-content { text-align: center; }
+      #donate-now-btn {
+        display: inline-block;
+        margin-top: 10px;
+        background: #FFC107;
+        color: #1a1a1a;
+        padding: 10px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      #donate-now-btn:hover { background: #ffca2c; }
+    </style>
     @endsection
 @endsection 
