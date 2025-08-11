@@ -113,11 +113,11 @@
                                 @endif
                             </td>
                             <td class="user-actions">
+                                <button class="user-action-btn view" title="View Details"
+                                    onclick="viewUser({{ $user->user_id }})">
+                                    <i class="fas fa-eye" style="color: #2563eb;"></i>
+                                </button>
                                 @if ($user->user_id !== auth()->user()->user_id)
-                                    <button class="user-action-btn view" title="View Details"
-                                        onclick="viewUser({{ $user->user_id }})">
-                                        <i class="fas fa-eye" style="color: #2563eb;"></i>
-                                    </button>
                                     <button class="user-action-btn unban" title="Unban User" style="color: #f59e42;"
                                         onclick="userAction({{ $user->user_id }}, 'unban')">
                                         <i class="fas fa-user-check"></i>
