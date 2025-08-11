@@ -177,6 +177,10 @@
                         <label>Status</label>
                         <p id="petStatus"></p>
                     </div>
+                    <div class="detail-item">
+                        <label>Special Needs</label>
+                        <p id="petSpecialNeeds"></p>
+                    </div>
                 </div>
                 <div class="pet-description">
                     <h3>About <span id="petNameDesc"></span></h3>
@@ -188,6 +192,8 @@
                     <h3 style="margin-top: 0; font-weight:600; margin-bottom: 1rem;">Medical Records</h3>
                     <ul id="medicalRecordsList" style="margin-bottom: 0; color:rgb(0, 140, 255)"></ul>
                 </div>
+
+
                 <div class="shelter-info" id="shelterInfo" style="display: none;">
                     <h3>Shelter Information</h3>
                     <p id="shelterName"></p>
@@ -326,6 +332,15 @@
                 document.getElementById('petSize').textContent = petDetails.size;
                 document.getElementById('petStatus').textContent = petDetails.adoption_status ?? petDetails.status;
                 document.getElementById('petDescription').textContent = petDetails.description;
+
+                const specialNeedsItem = document.querySelector('.detail-item label[for="petSpecialNeeds"]')
+                    ?.parentElement || document.getElementById('petSpecialNeeds').parentElement;
+                if (petDetails.special_needs === 'Yes' && petDetails.special_needs_details) {
+                    document.getElementById('petSpecialNeeds').textContent = petDetails.special_needs_details;
+                    specialNeedsItem.style.display = '';
+                } else {
+                    specialNeedsItem.style.display = 'none';
+                }
 
                 // --- Medical Records Section ---
                 const medicalSection = document.getElementById('medicalRecordsSection');
